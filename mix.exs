@@ -2,19 +2,19 @@ defmodule BoltSips.Mixfile do
   use Mix.Project
 
   @version "3.0.0"
-  @url_docs "https://hexdocs.pm/bolt_sips"
-  @url_github "https://github.com/florinpatrascu/bolt_sips"
+  @url_docs "https://hexdocs.pm/boltx"
+  @url_github "https://github.com/sagastume/boltx"
 
   def project do
     [
       app: :bolt_sips,
       version: @version,
-      elixir: "~> 1.7",
+      elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       deps: deps(),
       package: package(),
       description: "Neo4j driver for Elixir, using the fast Bolt protocol",
-      name: "Bolt.Sips",
+      name: "Boltx",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       docs: docs(),
@@ -60,10 +60,7 @@ defmodule BoltSips.Mixfile do
       ],
       licenses: ["Apache 2.0"],
       maintainers: [
-        "Florin T.PATRASCU",
-        "Dmitriy Nesteryuk",
-        "Dominique VASSARD",
-        "Kristof Semjen"
+        "Luis Sagastume",
       ],
       links: %{
         "Docs" => @url_docs,
@@ -74,12 +71,12 @@ defmodule BoltSips.Mixfile do
 
   defp docs do
     [
-      name: "Bolt.Sips",
+      name: "Boltx",
       logo: "assets/bolt_sips_white_transparent.png",
       assets: "assets",
       source_ref: "v#{@version}",
       source_url: @url_github,
-      main: "Bolt.Sips",
+      main: "Boltx",
       extra_section: "guides",
       extras: [
         "README.md",
