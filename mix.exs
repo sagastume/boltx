@@ -1,4 +1,4 @@
-defmodule BoltSips.Mixfile do
+defmodule Boltx.Mixfile do
   use Mix.Project
 
   @version "3.0.0"
@@ -7,7 +7,7 @@ defmodule BoltSips.Mixfile do
 
   def project do
     [
-      app: :bolt_sips,
+      app: :boltx,
       version: @version,
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -25,7 +25,7 @@ defmodule BoltSips.Mixfile do
       preferred_cli_env: [
         bench: :bench,
         credo: :dev,
-        bolt_sips: :test,
+        boltx: :test,
         coveralls: :test,
         "coveralls.html": :test,
         "coveralls.travis": :test
