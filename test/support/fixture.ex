@@ -1,22 +1,22 @@
-defmodule Bolt.Sips.Fixture do
+defmodule Boltx.Fixture do
   def create_graph(conn, :movie) do
-    Bolt.Sips.query!(conn, movie_cypher())
+    Boltx.query!(conn, movie_cypher())
   end
 
-  def create_graph(conn, :bolt_sips) do
-    Bolt.Sips.query!(conn, bolt_sips_cypher())
+  def create_graph(conn, :boltx) do
+    Boltx.query!(conn, boltx_cypher())
   end
 
-  def bolt_sips_cypher() do
+  def boltx_cypher() do
     """
-    MATCH (n {bolt_sips: true}) OPTIONAL MATCH (n)-[r]-() DELETE n,r;
+    MATCH (n {boltx: true}) OPTIONAL MATCH (n)-[r]-() DELETE n,r;
 
-    CREATE (BoltSips:BoltSips {title:'Elixir sipping from Neo4j, using Bolt', released:2016, license:'MIT', bolt_sips: true})
-    CREATE (TNOTW:Book {title:'The Name of the Wind', released:2007, genre:'fantasy', bolt_sips: true})
-    CREATE (Patrick:Person {name:'Patrick Rothfuss', bolt_sips: true})
-    CREATE (Kvothe:Person {name:'Kote', bolt_sips: true})
-    CREATE (Denna:Person {name:'Denna', bolt_sips: true})
-    CREATE (Chandrian:Deamon {name:'Chandrian', bolt_sips: true})
+    CREATE (boltx:boltx {title:'Elixir sipping from Neo4j, using Bolt', released:2016, license:'MIT', boltx: true})
+    CREATE (TNOTW:Book {title:'The Name of the Wind', released:2007, genre:'fantasy', boltx: true})
+    CREATE (Patrick:Person {name:'Patrick Rothfuss', boltx: true})
+    CREATE (Kvothe:Person {name:'Kote', boltx: true})
+    CREATE (Denna:Person {name:'Denna', boltx: true})
+    CREATE (Chandrian:Deamon {name:'Chandrian', boltx: true})
 
     CREATE
       (Kvothe)-[:ACTED_IN {roles:['sword fighter', 'magician', 'musician']}]->(TNOTW),

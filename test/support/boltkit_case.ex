@@ -1,4 +1,4 @@
-defmodule Bolt.Sips.BoltKitCase do
+defmodule Boltx.BoltKitCase do
   _doc = """
   tag your tests with `boltkit`, like this:
 
@@ -38,7 +38,7 @@ defmodule Bolt.Sips.BoltKitCase do
       with {:ok, pid} <- connect(url, prefix) do
         pid
       else
-        _ -> raise RuntimeError, "cannot create a Bolt.Sips process"
+        _ -> raise RuntimeError, "cannot create a Boltx process"
       end
 
     on_exit(fn ->
@@ -67,7 +67,7 @@ defmodule Bolt.Sips.BoltKitCase do
       end)
     end)
 
-    {:ok, porcelains: porcelains, prefix: prefix, sips: pid, url: url}
+    {:ok, porcelains: porcelains, prefix: prefix, boltx: pid, url: url}
   end
 
   defp stub_servers(%{scripts: scripts} = args) do
@@ -113,6 +113,6 @@ defmodule Bolt.Sips.BoltKitCase do
     ]
 
     Logger.debug("creating #{url}, prefix: #{prefix}")
-    Bolt.Sips.start_link(conf)
+    Boltx.start_link(conf)
   end
 end

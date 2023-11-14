@@ -72,7 +72,7 @@ defmodule Boltx.Mixfile do
   defp docs do
     [
       name: "Boltx",
-      logo: "assets/bolt_sips_white_transparent.png",
+      logo: "assets/boltx_white_transparent.png",
       assets: "assets",
       source_ref: "v#{@version}",
       source_url: @url_github,

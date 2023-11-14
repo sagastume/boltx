@@ -37,7 +37,7 @@
 #    same conn        1.46 K
 #     new conn        0.47 K - 3.14x slower
 
-{:ok, _pid} = Bolt.Sips.start_link(url: "localhost")
+{:ok, _pid} = Boltx.start_link(url: "localhost")
 
 simple_cypher = """
   MATCH (p:Person)-[r:WROTE]->(b:Book {title: 'The Name of the Wind'})
@@ -45,13 +45,13 @@ simple_cypher = """
 """
 
 query = fn (conn, cypher) ->
-  Bolt.Sips.Query.query(conn, cypher)
+  Boltx.Query.query(conn, cypher)
 end
 
-conn = Bolt.Sips.conn()
+conn = Boltx.conn()
 
 Benchee.run(
   %{
     "same conn" => fn -> query.(conn, simple_cypher) end,
-    " new conn" => fn -> query.(Bolt.Sips.conn(), simple_cypher) end
+    " new conn" => fn -> query.(Boltx.conn(), simple_cypher) end
   }, time: 1)

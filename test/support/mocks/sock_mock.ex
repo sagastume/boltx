@@ -1,4 +1,4 @@
-defmodule Bolt.Sips.Mocks.SockMock do
+defmodule Boltx.Mocks.SockMock do
   def loop(state) do
     receive do
       {_from, :push, value} ->

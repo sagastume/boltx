@@ -1,8 +1,8 @@
 defmodule Config.Test do
   use ExUnit.Case
-  alias Bolt.Sips.Utils
+  alias Boltx.Utils
 
-  doctest Bolt.Sips
+  doctest Boltx
 
   @graphenedb_like_url "bolt://hobby-happyHoHoHo.dbs.graphenedb.com:24786"
 
@@ -51,7 +51,7 @@ defmodule Config.Test do
     assert config[:port] == 24786
   end
 
-  test "standard Bolt.Sips configuration parameters" do
+  test "standard Boltx configuration parameters" do
     config = Utils.default_config(@basic_config)
 
     assert config[:url] == nil
@@ -71,7 +71,7 @@ defmodule Config.Test do
     assert config[:ssl] == true
   end
 
-  test "standard Bolt.Sips default configuration" do
+  test "standard Boltx default configuration" do
     config = Utils.default_config([])
 
     assert config[:hostname] == "localhost"

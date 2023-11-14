@@ -1,9 +1,9 @@
-defmodule Bolt.Sips.RoutingConnCase do
+defmodule Boltx.RoutingConnCase do
   @moduletag :routing
 
   use ExUnit.CaseTemplate
 
-  alias Bolt.Sips
+  alias Boltx
 
   @routing_connection_config [
     url: "bolt+routing://localhost:9001",
@@ -16,12 +16,12 @@ defmodule Bolt.Sips.RoutingConnCase do
   ]
 
   setup_all do
-    {:ok, _pid} = Sips.start_link(@routing_connection_config)
-    conn = Sips.conn(:write)
+    {:ok, _pid} = Boltx.start_link(@routing_connection_config)
+    conn = Boltx.conn(:write)
 
     on_exit(fn ->
-      with conn when not is_nil(conn) <- Sips.conn(:write) do
-        Sips.Test.Support.Database.clear(conn)
+      with conn when not is_nil(conn) <- Boltx.conn(:write) do
+        Boltx.Test.Support.Database.clear(conn)
       else
         e -> {:error, e}
       end

@@ -10,11 +10,11 @@ import Config
 
 # You can configure for your application as:
 #
-#     config :bolt_sips, key: :value
+#     config :boltx, key: :value
 #
 # And access this configuration in your application as:
 #
-#     Application.get_env(:bolt_sips, :key)
+#     Application.get_env(:boltx, :key)
 #
 # Or configure a 3rd-party app:
 #

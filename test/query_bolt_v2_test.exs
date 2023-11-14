@@ -1,13 +1,13 @@
-defmodule Bolt.Sips.QueryBoltV2Test do
-  use Bolt.Sips.ConnCase, async: true
+defmodule Boltx.QueryBoltV2Test do
+  use Boltx.ConnCase, async: true
   @moduletag :bolt_v2
 
-  alias Bolt.Sips.Types.{Duration, DateTimeWithTZOffset, Point, TimeWithTZOffset}
-  alias Bolt.Sips.{TypesHelper, Response}
+  alias Boltx.Types.{Duration, DateTimeWithTZOffset, Point, TimeWithTZOffset}
+  alias Boltx.{TypesHelper, Response}
 
   setup_all do
     # reuse the same connection for all the tests in the suite
-    conn = Bolt.Sips.conn()
+    conn = Boltx.conn()
     {:ok, [conn: conn]}
   end
 
@@ -16,11 +16,11 @@ defmodule Bolt.Sips.QueryBoltV2Test do
     query = "RETURN point($point_data) AS pt"
     params = %{point_data: Point.create(:cartesian, 50, 60.5)}
 
-    assert {:ok, %Response{results: res}} = Bolt.Sips.query(conn, query, params)
+    assert {:ok, %Response{results: res}} = Boltx.query(conn, query, params)
 
     assert res == [
              %{
-               "pt" => %Bolt.Sips.Types.Point{
+               "pt" => %Boltx.Types.Point{
                  crs: "cartesian",
                  height: nil,
                  latitude: nil,
@@ -62,7 +62,7 @@ defmodule Bolt.Sips.QueryBoltV2Test do
       years: 2
     }
 
-    assert {:ok, %Response{results: [%{"d" => ^expected}]}} = Bolt.Sips.query(conn, query, params)
+    assert {:ok, %Response{results: [%{"d" => ^expected}]}} = Boltx.query(conn, query, params)
   end
 
   test "transform Date in cypher-compliant data", context do
@@ -70,7 +70,7 @@ defmodule Bolt.Sips.QueryBoltV2Test do
     query = "RETURN date($d) AS d"
     params = %{d: ~D[2019-02-04]}
 
-    assert {:ok, %Response{results: res}} = Bolt.Sips.query(conn, query, params)
+    assert {:ok, %Response{results: res}} = Boltx.query(conn, query, params)
     assert res == [%{"d" => ~D[2019-02-04]}]
   end
 
@@ -81,7 +81,7 @@ defmodule Bolt.Sips.QueryBoltV2Test do
     params = %{t: time_with_tz}
 
     assert {:ok, %Response{results: [%{"t" => ^time_with_tz}]}} =
-             Bolt.Sips.query(conn, query, params)
+             Boltx.query(conn, query, params)
   end
 
   test "transform DateTimeWithTZOffset in cypher-compliant data", context do
@@ -96,7 +96,7 @@ defmodule Bolt.Sips.QueryBoltV2Test do
     params = %{t: date_time_with_tz}
 
     assert {:ok, %Response{results: [%{"t" => ^date_time_with_tz}]}} =
-             Bolt.Sips.query(conn, query, params)
+             Boltx.query(conn, query, params)
   end
 
   test "transform DateTime With TimeZone id (UTC) in cypher-compliant data", context do
@@ -109,7 +109,7 @@ defmodule Bolt.Sips.QueryBoltV2Test do
     params = %{t: date_time_with_tz_id}
 
     assert {:ok, %Response{results: [%{"t" => ^date_time_with_tz_id}]}} =
-             Bolt.Sips.query(conn, query, params)
+             Boltx.query(conn, query, params)
   end
 
   test "transform DateTime With TimeZone id (Non-UTC) in cypher-compliant data", context do
@@ -122,7 +122,7 @@ defmodule Bolt.Sips.QueryBoltV2Test do
     params = %{t: date_time_with_tz_id}
 
     assert {:ok, %Response{results: [%{"t" => ^date_time_with_tz_id}]}} =
-             Bolt.Sips.query(conn, query, params)
+             Boltx.query(conn, query, params)
   end
 
   test "transform NaiveDateTime in cypher-compliant data", context do
@@ -132,7 +132,7 @@ defmodule Bolt.Sips.QueryBoltV2Test do
     ndt = ~N[2016-05-24 13:26:08.543156]
     params = %{t: ndt}
 
-    assert {:ok, %Response{results: [%{"t" => ^ndt}]}} = Bolt.Sips.query(conn, query, params)
+    assert {:ok, %Response{results: [%{"t" => ^ndt}]}} = Boltx.query(conn, query, params)
   end
 
   test "transform Time in cypher-compliant data", context do
@@ -142,6 +142,6 @@ defmodule Bolt.Sips.QueryBoltV2Test do
     t = ~T[13:26:08.543440]
     params = %{t: t}
 
-    assert {:ok, %Response{results: [%{"t" => ^t}]}} = Bolt.Sips.query(conn, query, params)
+    assert {:ok, %Response{results: [%{"t" => ^t}]}} = Boltx.query(conn, query, params)
   end
 end

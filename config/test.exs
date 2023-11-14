@@ -1,9 +1,9 @@
 import Config
 
-config :bolt_sips, Bolt,
+config :boltx, Bolt,
   # default port considered to be: 7687
   url: "bolt://localhost",
-  basic_auth: [username: "neo4j", password: "BoltSipsPassword"],
+  basic_auth: [username: "neo4j", password: "boltxPassword"],
   pool_size: 10,
   max_overflow: 2,
   queue_interval: 500,
@@ -18,7 +18,7 @@ level =
     :info
   end
 
-config :bolt_sips,
+config :boltx,
   log: true,
   log_hex: false
 

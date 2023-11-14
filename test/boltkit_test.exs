@@ -1,10 +1,10 @@
-defmodule Bolt.Sips.BoltStubTest do
+defmodule Boltx.BoltStubTest do
   @moduledoc """
   !!Remember!!
     you cannot reuse the boltstub across the tests, therefore must use a
     unique prefix or use the one returned by the BoltKitCase
   """
-  use Bolt.Sips.BoltKitCase, async: false
+  use Boltx.BoltKitCase, async: false
 
   @moduletag :boltkit
 
@@ -16,9 +16,9 @@ defmodule Bolt.Sips.BoltStubTest do
          debug: true
        }
   test "test/scripts/return_x.bolt", %{prefix: prefix} do
-    assert %Bolt.Sips.Response{results: [%{"x" => 1}]} =
-             Bolt.Sips.conn(:direct, prefix: prefix)
-             |> Bolt.Sips.query!("RETURN $x", %{x: 1})
+    assert %Boltx.Response{results: [%{"x" => 1}]} =
+             Boltx.conn(:direct, prefix: prefix)
+             |> Boltx.query!("RETURN $x", %{x: 1})
   end
 
   @tag boltkit: %{
@@ -28,7 +28,7 @@ defmodule Bolt.Sips.BoltStubTest do
          ]
        }
   test "test/scripts/count.bolt", %{prefix: prefix} do
-    assert %Bolt.Sips.Response{
+    assert %Boltx.Response{
              results: [
                %{"n" => 1},
                %{"n" => 2},
@@ -42,7 +42,7 @@ defmodule Bolt.Sips.BoltStubTest do
                %{"n" => 10}
              ]
            } =
-             Bolt.Sips.conn(:direct, prefix: prefix)
-             |> Bolt.Sips.query!("UNWIND range(1, 10) AS n RETURN n")
+             Boltx.conn(:direct, prefix: prefix)
+             |> Boltx.query!("UNWIND range(1, 10) AS n RETURN n")
   end
 end

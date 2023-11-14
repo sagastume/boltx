@@ -1,8 +1,8 @@
-defmodule Bolt.Sips.Routing.RouterTest do
+defmodule Boltx.Routing.RouterTest do
   use ExUnit.Case
-  doctest Bolt.Sips.Router
+  doctest Boltx.Router
 
-  alias Bolt.Sips.Response
+  alias Boltx.Response
 
   # @routing_table %{
   #   "servers" => [
@@ -29,7 +29,7 @@ defmodule Bolt.Sips.Routing.RouterTest do
 
   @router_address "bolt+routing://localhost:7687?key=value,foo=bar;policy=EU"
 
-  @bolt_sips_config [
+  @boltx_config [
     url: @router_address,
     ssl: true
   ]
@@ -44,7 +44,7 @@ defmodule Bolt.Sips.Routing.RouterTest do
 
   describe "Role based configuration" do
     test "context attributes for routed connections" do
-      conf = Bolt.Sips.Utils.default_config(@bolt_sips_config)
+      conf = Boltx.Utils.default_config(@boltx_config)
 
       assert "bolt+routing" == conf[:schema]
       assert "key=value,foo=bar;policy=EU" == conf[:query]
@@ -52,27 +52,27 @@ defmodule Bolt.Sips.Routing.RouterTest do
     end
 
     test "user defined ad-hoc roles for standard (community) instances" do
-      assert {:ok, _pid} = Bolt.Sips.start_link(@role_based_configuration)
-      assert conn = Bolt.Sips.conn(@role_based_configuration[:role])
-      assert %Response{results: [%{"n" => 1}]} = Bolt.Sips.query!(conn, "RETURN 1 as n")
+      assert {:ok, _pid} = Boltx.start_link(@role_based_configuration)
+      assert conn = Boltx.conn(@role_based_configuration[:role])
+      assert %Response{results: [%{"n" => 1}]} = Boltx.query!(conn, "RETURN 1 as n")
     end
 
     test "user defined ad-hoc roles can coexist, and act as distinct connection pools" do
       assert {:ok, pid1} =
                @role_based_configuration
                |> Keyword.put(:role, :alpha)
-               |> Bolt.Sips.start_link()
+               |> Boltx.start_link()
 
-      assert conn1 = Bolt.Sips.conn(:alpha)
-      assert %Response{results: [%{"n" => 1}]} = Bolt.Sips.query!(conn1, "RETURN 1 as n")
+      assert conn1 = Boltx.conn(:alpha)
+      assert %Response{results: [%{"n" => 1}]} = Boltx.query!(conn1, "RETURN 1 as n")
 
-      assert {:ok, pid2} = Bolt.Sips.start_link(@role_based_configuration)
+      assert {:ok, pid2} = Boltx.start_link(@role_based_configuration)
       assert pid1 == pid2
 
-      assert conn2 = Bolt.Sips.conn(@role_based_configuration[:role])
+      assert conn2 = Boltx.conn(@role_based_configuration[:role])
       refute conn1 == conn2
 
-      assert %Response{results: [%{"n" => 1}]} = Bolt.Sips.query!(conn2, "RETURN 1 as n")
+      assert %Response{results: [%{"n" => 1}]} = Boltx.query!(conn2, "RETURN 1 as n")
 
       assert %{
                default: %{
@@ -83,15 +83,15 @@ defmodule Bolt.Sips.Routing.RouterTest do
                    zorba: %{"localhost:7687" => 0}
                  }
                }
-             } = Bolt.Sips.info()
+             } = Boltx.info()
 
-      assert :ok == Bolt.Sips.terminate_connections(:alpha)
+      assert :ok == Boltx.terminate_connections(:alpha)
 
-      assert_raise Bolt.Sips.Exception,
+      assert_raise Boltx.Exception,
                    "no connection exists with this role: alpha (prefix: default)",
-                   fn -> Bolt.Sips.conn(:alpha) end
+                   fn -> Boltx.conn(:alpha) end
 
-      refute Map.has_key?(Bolt.Sips.info(), :alpha)
+      refute Map.has_key?(Boltx.info(), :alpha)
     end
   end
 end
