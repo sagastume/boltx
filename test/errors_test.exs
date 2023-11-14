@@ -4,17 +4,17 @@ defmodule ErrorsTest do
   """
   use ExUnit.Case, async: true
 
-  @simple_map %{foo: "bar", bolt_sips: true}
+  @simple_map %{foo: "bar", boltx: true}
   @nested_map %{
     foo: "bar",
-    bolt_sips: true,
+    boltx: true,
     a_map: %{unu: 1, doi: 2, baz: "foo"},
     a_list: [1, 2, 3.14]
   }
 
   test "create a node using SET properties and a simple map" do
-    %Bolt.Sips.Response{stats: stats, type: type} =
-      Bolt.Sips.query!(Bolt.Sips.conn(), "CREATE (report:Report) SET report = $props", %{
+    %Boltx.Response{stats: stats, type: type} =
+      Boltx.query!(Boltx.conn(), "CREATE (report:Report) SET report = $props", %{
         props: @simple_map
       })
 
@@ -25,9 +25,9 @@ defmodule ErrorsTest do
   test "exception when creating a node using SET properties with a nested map" do
     err = "Property values can only be of primitive types or arrays thereof"
 
-    assert_raise Bolt.Sips.Exception, err, fn ->
-      Bolt.Sips.query!(
-        Bolt.Sips.conn(),
+    assert_raise Boltx.Exception, err, fn ->
+      Boltx.query!(
+        Boltx.conn(),
         "CREATE (report:Report) SET report = $props",
         %{props: @nested_map}
       )
@@ -35,8 +35,8 @@ defmodule ErrorsTest do
   end
 
   test "exception when creating a node using SET properties with a list" do
-    assert_raise Bolt.Sips.Exception, fn ->
-      Bolt.Sips.query!(Bolt.Sips.conn(), "CREATE (report:Report) SET report = $props", %{
+    assert_raise Boltx.Exception, fn ->
+      Boltx.query!(Boltx.conn(), "CREATE (report:Report) SET report = $props", %{
         props: ["foo", "bar"]
       })
     end

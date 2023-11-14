@@ -1,4 +1,4 @@
-defmodule Bolt.Sips do
+defmodule Boltx do
   @moduledoc """
   A Neo4j driver for Elixir providing many useful features:
 
@@ -9,14 +9,14 @@ defmodule Bolt.Sips do
   - Multi-tenancy
   - Supports Neo4j versions: 3.0.x/3.1.x/3.2.x/3.4.x/3.5.x
 
-  To start, add the `:bolt_sips` dependency to you project, run `mix do deps.get, compile` on it and then you can quickly start experimenting with Neo4j from the convenience of your IEx shell. Example:
+  To start, add the `:boltx` dependency to you project, run `mix do deps.get, compile` on it and then you can quickly start experimenting with Neo4j from the convenience of your IEx shell. Example:
 
-      iex> {:ok, _neo} = Bolt.Sips.start_link(url: "bolt://neo4j:test@localhost")
+      iex> {:ok, _neo} = Boltx.start_link(url: "bolt://neo4j:test@localhost")
       {:ok, #PID<0.250.0>}
-      iex>   conn = Bolt.Sips.conn()
+      iex>   conn = Boltx.conn()
       #PID<0.256.0>
-      iex> Bolt.Sips.query!(conn, "RETURN 1 as n")
-      %Bolt.Sips.Response{
+      iex> Boltx.query!(conn, "RETURN 1 as n")
+      %Boltx.Response{
         records: [[1]],
         results: [%{"n" => 1}]
       }
@@ -26,12 +26,12 @@ defmodule Bolt.Sips do
 
   use Supervisor
 
-  @registry_name :bolt_sips_registry
+  @registry_name :boltx_registry
 
   # @timeout 15_000
   # @max_rows     500
 
-  alias Bolt.Sips.{Query, ConnectionSupervisor, Router, Error, Response, Exception}
+  alias Boltx.{Query, ConnectionSupervisor, Router, Error, Response, Exception}
 
   @type conn :: DBConnection.conn()
   @type transaction :: DBConnection.t()
@@ -51,33 +51,33 @@ defmodule Bolt.Sips do
 
   This is the most basic configuration:
 
-      config :bolt_sips, Bolt,
+      config :boltx, Bolt,
         url: "bolt://localhost:7687"
 
   and if you need to connect to remote servers:
 
-      config :bolt_sips, Bolt,
+      config :boltx, Bolt,
         url: "bolt://Bilbo:Baggins@hobby-hobbits.dbs.graphenedb.com:24786",
         ssl: true,
         timeout: 15_000,
 
   Example with a configuration defined in the `config/dev.exs`:
 
-      opts = Application.get_env(:bolt_sips, Bolt)
-      {:ok, pid} = Bolt.Sips.start_link(opts)
+      opts = Application.get_env(:boltx, Bolt)
+      {:ok, pid} = Boltx.start_link(opts)
 
-      Bolt.Sips.query!(pid, "CREATE (a:Person {name:'Bob'})")
-      Bolt.Sips.query!(pid, "MATCH (a:Person) RETURN a.name AS name")
+      Boltx.query!(pid, "CREATE (a:Person {name:'Bob'})")
+      Boltx.query!(pid, "MATCH (a:Person) RETURN a.name AS name")
       |> Enum.map(&(&1["name"]))
 
   Or defining an ad-hoc configuration:
 
   Example with a configuration defined in the `config/dev.exs`:
 
-      {:ok, _neo} = Bolt.Sips.start_link(url: "bolt://neo4j:test@localhost")
+      {:ok, _neo} = Boltx.start_link(url: "bolt://neo4j:test@localhost")
 
-      conn = Bolt.Sips.conn()
-      Bolt.Sips.query!(conn, "return 1 as n")
+      conn = Boltx.conn()
+      Boltx.query!(conn, "return 1 as n")
 
   """
   @spec start_link(Keyword.t()) :: Supervisor.on_start()
@@ -181,21 +181,21 @@ defmodule Bolt.Sips do
 
     ```elixir
     setup do
-      {:ok, [main_conn: Bolt.Sips.conn()]}
+      {:ok, [main_conn: Boltx.conn()]}
     end
 
     test "execute statements in transaction", %{main_conn: main_conn} do
-      Bolt.Sips.transaction(main_conn, fn conn ->
+      Boltx.transaction(main_conn, fn conn ->
         book =
-          Bolt.Sips.query!(conn, "CREATE (b:Book {title: \"The Game Of Trolls\"}) return b")
+          Boltx.query!(conn, "CREATE (b:Book {title: \"The Game Of Trolls\"}) return b")
           |> Response.first()
 
         assert %{"b" => g_o_t} = book
         assert g_o_t.properties["title"] == "The Game Of Trolls"
-        Bolt.Sips.rollback(conn, :changed_my_mind)
+        Boltx.rollback(conn, :changed_my_mind)
       end)
 
-      books = Bolt.Sips.query!(main_conn, "MATCH (b:Book {title: \"The Game Of Trolls\"}) return b")
+      books = Boltx.query!(main_conn, "MATCH (b:Book {title: \"The Game Of Trolls\"}) return b")
       assert Enum.count(books) == 0
     end
     ```
@@ -214,8 +214,8 @@ defmodule Bolt.Sips do
 
   ### Example
 
-      {:error, :oops} = Bolt.Sips.transaction(pool, fn(conn) ->
-        Bolt.Sips.rollback(conn, :oops)
+      {:error, :oops} = Boltx.transaction(pool, fn(conn) ->
+        Boltx.rollback(conn, :oops)
       end)
   """
   @spec rollback(DBConnection.t(), reason :: any) :: no_return
@@ -234,11 +234,11 @@ defmodule Bolt.Sips do
 
   ### Examples:
 
-  iex> Bolt.Sips.info()
-  %{default: %{connections: %{direct: %{"localhost:7687" => 0}, routing_query: nil, zorba: %{"localhost:7687" => 0}}, user_options: [basic_auth: [username: "******", password: "******"], socket: Bolt.Sips.Socket, port: 7687, routing_context: %{}, schema: "bolt", hostname: "localhost", timeout: 15000, ssl: false, with_etls: false, prefix: :default, url: "bolt://localhost", pool_size: 10, max_overflow: 2, role: :zorba]}}
+  iex> Boltx.info()
+  %{default: %{connections: %{direct: %{"localhost:7687" => 0}, routing_query: nil, zorba: %{"localhost:7687" => 0}}, user_options: [basic_auth: [username: "******", password: "******"], socket: Boltx.Socket, port: 7687, routing_context: %{}, schema: "bolt", hostname: "localhost", timeout: 15000, ssl: false, with_etls: false, prefix: :default, url: "bolt://localhost", pool_size: 10, max_overflow: 2, role: :zorba]}}
   """
   @spec info() :: map
-  def info(), do: sanitized_info(Bolt.Sips.Router.info())
+  def info(), do: sanitized_info(Boltx.Router.info())
 
   @doc """
   extract the routing table from the router
@@ -247,13 +247,13 @@ defmodule Bolt.Sips do
   def routing_table(prefix \\ :default)
 
   def routing_table(prefix) do
-    Bolt.Sips.Router.routing_table(prefix)
+    Boltx.Router.routing_table(prefix)
   end
 
   @doc """
   the registry name used across the various driver components
   """
-  @spec registry_name() :: :bolt_sips_registry
+  @spec registry_name() :: :boltx_registry
   def registry_name(), do: @registry_name
 
   @hide_auth [username: "******", password: "******"]

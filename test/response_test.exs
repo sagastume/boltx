@@ -1,7 +1,7 @@
 defmodule ResponseTest do
   use ExUnit.Case
 
-  alias Bolt.Sips.Response
+  alias Boltx.Response
   # import ExUnit.CaptureLog
 
   @explain [
@@ -224,8 +224,8 @@ defmodule ResponseTest do
 
   describe "Response as Enumerable" do
     test "a simple query" do
-      conn = Bolt.Sips.conn()
-      response = Bolt.Sips.query!(conn, "RETURN 300 AS r")
+      conn = Boltx.conn()
+      response = Boltx.query!(conn, "RETURN 300 AS r")
 
       assert %Response{results: [%{"r" => 300}]} = response
       assert response |> Enum.member?("r")
@@ -234,7 +234,7 @@ defmodule ResponseTest do
       assert %{"r" => 300} = response |> Response.first()
     end
 
-    @unwind %Bolt.Sips.Response{
+    @unwind %Boltx.Response{
       records: [[1], [2], [3], [4], [5], [6], '\a', '\b', '\t', '\n'],
       results: [
         %{"n" => 1},

@@ -1,19 +1,19 @@
-defmodule Bolt.Sips.Routing.CrudTest do
-  use Bolt.Sips.RoutingConnCase
+defmodule Boltx.Routing.CrudTest do
+  use Boltx.RoutingConnCase
   @moduletag :routing
 
-  alias Bolt.Sips
+  alias Boltx
 
   describe "Basic Read/Write; " do
     test "read" do
       cypher = "return 10 as n"
 
       assert [%{"n" => 10}] ==
-               Sips.query!(Sips.conn(:read), cypher)
+               Boltx.query!(Boltx.conn(:read), cypher)
     end
 
     test "write" do
-      conn = Sips.conn(:write)
+      conn = Boltx.conn(:write)
       cypher = "CREATE (elf:Elf { name: $name, from: $from, klout: 99 })"
 
       assert %{
@@ -23,7 +23,7 @@ defmodule Bolt.Sips.Routing.CrudTest do
                  "properties-set" => 3
                },
                type: "w"
-             } == Sips.query!(conn, cypher, %{name: "Arameil", from: "Sweden"})
+             } == Boltx.query!(conn, cypher, %{name: "Arameil", from: "Sweden"})
     end
 
     # https://neo4j.com/docs/cypher-manual/current/clauses/set/#set-adding-properties-from-maps
@@ -36,7 +36,7 @@ defmodule Bolt.Sips.Routing.CrudTest do
         RETURN p.first as first_name, p.last as last_name
       """
 
-      conn = Sips.conn(:write)
+      conn = Boltx.conn(:write)
 
       assert %{
                stats: %{
@@ -46,16 +46,16 @@ defmodule Bolt.Sips.Routing.CrudTest do
                },
                type: "w"
              } ==
-               Sips.query!(conn, create_cypher, %{person: %{first: "Green", last: "Alien"}})
+               Boltx.query!(conn, create_cypher, %{person: %{first: "Green", last: "Alien"}})
 
       assert [%{"last_name" => "Alien"}] ==
-               Sips.query!(
+               Boltx.query!(
                  conn,
                  "MATCH (p:Person { first: 'Green', last: 'Alien' }) RETURN p.last AS last_name"
                )
 
       assert [%{"first_name" => "Florin", "last_name" => "Pătraşcu"}] ==
-               Sips.query!(conn, update_cypher, %{person: %{first: "Florin", last: "Pătraşcu"}})
+               Boltx.query!(conn, update_cypher, %{person: %{first: "Florin", last: "Pătraşcu"}})
     end
 
     test "upsert" do

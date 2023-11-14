@@ -10,7 +10,7 @@ level =
     :info
   end
 
-config :bolt_sips,
+config :boltx,
   log: false,
   log_hex: false
 

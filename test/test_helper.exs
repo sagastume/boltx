@@ -4,12 +4,12 @@ Application.ensure_started(:porcelain)
 
 Code.require_file("test_support.exs", __DIR__)
 
-defmodule Bolt.Sips.TestHelper do
+defmodule Boltx.TestHelper do
   def opts() do
     [
       address: "127.0.0.1",
-      auth: [username: "neo4j", password: "BoltSipsPassword"],
-      bolt_agent: [product: "boltSipsTest/1"],
+      auth: [username: "neo4j", password: "boltxPassword"],
+      bolt_agent: [product: "boltxTest/1"],
       pool_size: 15,
       max_overflow: 3,
       prefix: :default
@@ -19,7 +19,7 @@ defmodule Bolt.Sips.TestHelper do
   def opts_without_auth() do
     [
       address: "127.0.0.1",
-      bolt_agent: [product: "boltSipsTest/1"],
+      bolt_agent: [product: "boltxTest/1"],
       pool_size: 15,
       max_overflow: 3,
       prefix: :default
@@ -48,10 +48,10 @@ defmodule Bolt.Sips.TestHelper do
   defp file_error_description(reason), do: "due to #{reason}."
 end
 
-#Bolt.Sips.start_link(Application.get_env(:bolt_sips, Bolt))
+#Boltx.start_link(Application.get_env(:boltx, Bolt))
 
 # I am using the test db for debugging and the line below will clear *everything*
-# Bolt.Sips.query(Bolt.Sips.conn, "MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE n,r")
+# Boltx.query(Boltx.conn, "MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE n,r")
 #
 # todo: The tests should cleanup the data they create.
 

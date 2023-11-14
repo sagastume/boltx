@@ -2,7 +2,7 @@ defmodule Routing.Routing.TableParserTest do
   use ExUnit.Case, async: true
   @moduletag :routing
 
-  alias Bolt.Sips.Routing.RoutingTable
+  alias Boltx.Routing.RoutingTable
 
   @valid_routing_table %{
     "servers" => [
@@ -32,7 +32,7 @@ defmodule Routing.Routing.TableParserTest do
 
   describe "Routing table" do
     test "parse a valid server response having valid roles" do
-      assert %Bolt.Sips.Routing.RoutingTable{
+      assert %Boltx.Routing.RoutingTable{
                roles: %{
                  read: %{"127.0.0.1:9004" => 0, "127.0.0.1:9005" => 0},
                  route: %{
@@ -50,7 +50,7 @@ defmodule Routing.Routing.TableParserTest do
     end
 
     test "parse a valid server response containing some Magic roles" do
-      assert %Bolt.Sips.Routing.RoutingTable{
+      assert %Boltx.Routing.RoutingTable{
                roles: %{
                  read: %{"127.0.0.1:9004" => 0, "127.0.0.1:9005" => 0},
                  route: %{

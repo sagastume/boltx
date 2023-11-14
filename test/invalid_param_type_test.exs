@@ -1,9 +1,9 @@
-defmodule Bolt.Sips.InvalidParamType.Test do
+defmodule Boltx.InvalidParamType.Test do
   use ExUnit.Case
 
   setup_all do
-    Bolt.Sips.ConnectionSupervisor.connections()
-    {:ok, [conn: Bolt.Sips.conn()]}
+    Boltx.ConnectionSupervisor.connections()
+    {:ok, [conn: Boltx.conn()]}
   end
 
   test "executing a Cypher query, with invalid parameter value yields an error", context do
@@ -13,8 +13,8 @@ defmodule Bolt.Sips.InvalidParamType.Test do
       MATCH (n:Person {invalid: {an_elixir_datetime}}) RETURN TRUE
     """
 
-    {:error, %Bolt.Sips.Error{message: message}} =
-      Bolt.Sips.query(conn, cypher, %{an_elixir_tuple: {:not, :valid}})
+    {:error, %Boltx.Error{message: message}} =
+      Boltx.query(conn, cypher, %{an_elixir_tuple: {:not, :valid}})
 
     assert String.match?(message, ~r/unable to encode value: {:not, :valid}/i)
   end
