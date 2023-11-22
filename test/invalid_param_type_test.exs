@@ -13,7 +13,7 @@ defmodule Boltx.InvalidParamType.Test do
       MATCH (n:Person {invalid: {an_elixir_datetime}}) RETURN TRUE
     """
 
-    {:error, %Boltx.Error{message: message}} =
+    {:error, %Boltx.ErrorLegacy{message: message}} =
       Boltx.query(conn, cypher, %{an_elixir_tuple: {:not, :valid}})
 
     assert String.match?(message, ~r/unable to encode value: {:not, :valid}/i)

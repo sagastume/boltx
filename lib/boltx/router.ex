@@ -6,7 +6,7 @@ defmodule Boltx.Router do
   require Logger
 
   alias Boltx.Routing.RoutingTable
-  alias Boltx.{Protocol, ConnectionSupervisor, LoadBalancer, Response, Error}
+  alias Boltx.{Protocol, ConnectionSupervisor, LoadBalancer, Response, ErrorLegacy}
 
   defmodule State do
     @moduledoc """
@@ -174,7 +174,7 @@ defmodule Boltx.Router do
          {:ok, %Response{} = results} <- Boltx.query(conn, query, props) do
       {:ok, Response.first(results), updated_connections}
     else
-      {:error, %Error{code: code, message: message}} ->
+      {:error, %ErrorLegacy{code: code, message: message}} ->
         err_msg = "#{code}; #{message}"
         Logger.error(err_msg)
         {:error, err_msg}
@@ -221,7 +221,7 @@ defmodule Boltx.Router do
 
         {:ok, table}
       else
-        {:error, %Error{message: message}} ->
+        {:error, %ErrorLegacy{message: message}} ->
           Logger.error(message)
           {:error, message}
 

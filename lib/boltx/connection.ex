@@ -2,7 +2,6 @@ defmodule Boltx.Connection do
   @moduledoc false
   use DBConnection
   alias Boltx.Client
-  alias Boltx.Internals.Error, as: BoltError
 
   defstruct [
     :client,
@@ -21,11 +20,6 @@ defmodule Boltx.Connection do
           client = %Client{client | connection_id: connection_id }
           state = %__MODULE__{state | client: client}
           {:ok, state}
-      else
-        {:error, reason} ->
-          # TODO: Evaluate how to return errors
-          #{:error, BoltError.exception(reason, nil, :connect)}
-          {:error, reason}
     end
   end
 
@@ -37,11 +31,6 @@ defmodule Boltx.Connection do
     with {:ok, response_hello} <- Client.message_hello(client, opts),
          {:ok, _response_logon} <- Client.message_logon(client, opts) do
           {:ok, response_hello}
-        else
-          {:error, reason} ->
-            # TODO: Evaluate how to return errors
-            #{:error, BoltError.exception(reason, nil, :do_init)}
-            {:error, reason}
     end
   end
 

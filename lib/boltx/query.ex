@@ -46,7 +46,7 @@ defmodule Boltx.Query do
   See the various tests, or more examples and implementation details.
 
   """
-  alias Boltx.{QueryStatement, Response, Types, Error, Exception}
+  alias Boltx.{QueryStatement, Response, Types, ErrorLegacy, Exception}
 
   @cypher_seps ~r/;(.){0,1}\n/
 
@@ -66,19 +66,19 @@ defmodule Boltx.Query do
     end
   end
 
-  @spec query(Boltx.conn(), String.t()) :: {:error, Error.t()} | {:ok, Response.t()}
+  @spec query(Boltx.conn(), String.t()) :: {:error, ErrorLegacy.t()} | {:ok, Response.t()}
   def query(conn, statement), do: query(conn, statement, %{})
 
   @spec query(Boltx.conn(), String.t(), map, Keyword.t()) ::
-          {:error, Error.t()} | {:ok, Response.t()}
+          {:error, ErrorLegacy.t()} | {:ok, Response.t()}
   def query(conn, statement, params, opts \\ []) when is_map(params) do
     case query_commit(conn, statement, params, opts) do
-      {:error, message} -> {:error, %Error{message: message}}
+      {:error, message} -> {:error, %ErrorLegacy{message: message}}
       r -> r
     end
   rescue
     e in Boltx.Exception ->
-      {:error, %Boltx.Error{code: e.code, message: e.message}}
+      {:error, %Boltx.ErrorLegacy{code: e.code, message: e.message}}
   end
 
   ###########
@@ -112,7 +112,7 @@ defmodule Boltx.Query do
     {:ok, commit!(errors, conn, statements, formatted_params, opts)}
   rescue
     e in [RuntimeError, DBConnection.ConnectionError] ->
-      {:error, Boltx.Error.new(e.message)}
+      {:error, Boltx.ErrorLegacy.new(e.message)}
 
     e in Exception ->
       {:current_stacktrace, stacktrace} = Process.info(self(), :current_stacktrace)

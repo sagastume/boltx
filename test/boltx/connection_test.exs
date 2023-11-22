@@ -18,7 +18,7 @@ defmodule Boltx.ConnectionTest do
   @tag core: true
   test "connect/1 - not successful with incorrect credentials" do
     opts = @opts_without_auth ++ [auth: [username: "baduser", password: "badsecret"]]
-    {:error, %Boltx.Error{code: "Neo.ClientError.Security.Unauthorized"}} =
+    {:error, %Boltx.Error{code: :unauthorized}} =
       Connection.connect(opts)
   end
 
