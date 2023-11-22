@@ -116,7 +116,7 @@ defmodule Boltx.Client do
     encode_version <- recv_packets(client, config.connect_timeout),
     version <- decode_version(encode_version) do
       case version do
-        0.0 -> {:error, %Boltx.Error{code: :version_negotiation_error}}
+        0.0 -> {:error, Boltx.Error.wrap(__MODULE__, :version_negotiation_error)}
         _ -> {:ok, %{client | bolt_version: version}}
       end
     else
@@ -189,11 +189,7 @@ defmodule Boltx.Client do
       {:ok, response} ->
         case decode_messages(response, chunks) do
           {:complete_chunks, binary_message} ->
-            message = binary_message |> decoder.()
-            case message do
-              {:ok, decoded_message} ->  {:ok, decoded_message}
-              {:error, error_message} -> {:error, %Boltx.Error{code: error_message["code"], message: error_message["message"]}}
-            end
+            binary_message |> decoder.()
           {:remaining_chunks, binary_message} -> recv_packets(client, decoder, timeout, binary_message)
         end
       {:error, _} = error ->

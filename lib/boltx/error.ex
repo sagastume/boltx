@@ -1,34 +1,48 @@
 defmodule Boltx.Error do
-  @moduledoc """
-  represents an error message
+
+  @error_map %{
+    "Neo.ClientError.Security.Unauthorized" => :unauthorized,
+  }
+
+  @type t() :: %__MODULE__{
+          module: module(),
+          code: atom(),
+          bolt: %{code: binary(), message: binary() | nil} | nil,
+        }
+
+  defexception [:module, :code, :bolt]
+
+  @spec wrap(module(), atom()) :: t()
+  def wrap(module, code) when is_atom(code), do: %__MODULE__{module: module, code: code}
+
+  @spec wrap(module(), binary()) :: t()
+  def wrap(module, code) when is_binary(code), do: wrap(module, to_atom(code))
+
+  @spec wrap(module(), map()) :: t()
+  def wrap(module, bolt_error) when is_map(bolt_error), do: %__MODULE__{module: module, code: bolt_error.code |> to_atom(), bolt: bolt_error}
+
+
+  @doc """
+  Return the code for the given error.
+
+  ### Examples
+
+       iex> {:error, %Boltx.Error{} = error} = do_something()
+       iex> Exception.message(error)
+       "Unable to perform this action."
+
+
   """
-  alias __MODULE__
-  @type t :: %__MODULE__{}
-
-  defstruct [:code, :message]
-
-  def new(%Boltx.Internals.Error{
-        code: code,
-        connection_id: cid,
-        function: f,
-        message: message,
-        type: t
-      }) do
-    {:error,
-     %Error{
-       code: code,
-       message:
-         "Details: #{message}; connection_id: #{inspect(cid)}, function: #{inspect(f)}, type: #{
-           inspect(t)
-         }"
-     }}
+  @spec message(t()) :: String.t()
+  def message(%__MODULE__{code: code, module: module}) do
+    module.format_error(code)
   end
 
-  def new({:ignored, f} = _r), do: new({:error, f})
-
-  def new({:failure, %{"code" => code, "message" => message}} = _r) do
-    {:error, %Error{code: code, message: message}}
+  @doc """
+  Gets the corresponding atom based on the error code.
+  """
+  @spec to_atom(t()) :: String.t()
+  def to_atom(error_message) do
+    Map.get(@error_map, error_message, :unknown)
   end
-
-  def new(r), do: r
 end

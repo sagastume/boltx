@@ -18,7 +18,7 @@ defmodule Boltx.BoltProtocol.Message.InitMessage do
       {:success, response} ->
         {:ok, response}
       {:failure, response} ->
-        {:error, response}
+        {:error, Boltx.Error.wrap(__MODULE__, %{code: response["code"], message: response["message"]})}
     end
   end
 end

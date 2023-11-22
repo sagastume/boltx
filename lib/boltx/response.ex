@@ -84,7 +84,7 @@ defmodule Boltx.Response do
             type: nil,
             bookmark: nil
 
-  alias Boltx.Error
+  alias Boltx.ErrorLegacy
 
   require Logger
   require Integer
@@ -136,7 +136,7 @@ defmodule Boltx.Response do
   end
 
   defp parse(records) do
-    with {err_type, error} when err_type in ~w(halt error failure)a <- Error.new(records) do
+    with {err_type, error} when err_type in ~w(halt error failure)a <- ErrorLegacy.new(records) do
       {:error, error}
     else
       records ->
@@ -193,7 +193,7 @@ defmodule Boltx.Response do
 
     err_msg = "UNKNOWN success type: " <> inspect(record) <> line
     Logger.error(err_msg)
-    {:error, Boltx.Error.new(err_msg)}
+    {:error, Boltx.ErrorLegacy.new(err_msg)}
   end
 
   # defp parse_record(:record, %{"bookmark" => "neo4j:bookmark:v1:tx14519", "t_last" => 1, "type" => "r"}, response) do
@@ -208,7 +208,7 @@ defmodule Boltx.Response do
 
     err_msg = "UNKNOWN `:record`: " <> inspect(record) <> line
     Logger.error(err_msg)
-    {:error, Boltx.Error.new(err_msg)}
+    {:error, Boltx.ErrorLegacy.new(err_msg)}
   end
 
   defp create_results(fields, records) do
