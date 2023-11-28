@@ -95,6 +95,9 @@ defmodule Boltx.Client do
         :ok = :inet.setopts(sock, buffer: buffer)
         {:ok, %{client | sock: {:gen_tcp, sock}}}
 
+      {:error, :timeout} ->
+        {:error, Boltx.Error.wrap(__MODULE__, :timeout)}
+
       other ->
         other
     end
@@ -162,6 +165,8 @@ defmodule Boltx.Client do
     case recv_data(client, timeout) do
       {:ok, response} ->
         response
+      {:error, :timeout} ->
+          {:error, Boltx.Error.wrap(__MODULE__, :timeout)}
       {:error, _} = error ->
         error
     end
@@ -192,6 +197,8 @@ defmodule Boltx.Client do
             binary_message |> decoder.()
           {:remaining_chunks, binary_message} -> recv_packets(client, decoder, timeout, binary_message)
         end
+      {:error, :timeout} ->
+        {:error, Boltx.Error.wrap(__MODULE__, :timeout)}
       {:error, _} = error ->
         error
     end

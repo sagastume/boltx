@@ -11,13 +11,13 @@ defmodule Boltx.ClientTest do
     test "multiple versions specified" do
       opts = [versions: [5.3, 4, 3]] ++ @opts
       assert {:ok, client} = Client.connect(opts)
-      assert 5.3 = client.bolt_version
+      assert 5.3 == client.bolt_version
     end
     @tag bolt_version: "5.3"
     test "unordered versions specified" do
       opts = [versions: [4, 3, 5.3]] ++ @opts
       assert {:ok, client} = Client.connect(opts)
-      assert 5.3 = client.bolt_version
+      assert 5.3 == client.bolt_version
     end
     # TODO: add the latest version tag when it is the latest version being tested
     @tag last_version: true
@@ -25,7 +25,7 @@ defmodule Boltx.ClientTest do
       opts = [] ++ @opts
       assert {:ok, client} = Client.connect(opts)
       last_version = hd(Versions.latest_versions)
-      assert last_version = client.bolt_version
+      assert last_version == client.bolt_version
     end
     @tag core: true
     test "zero version" do
@@ -43,7 +43,7 @@ defmodule Boltx.ClientTest do
       assert {:ok, client} = Client.connect(opts)
       assert is_map(client)
       assert is_tuple(client.sock)
-      assert 1.0 = client.bolt_version
+      assert 1.0 == client.bolt_version
     end
   end
 
