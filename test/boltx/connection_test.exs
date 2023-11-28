@@ -47,6 +47,15 @@ defmodule Boltx.ConnectionTest do
     :ok = Connection.disconnect(:stop, conn_data)
   end
 
+  @tag core: true
+  test "connect/1 fails when connection is not available" do
+    opts = [
+      address: "192.0.0.198",
+      connect_timeout: 1
+    ]
+    {:error, %Boltx.Error{code: :timeout}} = Connection.connect(opts)
+  end
+
   @tag bolt_version: "1.0"
   test "connect/1 successful with bolt version 1.0" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
