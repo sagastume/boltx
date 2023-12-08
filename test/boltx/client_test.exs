@@ -1,11 +1,22 @@
 defmodule Boltx.ClientTest do
   use ExUnit.Case, async: true
+
   alias Boltx.Client
   alias Boltx.BoltProtocol.Versions
+  import Boltx.BoltProtocol.ServerResponse
 
   @opts Boltx.TestHelper.opts()
   @noop_chunk <<0x00, 0x00>>
 
+  defp handle_handshake(client, opts) do
+    case client.bolt_version do
+      version when version >= 5.1 ->
+        Client.message_hello(client, @opts)
+        Client.message_logon(client, @opts)
+      version when version >= 3.0 -> Client.message_hello(client, @opts)
+      version when version <= 2.0 -> Client.message_init(client, @opts)
+    end
+  end
   describe "connect" do
     @tag bolt_version: "5.3"
     test "multiple versions specified" do
@@ -49,35 +60,76 @@ defmodule Boltx.ClientTest do
 
   describe "recv_packets" do
     @tag core: true
-    test "recv_packets concatenates and decodes two chunks" do
+    test "recv_packets concatenates and decodes one message in two chunks" do
       sizeMock = <<0,10>>
-      chunk1 = <<0,14,103,106>>
-      chunk2 = <<0,5,107,108,0,0>>
-      pid = Boltx.Mocks.SockMock.start_link([@noop_chunk, sizeMock <> chunk1, sizeMock <> chunk2])
-      client = %{sock: {Boltx.Mocks.SockMock, pid}}
-      {:ok, message} = Client.recv_packets(client, fn data -> {:ok, data} end, 0)
-      assert message == chunk1 <> chunk2
+      chunk1 = <<177,14,103,106>>
+      chunk2 = <<120,5,107,108,109,15,0,0>>
+      pid = Boltx.Mocks.SockMock.start_link([@noop_chunk, sizeMock <> chunk1, chunk2])
+      client = %{sock: {Boltx.Mocks.SockMock, pid}, bolt_version: 1.0}
+      {:ok, message} = Client.recv_packets(client, fn _bolt_version, data -> {:ok, data} end, 0)
+      assert message == [chunk1 <> chunk2]
     end
 
     @tag core: true
-    test "recv_packets decodes a single chunk" do
-      sizeMock = <<0,10>>
-      chunk1 = <<0,14,103,106,0,0>>
+    test "recv_packets decodes a message into a single chunk" do
+      sizeMock = <<0,4>>
+      chunk1 = <<122,14,103,106,0,0>>
       pid = Boltx.Mocks.SockMock.start_link([@noop_chunk, sizeMock <> chunk1])
-      client = %{sock: {Boltx.Mocks.SockMock, pid}}
-      {:ok, message} = Client.recv_packets(client, fn data -> {:ok, data} end, 0)
-      assert message == chunk1
+      client = %{sock: {Boltx.Mocks.SockMock, pid}, bolt_version: 3.0}
+      {:ok, message} = Client.recv_packets(client, fn _bolt_version, data -> {:ok, data} end, 0)
+      assert message == [chunk1]
     end
 
     @tag core: true
     test "ignores noop chunks between two chunks" do
       sizeMock = <<0,10>>
-      chunk1 = <<0,14,103,106>>
-      chunk2 = <<0,5,107,108,0,0>>
-      pid = Boltx.Mocks.SockMock.start_link([@noop_chunk, sizeMock <> chunk1, @noop_chunk, sizeMock <> chunk2, @noop_chunk])
-      client = %{sock: {Boltx.Mocks.SockMock, pid}}
-      {:ok, message} = Client.recv_packets(client, fn data -> {:ok, data} end, 0)
-      assert message == chunk1 <> chunk2
+      chunk1 = <<177,14,103,106>>
+      chunk2 = <<120,5,107,108,109,15,0,0>>
+      pid = Boltx.Mocks.SockMock.start_link([@noop_chunk, sizeMock <> chunk1, @noop_chunk, chunk2, @noop_chunk])
+      client = %{sock: {Boltx.Mocks.SockMock, pid}, bolt_version: 5.0}
+      {:ok, message} = Client.recv_packets(client, fn _bolt_version, data -> {:ok, data} end, 0)
+      assert message == [chunk1 <> chunk2]
+    end
+
+  end
+
+  describe "run_statement" do
+    @tag core: true
+    test "simple query" do
+      assert {:ok, client} = Client.connect(@opts)
+      handle_handshake(client, @opts)
+
+      query = "RETURN 1024 AS a, 2048 AS b"
+      statement_result(
+        result_run: result_run,
+        result_pull: result_pull,
+        query: query_result) = Client.run_statement(client, query, %{}, %{})
+
+      assert query_result == query
+      assert %{"fields" => ["a", "b"], "t_first" => _} = result_run
+
+      assert pull_result(records: records, success_data: success_data) = result_pull
+      assert %{"t_last" => _, "type" => "r"} = success_data
+      assert [[1024, 2048]]  == records
+    end
+
+    @tag core: true
+    test "simple range query" do
+      assert {:ok, client} = Client.connect(@opts)
+      handle_handshake(client, @opts)
+
+      query = "UNWIND range(1, 10) AS n RETURN n"
+      statement_result(
+        result_run: result_run,
+        result_pull: result_pull,
+        query: query_result) = Client.run_statement(client, query, %{}, %{})
+
+      assert query_result == query
+      assert %{"fields" => ["n"], "t_first" => _} = result_run
+
+      assert pull_result(records: records, success_data: success_data) = result_pull
+      assert %{"t_last" => _, "type" => "r"} = success_data
+      assert [[1], [2], [3], [4], [5], [6], [7], [8], [9], [10]]  == records
     end
   end
 end
