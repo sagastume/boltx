@@ -18,8 +18,10 @@ defmodule Boltx.BoltProtocol.Message.HelloMessage do
     {:error, %Boltx.Internals.Error{code: :unsupported_message_version, message: "HELLO message version not supported"}}
   end
 
-  def decode(response_message) do
-    case Decoder.decode(response_message, 3) do
+  def decode(_bolt_version, binary_messages) do
+    messages = Enum.map(binary_messages, &Decoder.decode(&1, 3))
+    response = hd(messages)
+    case response do
       {:success, response} ->
         {:ok, response}
       {:failure, response} ->

@@ -2,9 +2,11 @@ defmodule Boltx.Client do
   @handshake_bytes_identifier <<0x60, 0x60, 0xB0, 0x17>>
   @noop_chunk <<0x00, 0x00>>
 
+  import Boltx.BoltProtocol.ServerResponse
+
   alias Boltx.BoltProtocol.Versions
   alias Boltx.Utils.Converters
-  alias Boltx.BoltProtocol.Message.{HelloMessage, InitMessage, LogonMessage}
+  alias Boltx.BoltProtocol.Message.{HelloMessage, InitMessage, LogonMessage, RunMessage, PullMessage}
 
   defstruct [:sock, :connection_id, :bolt_version]
 
@@ -131,21 +133,42 @@ defmodule Boltx.Client do
   def message_hello(client, fields) do
     payload = HelloMessage.encode(client.bolt_version, fields)
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &HelloMessage.decode/1, :infinity)
+      recv_packets(client, &HelloMessage.decode/2, :infinity)
     end
   end
 
   def message_logon(client, fields) do
     payload = LogonMessage.encode(client.bolt_version, fields)
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &LogonMessage.decode/1, :infinity)
+      recv_packets(client, &LogonMessage.decode/2, :infinity)
     end
   end
 
   def message_init(client, fields) do
     payload = InitMessage.encode(client.bolt_version, fields)
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &InitMessage.decode/1, :infinity)
+      recv_packets(client, &InitMessage.decode/2, :infinity)
+    end
+  end
+
+  def message_run(client, query, parameters, extra_parameters) do
+    payload = RunMessage.encode(client.bolt_version, query, parameters, extra_parameters)
+    with :ok <- send_packet(client, payload) do
+      recv_packets(client, &RunMessage.decode/2, :infinity)
+    end
+  end
+
+  def message_pull(client, extra_parameters) do
+    payload = PullMessage.encode(client.bolt_version, extra_parameters)
+    with :ok <- send_packet(client, payload) do
+      recv_packets(client, &PullMessage.decode/2, :infinity)
+    end
+  end
+
+  def run_statement(client, query, parameters, extra_parameters) do
+    with {:ok, result_run} <- message_run(client, query, parameters, extra_parameters),
+         {:ok, result_pull} <- message_pull(client, extra_parameters) do
+      statement_result(result_run: result_run, result_pull: result_pull, query: query)
     end
   end
 
@@ -176,25 +199,12 @@ defmodule Boltx.Client do
     recv_packets(client, decoder, timeout, <<>>)
   end
 
-  defp decode_messages(response, chunks) do
-    case response do
-      @noop_chunk ->
-        {:remaining_chunks, chunks}
-      <<_::binary-size(byte_size(response)-2), 0,0>> ->
-        <<_::16, message::binary>> = response
-        {:complete_chunks, chunks <> message}
-      << _::binary>> ->
-        <<_::16, message::binary>> = response
-        {:remaining_chunks, chunks <> message}
-    end
-  end
-
   defp recv_packets(client, decoder, timeout, chunks) do
     case recv_data(client, timeout) do
       {:ok, response} ->
-        case decode_messages(response, chunks) do
-          {:complete_chunks, binary_message} ->
-            binary_message |> decoder.()
+        case concatenateChunks(response, chunks) do
+          {:complete_chunks, binary_messages} ->
+            decode_messages(client.bolt_version, binary_messages, decoder)
           {:remaining_chunks, binary_message} -> recv_packets(client, decoder, timeout, binary_message)
         end
       {:error, :timeout} ->
@@ -202,6 +212,31 @@ defmodule Boltx.Client do
       {:error, _} = error ->
         error
     end
+  end
+
+  defp concatenateChunks(response, chunks) do
+    case response do
+      @noop_chunk ->
+        {:remaining_chunks, chunks}
+      <<_::binary-size(byte_size(response)-2), 0,0>> ->
+        {:complete_chunks, chunks <> response}
+      << _::binary>> ->
+        {:remaining_chunks, chunks <> response}
+    end
+  end
+
+  def decode_messages(bolt_version, binary_messages, decoder) do
+    messages = split_message(binary_messages, [])
+    decoder.(bolt_version, messages)
+  end
+
+  defp split_message(<<size::16, data::binary>>, acc) do
+    <<message::binary-size(size + byte_size(@noop_chunk)), remaining::binary>> = data
+    split_message(remaining, [message | acc])
+  end
+
+  defp split_message(<<>>, acc) do
+    acc
   end
 
   def recv_data(%{sock: {sock_mod, sock}}, timeout) do
