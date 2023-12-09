@@ -5,8 +5,8 @@ defmodule Boltx.BoltProtocol.Message.PullMessage do
   alias Boltx.Internals.PackStream.Message.Encoder
   alias Boltx.Internals.PackStream.Message.Decoder
 
-  def encode(bolt_version, _extra_parameters) when is_float(bolt_version) and bolt_version >=4.0 do
-    message = []
+  def encode(bolt_version, extra_parameters) when is_float(bolt_version) and bolt_version >= 4.0 do
+    message = [get_extra_parameters(extra_parameters)]
     Encoder.do_encode(:pull_all, message, 1)
   end
 
@@ -24,13 +24,20 @@ defmodule Boltx.BoltProtocol.Message.PullMessage do
     records = Enum.reduce(messages, [], &group_record/2)
 
     success_data =
-      if bolt_version <= 2 do
+      if bolt_version <= 2.0 do
         Map.merge(%{"t_last" => messages[:success]["result_consumed_after"]}, Map.delete(messages[:success], "result_consumed_after"))
       else
         messages[:success]
       end
 
     {:ok, pull_result(records: records, success_data: success_data )}
+  end
+
+  defp get_extra_parameters(extra_parameters) do
+    %{
+      n: Map.get(extra_parameters, :n, -1),
+      qid: Map.get(extra_parameters, :qid, -1),
+    }
   end
 
   defp group_record({:record, data}, acc) do

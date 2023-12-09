@@ -11,10 +11,10 @@ defmodule Boltx.ClientTest do
   defp handle_handshake(client, opts) do
     case client.bolt_version do
       version when version >= 5.1 ->
-        Client.message_hello(client, @opts)
-        Client.message_logon(client, @opts)
-      version when version >= 3.0 -> Client.message_hello(client, @opts)
-      version when version <= 2.0 -> Client.message_init(client, @opts)
+        Client.message_hello(client, opts)
+        Client.message_logon(client, opts)
+      version when version >= 3.0 -> Client.message_hello(client, opts)
+      version when version <= 2.0 -> Client.message_init(client, opts)
     end
   end
   describe "connect" do
