@@ -2,6 +2,7 @@ defmodule Boltx.ConnectionTest do
   use ExUnit.Case, async: false
 
   alias Boltx.Connection
+  alias Boltx.BoltProtocol.Versions
 
   @opts Boltx.TestHelper.opts()
   @opts_without_auth Boltx.TestHelper.opts_without_auth()
@@ -225,14 +226,14 @@ defmodule Boltx.ConnectionTest do
     :ok = Connection.disconnect(:stop, conn_data)
   end
 
-  # TODO: add the latest version tag when it is the latest version being tested
-  @tag last_version: true
+  @tag :last_version
   test "connect/1 successful with specific bolt version" do
-    opts = [versions: [5.3]] ++ @opts
+    last_version = List.last(Versions.available_versions())
+    opts = [versions: [last_version]] ++ @opts
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(opts)
-    assert server_version == "Neo4j/3.4.0"
-    assert client.bolt_version == 5.3
+    assert server_version == "Neo4j/5.13.0"
+    assert client.bolt_version == last_version
 
     assert {:ok, %Connection{client: _, } = conn_data} =
       Connection.checkin(conn_data)

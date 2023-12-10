@@ -4,6 +4,7 @@ defmodule Query.Test do
   alias Query.Test
   alias Boltx.Test.Support.Database
   alias Boltx.Response
+  @moduletag :legacy
 
   defmodule TestUser do
     defstruct name: "", boltx: true

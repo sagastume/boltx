@@ -23,14 +23,19 @@ defmodule Boltx.BoltProtocol.Message.PullMessage do
     messages = Enum.map(binary_messages, &Decoder.decode(&1, 1))
     records = Enum.reduce(messages, [], &group_record/2)
 
-    success_data =
-      if bolt_version <= 2.0 do
-        Map.merge(%{"t_last" => messages[:success]["result_consumed_after"]}, Map.delete(messages[:success], "result_consumed_after"))
-      else
-        messages[:success]
-      end
+    case List.keymember?(messages, :failure, 0) do
+      true ->
+        {:error, Boltx.Error.wrap(__MODULE__, %{code: messages[:failure]["code"], message: messages[:failure]["message"]})}
 
-    {:ok, pull_result(records: records, success_data: success_data )}
+      false ->
+        success_data =
+          if bolt_version <= 2.0 do
+            Map.merge(%{"t_last" => messages[:success]["result_consumed_after"]}, Map.delete(messages[:success], "result_consumed_after"))
+          else
+            messages[:success]
+          end
+        {:ok, pull_result(records: records, success_data: success_data )}
+    end
   end
 
   defp get_extra_parameters(extra_parameters) do

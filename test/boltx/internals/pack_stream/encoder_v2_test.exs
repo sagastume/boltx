@@ -5,6 +5,8 @@ defmodule Boltx.Internals.PackStream.EncoderV2Test do
   alias Boltx.Types.{TimeWithTZOffset, DateTimeWithTZOffset, Duration, Point}
   alias Boltx.TypesHelper
 
+  @moduletag :legacy
+
   doctest Boltx.Internals.PackStream.EncoderV2
 
   describe "Encode temporal types:" do

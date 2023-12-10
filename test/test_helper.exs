@@ -1,5 +1,37 @@
+alias Boltx.Utils.Converters
+
 Logger.configure(level: :debug)
-ExUnit.start(capture_log: true, assert_receive_timeout: 500, exclude: [:skip, :bench, :apoc])
+
+exclude = [
+  :skip,
+  :bench,
+  :apoc,
+  :legacy
+]
+include = [:core]
+
+available_versions = Boltx.BoltProtocol.Versions.available_versions()
+env_versions = System.get_env("BOLT_VERSIONS", "") |> String.split(",") |> Enum.reject(&(&1 == "")) |> Enum.map(&Converters.to_float/1)
+
+{include, exclude} =
+  Enum.reduce(available_versions, {include, exclude}, fn version, {inc, exc} ->
+    bolt_version = {:bolt_version, Float.to_string(version)}
+    bolt_version_x = String.to_atom("bolt_#{Integer.to_string(trunc(version))}_x")
+    if version in env_versions do
+      case version === List.last(available_versions) do
+        true -> {[:last_version, bolt_version, bolt_version_x | inc], exc}
+        false -> {[bolt_version, bolt_version_x | inc], exc}
+      end
+    else
+      case version !== List.last(available_versions) do
+        true -> {inc, [:last_version, bolt_version, bolt_version_x | exc]}
+        false -> {inc, [bolt_version, bolt_version_x | exc]}
+      end
+    end
+  end)
+
+
+ExUnit.start(capture_log: true, assert_receive_timeout: 500, exclude: exclude, include: include)
 Application.ensure_started(:porcelain)
 
 Code.require_file("test_support.exs", __DIR__)

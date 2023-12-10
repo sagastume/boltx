@@ -1,6 +1,7 @@
 defmodule Boltx.Routing.TransactionTest do
   use Boltx.RoutingConnCase
   @moduletag :routing
+  @moduletag :legacy
 
   setup do
     {:ok, [write_conn: Boltx.conn(:write)]}

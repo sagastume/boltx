@@ -4,6 +4,8 @@ defmodule Boltx.Internals.PackStream.DecoderV1Test do
   alias Boltx.Internals.PackStream
   alias Boltx.Internals.PackStream.DecoderV1
 
+  @moduletag :legacy
+
   test "decodes null" do
     assert DecoderV1.decode(<<0xC0>>, 1) == [nil]
   end

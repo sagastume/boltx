@@ -1,6 +1,7 @@
 defmodule Large.Param.Set.Test do
   use ExUnit.Case
   doctest Boltx
+  @moduletag :legacy
 
   setup_all do
     {:ok, [conn: Boltx.conn()]}

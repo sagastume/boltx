@@ -6,6 +6,8 @@ defmodule Boltx.Internals.PackStream.EncoderTest do
   alias Boltx.Types
   alias Boltx.TypesHelper
 
+  @moduletag :legacy
+
   defmodule TestStruct do
     defstruct foo: "bar"
   end

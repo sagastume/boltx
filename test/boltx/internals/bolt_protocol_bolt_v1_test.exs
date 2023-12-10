@@ -3,6 +3,8 @@ defmodule Boltx.Internals.BoltProtocolV1Test do
   @moduletag :bolt_v1
   alias Boltx.Internals.BoltProtocol
 
+  @moduletag :legacy
+
   test "allows to recover from error with ack_failure", %{port: port, bolt_version: bolt_version} do
     assert %Boltx.Internals.Error{type: :cypher_error} =
              BoltProtocol.run_statement(:gen_tcp, port, bolt_version, "What?")

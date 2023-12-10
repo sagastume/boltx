@@ -2,6 +2,7 @@ defmodule Boltx.ProtocolTest do
   use ExUnit.Case, async: false
 
   alias Boltx.Protocol
+  @moduletag :legacy
 
   # Transactions are not tested as BEGIN fails
   # But works fine from Boltx.transaction

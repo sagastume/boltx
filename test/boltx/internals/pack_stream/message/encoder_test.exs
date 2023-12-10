@@ -7,6 +7,8 @@ defmodule Boltx.Internals.PackStream.Message.EncoderTest do
   alias Boltx.Metadata
   alias Boltx.Internals.BoltVersionHelper
 
+  @moduletag :legacy
+
   defmodule TestUser do
     defstruct name: "", boltx: true
   end

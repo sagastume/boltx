@@ -2,6 +2,7 @@ defmodule Boltx.TypesHelperTest do
   use ExUnit.Case, async: true
 
   alias Boltx.TypesHelper
+  @moduletag :legacy
 
   describe "decompose_in_hms/1:" do
     test "Ok if more than a hour" do

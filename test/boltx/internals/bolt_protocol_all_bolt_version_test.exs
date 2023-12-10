@@ -2,6 +2,8 @@ defmodule Boltx.Internals.BoltProtocolAllBoltVersionTest do
   use Boltx.InternalCase
   alias Boltx.Internals.BoltProtocol
 
+  @moduletag :legacy
+
   test "works for small queries", %{port: port, bolt_version: bolt_version} do
     string = Enum.to_list(0..100) |> Enum.join()
 

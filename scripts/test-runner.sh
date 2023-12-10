@@ -220,7 +220,7 @@ function main() {
           port=$(get_published_port $service)
           if [ -n "$port" ]; then
             info_message "Tests for Service: "$service", Port ${port}, DB: ${db}, boltVersions: ${version}"
-            BOLT_VERSIONS="${version}" BOLT_TCP_PORT=$port $command --only bolt_version:$version
+            BOLT_VERSIONS="${version}" BOLT_TCP_PORT=$port $command
           else
             warning_message "The PublishedPort port is null or not found. Service: "$service", DB: ${db}, boltVersions: ${boltVersions}"
           fi

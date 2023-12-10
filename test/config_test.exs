@@ -2,6 +2,7 @@ defmodule Config.Test do
   use ExUnit.Case
   alias Boltx.Utils
 
+  @moduletag :legacy
   doctest Boltx
 
   @graphenedb_like_url "bolt://hobby-happyHoHoHo.dbs.graphenedb.com:24786"

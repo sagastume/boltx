@@ -4,6 +4,7 @@ defmodule Boltx.Internals.PackStream.EncoderHelperTest do
   alias Boltx.Internals.PackStream.EncoderHelper
   alias Boltx.Internals.PackStreamError
 
+  @moduletag :legacy
   describe "call_encode/3" do
     test "successfull when call with existing bolt_version" do
       assert <<_::binary>> = EncoderHelper.call_encode(:atom, true, 1)

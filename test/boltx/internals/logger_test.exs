@@ -3,6 +3,7 @@ defmodule Boltx.Internals.LoggerTest do
   import ExUnit.CaptureLog
 
   alias Boltx.Internals.Logger
+  @moduletag :legacy
 
   test "Log from formed message" do
     assert capture_log(fn -> Logger.log_message(:client, {:success, %{data: "ok"}}) end) =~

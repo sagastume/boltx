@@ -1,6 +1,8 @@
 defmodule Boltx.JsonImplementationsTest do
   use ExUnit.Case, async: true
 
+  @moduletag :legacy
+
   alias Boltx.Types.{
     DateTimeWithTZOffset,
     TimeWithTZOffset,

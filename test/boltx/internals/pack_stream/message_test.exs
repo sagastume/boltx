@@ -5,6 +5,8 @@ defmodule Boltx.Internals.PackStream.MessageTest do
   alias Boltx.Metadata
   alias Boltx.Internals.BoltVersionHelper
 
+  @moduletag :legacy
+
   describe "Encode all-bolt-version-compliant message:" do
     Enum.each(BoltVersionHelper.available_versions(), fn bolt_version ->
       test "DISCARD_ALL (bolt_version: #{bolt_version})" do

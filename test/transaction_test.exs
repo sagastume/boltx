@@ -2,6 +2,7 @@ defmodule Transaction.Test do
   use ExUnit.Case, async: true
 
   alias Boltx.Response
+  @moduletag :legacy
 
   setup do
     {:ok, [main_conn: Boltx.conn()]}

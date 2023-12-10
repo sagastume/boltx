@@ -5,6 +5,8 @@ defmodule Boltx.Internals.PackStream.Message.EncoderV1Test do
 
   alias Boltx.Internals.PackStream.Message.EncoderV1
 
+  @moduletag :legacy
+
   test "Encode ACK_FAILURE" do
     assert <<0x0, 0x2, 0xB0, 0xE, 0x0, 0x0>> ==
              :erlang.iolist_to_binary(EncoderV1.encode({:ack_failure, []}, 1))

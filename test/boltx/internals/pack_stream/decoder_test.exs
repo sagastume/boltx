@@ -5,6 +5,7 @@ defmodule Boltx.Internals.PackStream.DecoderTest do
   alias Boltx.Internals.PackStreamError
   alias Boltx.Internals.BoltVersionHelper
   alias Boltx.Types
+  @moduletag :legacy
 
   describe "Decode common types" do
     Enum.each(BoltVersionHelper.available_versions(), fn bolt_version ->

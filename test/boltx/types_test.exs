@@ -1,5 +1,6 @@
 defmodule Boltx.TypesTest do
   use ExUnit.Case, async: true
+  @moduletag :legacy
 
   alias Boltx.Types.{DateTimeWithTZOffset, Duration, TimeWithTZOffset, Point}
 

@@ -6,6 +6,7 @@ defmodule Boltx.Internals.PackStream.Message.EncoderV3Test do
   alias Boltx.Internals.PackStream.Message.EncoderV3
   alias Boltx.Metadata
 
+  @moduletag :legacy
   describe "Encode BEGIN" do
     test "without params" do
       assert <<0x0, 0x3, 0xB1, 0x11, 0xA0, 0x0, 0x0>> ==

@@ -1,6 +1,7 @@
 defmodule Boltx.Internals.BoltProtoolBoltV2Test do
   use Boltx.InternalCase
-  @moduletag :bolt_v2
+
+  @moduletag :legacy
 
   alias Boltx.Internals.BoltProtocol
 

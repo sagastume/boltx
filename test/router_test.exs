@@ -3,6 +3,7 @@ defmodule Boltx.Routing.RouterTest do
   doctest Boltx.Router
 
   alias Boltx.Response
+  @moduletag :legacy
 
   # @routing_table %{
   #   "servers" => [
