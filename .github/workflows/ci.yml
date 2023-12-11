@@ -78,5 +78,5 @@ jobs:
       - run: mix deps.compile
       - name: Run Test Script
         run: |
-          mix test --only bolt_version:${{matrix.boltVersion}}
+          mix test
         working-directory: .
