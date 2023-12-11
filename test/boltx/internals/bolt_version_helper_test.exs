@@ -1,6 +1,8 @@
 defmodule Boltx.Internals.BoltVersionHelperTest do
   use ExUnit.Case, async: true
 
+  @moduletag :legacy
+
   doctest Boltx.Internals.BoltVersionHelper
 
   alias Boltx.Internals.BoltVersionHelper

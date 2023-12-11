@@ -1,6 +1,7 @@
 defmodule Boltx.Routing.CrudTest do
   use Boltx.RoutingConnCase
   @moduletag :routing
+  @moduletag :legacy
 
   alias Boltx
 

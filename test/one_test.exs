@@ -13,6 +13,7 @@ defmodule One.Test do
 
   use ExUnit.Case
   alias Boltx.Response
+  @moduletag :legacy
 
   test "a simple query" do
     conn = Boltx.conn()

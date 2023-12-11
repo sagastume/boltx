@@ -2,6 +2,7 @@ defmodule Boltx.Error do
 
   @error_map %{
     "Neo.ClientError.Security.Unauthorized" => :unauthorized,
+    "Neo.ClientError.Request.Invalid" => :request_invalid
   }
 
   @type t() :: %__MODULE__{

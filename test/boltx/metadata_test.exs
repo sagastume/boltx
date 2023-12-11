@@ -2,6 +2,8 @@ defmodule Boltx.MetadataTest do
   use ExUnit.Case, async: true
   alias Boltx.Metadata
 
+  @moduletag :legacy
+
   @valid_metadata %{
     bookmarks: ["neo4j:bookmark:v1:tx1111"],
     tx_timeout: 5000,

@@ -1,6 +1,7 @@
 defmodule Routing.Routing.TableParserTest do
   use ExUnit.Case, async: true
   @moduletag :routing
+  @moduletag :legacy
 
   alias Boltx.Routing.RoutingTable
 

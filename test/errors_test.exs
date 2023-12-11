@@ -3,6 +3,7 @@ defmodule ErrorsTest do
   every new error, and related tests
   """
   use ExUnit.Case, async: true
+  @moduletag :legacy
 
   @simple_map %{foo: "bar", boltx: true}
   @nested_map %{

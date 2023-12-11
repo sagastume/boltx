@@ -1,6 +1,7 @@
 defmodule Boltx.QueryBoltV2Test do
   use Boltx.ConnCase, async: true
   @moduletag :bolt_v2
+  @moduletag :legacy
 
   alias Boltx.Types.{Duration, DateTimeWithTZOffset, Point, TimeWithTZOffset}
   alias Boltx.{TypesHelper, Response}

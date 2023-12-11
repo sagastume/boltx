@@ -7,6 +7,7 @@ defmodule Boltx.BoltStubTest do
   use Boltx.BoltKitCase, async: false
 
   @moduletag :boltkit
+  @moduletag :legacy
 
   @tag boltkit: %{
          url: "bolt://127.0.0.1:9001",

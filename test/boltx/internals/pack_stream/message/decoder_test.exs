@@ -3,6 +3,7 @@ defmodule Boltx.Internals.PackStream.Message.DecoderTest do
   alias Boltx.Internals.PackStream.Message.Decoder
   alias Boltx.Internals.BoltVersionHelper
 
+  @moduletag :legacy
   describe "Decode common messages" do
     Enum.each(BoltVersionHelper.available_versions(), fn bolt_version ->
       test "SUCCESS (bolt_version: #{bolt_version})" do

@@ -3,6 +3,8 @@ defmodule Boltx.Internals.PackStream.EncoderV1Test do
 
   alias Boltx.Internals.PackStream.EncoderV1
 
+  @moduletag :legacy
+
   defmodule TestStruct do
     defstruct foo: "bar"
   end

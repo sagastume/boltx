@@ -43,7 +43,7 @@ defmodule Boltx.Mixfile do
   defp aliases do
     [
       test: [
-        "test --only core"
+        "test"
       ]
     ]
   end

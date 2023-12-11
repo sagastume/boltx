@@ -3,6 +3,7 @@ defmodule Boltx.Internals.PackStream.DecoderV2Test do
   alias Boltx.Internals.PackStream.DecoderV2
   alias Boltx.Types.{TimeWithTZOffset, DateTimeWithTZOffset, Duration, Point}
 
+  @moduletag :legacy
   describe "Decode temporal data:" do
     test "date post 1970-01-01" do
       assert [~D[2018-07-29]] == DecoderV2.decode({0x44, <<0xC9, 0x45, 0x4D>>, 1}, 2)

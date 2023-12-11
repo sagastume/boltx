@@ -1,6 +1,6 @@
 defmodule Boltx.Internals.BoltProtocolBoltV3Test do
   use ExUnit.Case, async: true
-  @moduletag :bolt_v3
+  @moduletag :legacy
 
   alias Boltx.Internals.BoltProtocol
   alias Boltx.Metadata

@@ -5,6 +5,7 @@ defmodule Boltx.RoutingTest do
   use Boltx.BoltKitCase, async: false
 
   alias Boltx.Response
+  @moduletag :legacy
 
   @moduletag :boltkit
 

@@ -1,5 +1,6 @@
 defmodule Boltx.InvalidParamType.Test do
   use ExUnit.Case
+  @moduletag :legacy
 
   setup_all do
     Boltx.ConnectionSupervisor.connections()

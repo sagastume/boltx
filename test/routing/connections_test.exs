@@ -1,6 +1,7 @@
 defmodule Boltx.Routing.ConnectionsTest do
   use ExUnit.Case, async: true
   @moduletag :routing
+  @moduletag :legacy
 
   alias Boltx.Router
 

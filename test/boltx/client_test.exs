@@ -131,5 +131,16 @@ defmodule Boltx.ClientTest do
       assert %{"t_last" => _, "type" => "r"} = success_data
       assert [[1], [2], [3], [4], [5], [6], [7], [8], [9], [10]]  == records
     end
+
+    @tag :bolt_4_x
+    @tag :bolt_5_x
+    test "simple query with wrong extra parameters" do
+      assert {:ok, client} = Client.connect(@opts)
+      handle_handshake(client, @opts)
+
+      query = "RETURN 1024 AS a, 2048 AS b"
+      {:error, %Boltx.Error{code: :request_invalid}} = Client.run_statement(client, query, %{}, %{n: %{d: 4}})
+    end
+
   end
 end

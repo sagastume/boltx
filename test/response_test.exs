@@ -2,6 +2,7 @@ defmodule ResponseTest do
   use ExUnit.Case
 
   alias Boltx.Response
+  @moduletag :legacy
   # import ExUnit.CaptureLog
 
   @explain [

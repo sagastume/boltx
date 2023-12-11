@@ -1,6 +1,8 @@
 defmodule Boltx.PerformanceTest do
   use Boltx.ConnCase, async: false
 
+  @moduletag :legacy
+
   setup(%{conn: conn} = context) do
     Boltx.Test.Support.Database.clear(conn)
     {:ok, context}

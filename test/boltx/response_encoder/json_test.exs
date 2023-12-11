@@ -1,6 +1,8 @@
 defmodule Boltx.ResponseEncode.JsonTest do
   use ExUnit.Case, async: true
 
+  @moduletag :legacy
+
   alias Boltx.Types.{
     DateTimeWithTZOffset,
     TimeWithTZOffset,
