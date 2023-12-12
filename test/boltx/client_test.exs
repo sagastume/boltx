@@ -160,6 +160,15 @@ defmodule Boltx.ClientTest do
       query = "RETURN 1024 AS a, 2048 AS b"
       {:error, %Boltx.Error{code: :request_invalid}} = Client.run_statement(client, query, %{}, %{n: %{d: 4}})
     end
-
   end
+
+  describe "Explicit Transaction" do
+    @tag :core
+    test "simple begin message" do
+      assert {:ok, client} = Client.connect(@opts)
+      handle_handshake(client, @opts)
+      assert {:ok, _} = Client.message_begin(client, %{})
+    end
+  end
+
 end

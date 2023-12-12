@@ -6,7 +6,7 @@ defmodule Boltx.Client do
 
   alias Boltx.BoltProtocol.Versions
   alias Boltx.Utils.Converters
-  alias Boltx.BoltProtocol.Message.{HelloMessage, InitMessage, LogonMessage, RunMessage, PullMessage}
+  alias Boltx.BoltProtocol.Message.{HelloMessage, InitMessage, LogonMessage, RunMessage, PullMessage, BeginMessage}
 
   defstruct [:sock, :connection_id, :bolt_version]
 
@@ -169,6 +169,18 @@ defmodule Boltx.Client do
     with {:ok, result_run} <- message_run(client, query, parameters, extra_parameters),
          {:ok, result_pull} <- message_pull(client, extra_parameters) do
       statement_result(result_run: result_run, result_pull: result_pull, query: query)
+    end
+  end
+
+  def message_begin(client, _extra_parameters) when is_float(client.bolt_version) and client.bolt_version <= 2.0 do
+    run_statement(client, "BEGIN", %{}, %{})
+    {:ok, %{}}
+  end
+
+  def message_begin(client, extra_parameters) do
+    payload = BeginMessage.encode(client.bolt_version, extra_parameters)
+    with :ok <- send_packet(client, payload) do
+      recv_packets(client, &BeginMessage.decode/2, :infinity)
     end
   end
 
