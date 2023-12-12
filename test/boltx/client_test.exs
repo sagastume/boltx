@@ -30,8 +30,8 @@ defmodule Boltx.ClientTest do
       assert {:ok, client} = Client.connect(opts)
       assert 5.3 == client.bolt_version
     end
-    # TODO: add the latest version tag when it is the latest version being tested
-    @tag last_version: true
+
+    @tag :last_version
     test "no versions specified" do
       opts = [] ++ @opts
       assert {:ok, client} = Client.connect(opts)
@@ -111,6 +111,25 @@ defmodule Boltx.ClientTest do
       assert pull_result(records: records, success_data: success_data) = result_pull
       assert %{"t_last" => _, "type" => "r"} = success_data
       assert [[1024, 2048]]  == records
+    end
+
+    @tag core: true
+    test "simple query with parameters" do
+      assert {:ok, client} = Client.connect(@opts)
+      handle_handshake(client, @opts)
+
+      query = "RETURN 4 + $number AS result"
+      statement_result(
+        result_run: result_run,
+        result_pull: result_pull,
+        query: query_result) = Client.run_statement(client, query, %{number: 5}, %{})
+
+      assert query_result == query
+      assert %{"fields" => ["result"], "t_first" => _} = result_run
+
+      assert pull_result(records: records, success_data: success_data) = result_pull
+      assert %{"t_last" => _, "type" => "r"} = success_data
+      assert [[9]]  == records
     end
 
     @tag core: true

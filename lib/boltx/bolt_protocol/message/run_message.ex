@@ -4,7 +4,7 @@ defmodule Boltx.BoltProtocol.Message.RunMessage do
   alias Boltx.Internals.PackStream.Message.Decoder
 
   def encode(bolt_version, query, parameters, extra_parameters) when is_float(bolt_version) and bolt_version >= 3.0 do
-    message = [query, parameters, extra_parameters]
+    message = [query, parameters, get_extra_parameters(extra_parameters)]
     Encoder.do_encode(:run, message, 3)
   end
 
@@ -32,7 +32,12 @@ defmodule Boltx.BoltProtocol.Message.RunMessage do
     end
   end
 
-  defp get_parameters(parameters_raw) do
-
+  defp get_extra_parameters(extra_parameters) do
+    %{
+      bookmarks: Map.get(extra_parameters, :bookmarks, []),
+      mode: Map.get(extra_parameters, :mode, "w"),
+      db: Map.get(extra_parameters, :db, nil),
+      tx_metadata: Map.get(extra_parameters, :tx_metadata, nil)
+    }
   end
 end
