@@ -1,5 +1,4 @@
 defmodule Boltx.BoltProtocol.Message.CommitMessage do
-
   alias Boltx.Internals.PackStream.Message.Encoder
   alias Boltx.Internals.PackStream.Message.Decoder
 
@@ -9,7 +8,11 @@ defmodule Boltx.BoltProtocol.Message.CommitMessage do
   end
 
   def encode(_, _) do
-    {:error, %Boltx.Internals.Error{code: :unsupported_message_version, message: "COMMIT message version not supported"}}
+    {:error,
+     %Boltx.Internals.Error{
+       code: :unsupported_message_version,
+       message: "COMMIT message version not supported"
+     }}
   end
 
   @spec decode(float(), <<_::16, _::_*8>>) :: {:error, Boltx.Error.t()} | {:ok, any()}
@@ -19,8 +22,10 @@ defmodule Boltx.BoltProtocol.Message.CommitMessage do
     case hd(messages) do
       {:success, response} ->
         {:ok, response}
+
       {:failure, response} ->
-        {:error, Boltx.Error.wrap(__MODULE__, %{code: response["code"], message: response["message"]})}
+        {:error,
+         Boltx.Error.wrap(__MODULE__, %{code: response["code"], message: response["message"]})}
     end
   end
 end

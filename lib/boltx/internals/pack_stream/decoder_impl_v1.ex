@@ -60,16 +60,19 @@ defmodule Boltx.Internals.PackStream.DecoderImplV1 do
 
       @spec decode(binary() | {integer(), binary(), integer()}, integer()) ::
               list() | {:error, :not_implemented}
-      def decode(<<@null_marker, rest::binary>>, bolt_version) when bolt_version <= @last_version do
+      def decode(<<@null_marker, rest::binary>>, bolt_version)
+          when bolt_version <= @last_version do
         [nil | decode(rest, bolt_version)]
       end
 
       # Boolean
-      def decode(<<@true_marker, rest::binary>>, bolt_version) when bolt_version <= @last_version do
+      def decode(<<@true_marker, rest::binary>>, bolt_version)
+          when bolt_version <= @last_version do
         [true | decode(rest, bolt_version)]
       end
 
-      def decode(<<@false_marker, rest::binary>>, bolt_version) when bolt_version <= @last_version do
+      def decode(<<@false_marker, rest::binary>>, bolt_version)
+          when bolt_version <= @last_version do
         [false | decode(rest, bolt_version)]
       end
 

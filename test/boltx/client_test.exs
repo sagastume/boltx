@@ -13,10 +13,15 @@ defmodule Boltx.ClientTest do
       version when version >= 5.1 ->
         Client.message_hello(client, opts)
         Client.message_logon(client, opts)
-      version when version >= 3.0 -> Client.message_hello(client, opts)
-      version when version <= 2.0 -> Client.message_init(client, opts)
+
+      version when version >= 3.0 ->
+        Client.message_hello(client, opts)
+
+      version when version <= 2.0 ->
+        Client.message_init(client, opts)
     end
   end
+
   describe "connect" do
     @tag bolt_version: "5.3"
     test "multiple versions specified" do
@@ -24,6 +29,7 @@ defmodule Boltx.ClientTest do
       assert {:ok, client} = Client.connect(opts)
       assert 5.3 == client.bolt_version
     end
+
     @tag bolt_version: "5.3"
     test "unordered versions specified" do
       opts = [versions: [4, 3, 5.3]] ++ @opts
@@ -35,19 +41,22 @@ defmodule Boltx.ClientTest do
     test "no versions specified" do
       opts = [] ++ @opts
       assert {:ok, client} = Client.connect(opts)
-      last_version = hd(Versions.latest_versions)
+      last_version = hd(Versions.latest_versions())
       assert last_version == client.bolt_version
     end
+
     @tag core: true
     test "zero version" do
       opts = [versions: [0]] ++ @opts
       {:error, %Boltx.Error{code: :version_negotiation_error}} = Client.connect(opts)
     end
+
     @tag core: true
     test "major version incompatible with the server" do
       opts = [versions: [50]] ++ @opts
       {:error, %Boltx.Error{code: :version_negotiation_error}} = Client.connect(opts)
     end
+
     @tag bolt_version: "1.0"
     test "one version specified" do
       opts = [versions: [1]] ++ @opts
@@ -61,9 +70,9 @@ defmodule Boltx.ClientTest do
   describe "recv_packets" do
     @tag core: true
     test "recv_packets concatenates and decodes one message in two chunks" do
-      sizeMock = <<0,10>>
-      chunk1 = <<177,14,103,106>>
-      chunk2 = <<120,5,107,108,109,15,0,0>>
+      sizeMock = <<0, 10>>
+      chunk1 = <<177, 14, 103, 106>>
+      chunk2 = <<120, 5, 107, 108, 109, 15, 0, 0>>
       pid = Boltx.Mocks.SockMock.start_link([@noop_chunk, sizeMock <> chunk1, chunk2])
       client = %{sock: {Boltx.Mocks.SockMock, pid}, bolt_version: 1.0}
       {:ok, message} = Client.recv_packets(client, fn _bolt_version, data -> {:ok, data} end, 0)
@@ -72,8 +81,8 @@ defmodule Boltx.ClientTest do
 
     @tag core: true
     test "recv_packets decodes a message into a single chunk" do
-      sizeMock = <<0,4>>
-      chunk1 = <<122,14,103,106,0,0>>
+      sizeMock = <<0, 4>>
+      chunk1 = <<122, 14, 103, 106, 0, 0>>
       pid = Boltx.Mocks.SockMock.start_link([@noop_chunk, sizeMock <> chunk1])
       client = %{sock: {Boltx.Mocks.SockMock, pid}, bolt_version: 3.0}
       {:ok, message} = Client.recv_packets(client, fn _bolt_version, data -> {:ok, data} end, 0)
@@ -82,15 +91,23 @@ defmodule Boltx.ClientTest do
 
     @tag core: true
     test "ignores noop chunks between two chunks" do
-      sizeMock = <<0,10>>
-      chunk1 = <<177,14,103,106>>
-      chunk2 = <<120,5,107,108,109,15,0,0>>
-      pid = Boltx.Mocks.SockMock.start_link([@noop_chunk, sizeMock <> chunk1, @noop_chunk, chunk2, @noop_chunk])
+      sizeMock = <<0, 10>>
+      chunk1 = <<177, 14, 103, 106>>
+      chunk2 = <<120, 5, 107, 108, 109, 15, 0, 0>>
+
+      pid =
+        Boltx.Mocks.SockMock.start_link([
+          @noop_chunk,
+          sizeMock <> chunk1,
+          @noop_chunk,
+          chunk2,
+          @noop_chunk
+        ])
+
       client = %{sock: {Boltx.Mocks.SockMock, pid}, bolt_version: 5.0}
       {:ok, message} = Client.recv_packets(client, fn _bolt_version, data -> {:ok, data} end, 0)
       assert message == [chunk1 <> chunk2]
     end
-
   end
 
   describe "run_statement" do
@@ -100,17 +117,20 @@ defmodule Boltx.ClientTest do
       handle_handshake(client, @opts)
 
       query = "RETURN 1024 AS a, 2048 AS b"
-      {:ok, statement_result(
-        result_run: result_run,
-        result_pull: result_pull,
-        query: query_result)} = Client.run_statement(client, query, %{}, %{})
+
+      {:ok,
+       statement_result(
+         result_run: result_run,
+         result_pull: result_pull,
+         query: query_result
+       )} = Client.run_statement(client, query, %{}, %{})
 
       assert query_result == query
       assert %{"fields" => ["a", "b"], "t_first" => _} = result_run
 
       assert pull_result(records: records, success_data: success_data) = result_pull
       assert %{"t_last" => _, "type" => "r"} = success_data
-      assert [[1024, 2048]]  == records
+      assert [[1024, 2048]] == records
     end
 
     @tag core: true
@@ -119,17 +139,20 @@ defmodule Boltx.ClientTest do
       handle_handshake(client, @opts)
 
       query = "RETURN 4 + $number AS result"
-      {:ok, statement_result(
-        result_run: result_run,
-        result_pull: result_pull,
-        query: query_result)} = Client.run_statement(client, query, %{number: 5}, %{})
+
+      {:ok,
+       statement_result(
+         result_run: result_run,
+         result_pull: result_pull,
+         query: query_result
+       )} = Client.run_statement(client, query, %{number: 5}, %{})
 
       assert query_result == query
       assert %{"fields" => ["result"], "t_first" => _} = result_run
 
       assert pull_result(records: records, success_data: success_data) = result_pull
       assert %{"t_last" => _, "type" => "r"} = success_data
-      assert [[9]]  == records
+      assert [[9]] == records
     end
 
     @tag core: true
@@ -138,17 +161,20 @@ defmodule Boltx.ClientTest do
       handle_handshake(client, @opts)
 
       query = "UNWIND range(1, 10) AS n RETURN n"
-      {:ok, statement_result(
-        result_run: result_run,
-        result_pull: result_pull,
-        query: query_result)} = Client.run_statement(client, query, %{}, %{})
+
+      {:ok,
+       statement_result(
+         result_run: result_run,
+         result_pull: result_pull,
+         query: query_result
+       )} = Client.run_statement(client, query, %{}, %{})
 
       assert query_result == query
       assert %{"fields" => ["n"], "t_first" => _} = result_run
 
       assert pull_result(records: records, success_data: success_data) = result_pull
       assert %{"t_last" => _, "type" => "r"} = success_data
-      assert [[1], [2], [3], [4], [5], [6], [7], [8], [9], [10]]  == records
+      assert [[1], [2], [3], [4], [5], [6], [7], [8], [9], [10]] == records
     end
 
     @tag :bolt_4_x
@@ -158,7 +184,9 @@ defmodule Boltx.ClientTest do
       handle_handshake(client, @opts)
 
       query = "RETURN 1024 AS a, 2048 AS b"
-      {:error, %Boltx.Error{code: :request_invalid}} = Client.run_statement(client, query, %{}, %{n: %{d: 4}})
+
+      {:error, %Boltx.Error{code: :request_invalid}} =
+        Client.run_statement(client, query, %{}, %{n: %{d: 4}})
     end
   end
 
@@ -217,5 +245,4 @@ defmodule Boltx.ClientTest do
       assert {:error, %Boltx.Error{code: :request_invalid}} = Client.message_rollback(client)
     end
   end
-
 end

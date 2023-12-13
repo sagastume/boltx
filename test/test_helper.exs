@@ -8,15 +8,22 @@ exclude = [
   :apoc,
   :legacy
 ]
+
 include = [:core]
 
 available_versions = Boltx.BoltProtocol.Versions.available_versions()
-env_versions = System.get_env("BOLT_VERSIONS", "") |> String.split(",") |> Enum.reject(&(&1 == "")) |> Enum.map(&Converters.to_float/1)
+
+env_versions =
+  System.get_env("BOLT_VERSIONS", "")
+  |> String.split(",")
+  |> Enum.reject(&(&1 == ""))
+  |> Enum.map(&Converters.to_float/1)
 
 {include, exclude} =
   Enum.reduce(available_versions, {include, exclude}, fn version, {inc, exc} ->
     bolt_version = {:bolt_version, Float.to_string(version)}
     bolt_version_x = String.to_atom("bolt_#{Integer.to_string(trunc(version))}_x")
+
     if version in env_versions do
       case version === List.last(available_versions) do
         true -> {[:last_version, bolt_version, bolt_version_x | inc], exc}
@@ -29,7 +36,6 @@ env_versions = System.get_env("BOLT_VERSIONS", "") |> String.split(",") |> Enum.
       end
     end
   end)
-
 
 ExUnit.start(capture_log: true, assert_receive_timeout: 500, exclude: exclude, include: include)
 Application.ensure_started(:porcelain)
@@ -57,6 +63,7 @@ defmodule Boltx.TestHelper do
       prefix: :default
     ]
   end
+
   @doc """
    Read an entire file into a string.
    Return a tuple of success and data.
@@ -80,7 +87,7 @@ defmodule Boltx.TestHelper do
   defp file_error_description(reason), do: "due to #{reason}."
 end
 
-#Boltx.start_link(Application.get_env(:boltx, Bolt))
+# Boltx.start_link(Application.get_env(:boltx, Bolt))
 
 # I am using the test db for debugging and the line below will clear *everything*
 # Boltx.query(Boltx.conn, "MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE n,r")

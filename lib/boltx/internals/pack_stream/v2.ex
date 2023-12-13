@@ -97,7 +97,6 @@ defmodule Boltx.Internals.PackStream.V2 do
           bolt_version
         )
       end
-
     end
   end
 end

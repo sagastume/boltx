@@ -15,7 +15,6 @@ defmodule Boltx.Internals.PackStream.Message.EncoderV3 do
     @run_signature
   ]
 
-
   @doc """
   Return the valid signatures for bolt V1
   """
@@ -23,7 +22,6 @@ defmodule Boltx.Internals.PackStream.Message.EncoderV3 do
   def valid_signatures() do
     @valid_signatures
   end
-
 
   @doc """
   Encode HELLO message without auth token
@@ -35,5 +33,4 @@ defmodule Boltx.Internals.PackStream.Message.EncoderV3 do
   def encode(data, bolt_version) do
     Encoder.encode(data, bolt_version)
   end
-
 end

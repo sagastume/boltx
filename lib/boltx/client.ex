@@ -6,6 +6,7 @@ defmodule Boltx.Client do
 
   alias Boltx.BoltProtocol.Versions
   alias Boltx.Utils.Converters
+
   alias Boltx.BoltProtocol.Message.{
     HelloMessage,
     InitMessage,
@@ -45,7 +46,8 @@ defmodule Boltx.Client do
       %__MODULE__{
         address: address,
         port: port,
-        username: Keyword.get(opts, :username, System.get_env("USER")) || raise(":username is missing"),
+        username:
+          Keyword.get(opts, :username, System.get_env("USER")) || raise(":username is missing"),
         password: Keyword.get(opts, :password),
         connect_timeout: Keyword.get(opts, :connect_timeout, @default_timeout),
         socket_options:
@@ -61,11 +63,13 @@ defmodule Boltx.Client do
             case System.get_env("BOLT_VERSIONS") do
               nil ->
                 Versions.latest_versions()
+
               env_versions ->
-                  env_versions
-                  |> String.split(",")
-                  |> Enum.map(&Converters.to_float/1)
+                env_versions
+                |> String.split(",")
+                |> Enum.map(&Converters.to_float/1)
             end
+
           ops_versions ->
             ops_versions
         end
@@ -94,6 +98,7 @@ defmodule Boltx.Client do
 
     buffer? = Keyword.has_key?(socket_options, :buffer)
     client = %__MODULE__{connection_id: nil, sock: nil, bolt_version: nil}
+
     case :gen_tcp.connect(address, port, socket_options, connect_timeout) do
       {:ok, sock} when buffer? ->
         {:ok, %{client | sock: {:gen_tcp, sock}}}
@@ -125,10 +130,15 @@ defmodule Boltx.Client do
   end
 
   defp do_handshake(client, config) do
-    data = @handshake_bytes_identifier <> (config.versions |>  Enum.sort(&>=/2) |> Enum.reduce(<<>>, fn version, acc -> acc <> Versions.to_bytes(version) end))
+    data =
+      @handshake_bytes_identifier <>
+        (config.versions
+         |> Enum.sort(&>=/2)
+         |> Enum.reduce(<<>>, fn version, acc -> acc <> Versions.to_bytes(version) end))
+
     with :ok <- send_packet(client, data),
-    encode_version <- recv_packets(client, config.connect_timeout),
-    version <- decode_version(encode_version) do
+         encode_version <- recv_packets(client, config.connect_timeout),
+         version <- decode_version(encode_version) do
       case version do
         0.0 -> {:error, Boltx.Error.wrap(__MODULE__, :version_negotiation_error)}
         _ -> {:ok, %{client | bolt_version: version}}
@@ -141,6 +151,7 @@ defmodule Boltx.Client do
 
   def message_hello(client, fields) do
     payload = HelloMessage.encode(client.bolt_version, fields)
+
     with :ok <- send_packet(client, payload) do
       recv_packets(client, &HelloMessage.decode/2, :infinity)
     end
@@ -148,6 +159,7 @@ defmodule Boltx.Client do
 
   def message_logon(client, fields) do
     payload = LogonMessage.encode(client.bolt_version, fields)
+
     with :ok <- send_packet(client, payload) do
       recv_packets(client, &LogonMessage.decode/2, :infinity)
     end
@@ -155,6 +167,7 @@ defmodule Boltx.Client do
 
   def message_init(client, fields) do
     payload = InitMessage.encode(client.bolt_version, fields)
+
     with :ok <- send_packet(client, payload) do
       recv_packets(client, &InitMessage.decode/2, :infinity)
     end
@@ -162,6 +175,7 @@ defmodule Boltx.Client do
 
   def message_run(client, query, parameters, extra_parameters) do
     payload = RunMessage.encode(client.bolt_version, query, parameters, extra_parameters)
+
     with :ok <- send_packet(client, payload) do
       recv_packets(client, &RunMessage.decode/2, :infinity)
     end
@@ -169,6 +183,7 @@ defmodule Boltx.Client do
 
   def message_pull(client, extra_parameters) do
     payload = PullMessage.encode(client.bolt_version, extra_parameters)
+
     with :ok <- send_packet(client, payload) do
       recv_packets(client, &PullMessage.decode/2, :infinity)
     end
@@ -181,10 +196,12 @@ defmodule Boltx.Client do
     end
   end
 
-  def message_begin(client, _extra_parameters) when is_float(client.bolt_version) and client.bolt_version <= 2.0 do
+  def message_begin(client, _extra_parameters)
+      when is_float(client.bolt_version) and client.bolt_version <= 2.0 do
     case run_statement(client, "BEGIN", %{}, %{}) do
-      {:ok, pull_result(success_data: success_data )} ->
+      {:ok, pull_result(success_data: success_data)} ->
         {:ok, success_data}
+
       other ->
         other
     end
@@ -192,6 +209,7 @@ defmodule Boltx.Client do
 
   def message_begin(client, extra_parameters) do
     payload = BeginMessage.encode(client.bolt_version, extra_parameters)
+
     with :ok <- send_packet(client, payload) do
       recv_packets(client, &BeginMessage.decode/2, :infinity)
     end
@@ -199,8 +217,9 @@ defmodule Boltx.Client do
 
   def message_commit(client) when is_float(client.bolt_version) and client.bolt_version <= 2.0 do
     case run_statement(client, "COMMIT", %{}, %{}) do
-      {:ok, pull_result(success_data: success_data )} ->
+      {:ok, pull_result(success_data: success_data)} ->
         {:ok, success_data}
+
       other ->
         other
     end
@@ -208,15 +227,18 @@ defmodule Boltx.Client do
 
   def message_commit(client) do
     payload = CommitMessage.encode(client.bolt_version)
+
     with :ok <- send_packet(client, payload) do
       recv_packets(client, &CommitMessage.decode/2, :infinity)
     end
   end
 
-  def message_rollback(client) when is_float(client.bolt_version) and client.bolt_version <= 2.0 do
+  def message_rollback(client)
+      when is_float(client.bolt_version) and client.bolt_version <= 2.0 do
     case run_statement(client, "ROLLBACK", %{}, %{}) do
-      {:ok, pull_result(success_data: success_data )} ->
+      {:ok, pull_result(success_data: success_data)} ->
         {:ok, success_data}
+
       other ->
         other
     end
@@ -224,12 +246,14 @@ defmodule Boltx.Client do
 
   def message_rollback(client) do
     payload = RollbackMessage.encode(client.bolt_version)
+
     with :ok <- send_packet(client, payload) do
       recv_packets(client, &RollbackMessage.decode/2, :infinity)
     end
   end
 
-  defp decode_version(<<0, 0, minor::unsigned-integer, major::unsigned-integer>>) when is_integer(major) and is_integer(minor) do
+  defp decode_version(<<0, 0, minor::unsigned-integer, major::unsigned-integer>>)
+       when is_integer(major) and is_integer(minor) do
     Float.round(major + minor / 10.0, 1)
   end
 
@@ -245,8 +269,10 @@ defmodule Boltx.Client do
     case recv_data(client, timeout) do
       {:ok, response} ->
         response
+
       {:error, :timeout} ->
-          {:error, Boltx.Error.wrap(__MODULE__, :timeout)}
+        {:error, Boltx.Error.wrap(__MODULE__, :timeout)}
+
       {:error, _} = error ->
         error
     end
@@ -262,10 +288,14 @@ defmodule Boltx.Client do
         case concatenateChunks(response, chunks) do
           {:complete_chunks, binary_messages} ->
             decode_messages(client.bolt_version, binary_messages, decoder)
-          {:remaining_chunks, binary_message} -> recv_packets(client, decoder, timeout, binary_message)
+
+          {:remaining_chunks, binary_message} ->
+            recv_packets(client, decoder, timeout, binary_message)
         end
+
       {:error, :timeout} ->
         {:error, Boltx.Error.wrap(__MODULE__, :timeout)}
+
       {:error, _} = error ->
         error
     end
@@ -275,9 +305,11 @@ defmodule Boltx.Client do
     case response do
       @noop_chunk ->
         {:remaining_chunks, chunks}
-      <<_::binary-size(byte_size(response)-2), 0,0>> ->
+
+      <<_::binary-size(byte_size(response) - 2), 0, 0>> ->
         {:complete_chunks, chunks <> response}
-      << _::binary>> ->
+
+      <<_::binary>> ->
         {:remaining_chunks, chunks <> response}
     end
   end
@@ -308,6 +340,7 @@ defmodule Boltx.Client do
 
   def checkin(client) do
     {sock_mod, sock} = client.sock
+
     case sock_mod.setopts(sock, active: :once) do
       :ok -> :ok
       other -> other

@@ -10,7 +10,8 @@ defmodule Boltx.ConnectionTest do
   @tag core: true
   test "connect/1 - disconnect/1 successful" do
     assert {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
-      Connection.connect(@opts)
+             Connection.connect(@opts)
+
     assert is_bitstring(server_version)
     assert is_float(client.bolt_version)
     assert :ok = Connection.disconnect(:stop, conn_data)
@@ -19,6 +20,7 @@ defmodule Boltx.ConnectionTest do
   @tag core: true
   test "connect/1 - not successful with incorrect credentials" do
     opts = @opts_without_auth ++ [auth: [username: "baduser", password: "badsecret"]]
+
     {:error, %Boltx.Error{code: :unauthorized}} =
       Connection.connect(opts)
   end
@@ -27,10 +29,12 @@ defmodule Boltx.ConnectionTest do
   test "checkout/1 successful" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
+
     assert is_bitstring(server_version)
     assert is_float(client.bolt_version)
-    assert {:ok, %Connection{client: _, } = conn_data} =
-      Connection.checkout(conn_data)
+
+    assert {:ok, %Connection{client: _} = conn_data} =
+             Connection.checkout(conn_data)
 
     :ok = Connection.disconnect(:stop, conn_data)
   end
@@ -39,11 +43,12 @@ defmodule Boltx.ConnectionTest do
   test "checkin/1 successful" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
+
     assert is_bitstring(server_version)
     assert is_float(client.bolt_version)
 
-    assert {:ok, %Connection{client: _, } = conn_data} =
-      Connection.checkin(conn_data)
+    assert {:ok, %Connection{client: _} = conn_data} =
+             Connection.checkin(conn_data)
 
     :ok = Connection.disconnect(:stop, conn_data)
   end
@@ -54,6 +59,7 @@ defmodule Boltx.ConnectionTest do
       address: "192.0.0.198",
       connect_timeout: 1
     ]
+
     {:error, %Boltx.Error{code: :timeout}} = Connection.connect(opts)
   end
 
@@ -61,11 +67,12 @@ defmodule Boltx.ConnectionTest do
   test "connect/1 successful with bolt version 1.0" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
+
     assert server_version == "Neo4j/3.4.0"
     assert client.bolt_version == 1.0
 
-    assert {:ok, %Connection{client: _, } = conn_data} =
-      Connection.checkin(conn_data)
+    assert {:ok, %Connection{client: _} = conn_data} =
+             Connection.checkin(conn_data)
 
     :ok = Connection.disconnect(:stop, conn_data)
   end
@@ -74,11 +81,12 @@ defmodule Boltx.ConnectionTest do
   test "connect/1 successful with bolt version 2.0" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
+
     assert server_version == "Neo4j/3.4.0"
     assert client.bolt_version == 2.0
 
-    assert {:ok, %Connection{client: _, } = conn_data} =
-      Connection.checkin(conn_data)
+    assert {:ok, %Connection{client: _} = conn_data} =
+             Connection.checkin(conn_data)
 
     :ok = Connection.disconnect(:stop, conn_data)
   end
@@ -87,11 +95,12 @@ defmodule Boltx.ConnectionTest do
   test "connect/1 successful with bolt version 3.0" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
+
     assert server_version == "Neo4j/4.4.27"
     assert client.bolt_version == 3.0
 
-    assert {:ok, %Connection{client: _, } = conn_data} =
-      Connection.checkin(conn_data)
+    assert {:ok, %Connection{client: _} = conn_data} =
+             Connection.checkin(conn_data)
 
     :ok = Connection.disconnect(:stop, conn_data)
   end
@@ -100,11 +109,12 @@ defmodule Boltx.ConnectionTest do
   test "connect/1 successful with bolt version 4.0" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
+
     assert server_version == "Neo4j/4.4.27"
     assert client.bolt_version == 4.0
 
-    assert {:ok, %Connection{client: _, } = conn_data} =
-      Connection.checkin(conn_data)
+    assert {:ok, %Connection{client: _} = conn_data} =
+             Connection.checkin(conn_data)
 
     :ok = Connection.disconnect(:stop, conn_data)
   end
@@ -113,11 +123,12 @@ defmodule Boltx.ConnectionTest do
   test "connect/1 successful with bolt version 4.1" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
+
     assert server_version == "Neo4j/4.4.27"
     assert client.bolt_version == 4.1
 
-    assert {:ok, %Connection{client: _, } = conn_data} =
-      Connection.checkin(conn_data)
+    assert {:ok, %Connection{client: _} = conn_data} =
+             Connection.checkin(conn_data)
 
     :ok = Connection.disconnect(:stop, conn_data)
   end
@@ -126,11 +137,12 @@ defmodule Boltx.ConnectionTest do
   test "connect/1 successful with bolt version 4.2" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
+
     assert server_version == "Neo4j/4.4.27"
     assert client.bolt_version == 4.2
 
-    assert {:ok, %Connection{client: _, } = conn_data} =
-      Connection.checkin(conn_data)
+    assert {:ok, %Connection{client: _} = conn_data} =
+             Connection.checkin(conn_data)
 
     :ok = Connection.disconnect(:stop, conn_data)
   end
@@ -139,11 +151,12 @@ defmodule Boltx.ConnectionTest do
   test "connect/1 successful with bolt version 4.3" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
+
     assert server_version == "Neo4j/4.4.27"
     assert client.bolt_version == 4.3
 
-    assert {:ok, %Connection{client: _, } = conn_data} =
-      Connection.checkin(conn_data)
+    assert {:ok, %Connection{client: _} = conn_data} =
+             Connection.checkin(conn_data)
 
     :ok = Connection.disconnect(:stop, conn_data)
   end
@@ -152,11 +165,12 @@ defmodule Boltx.ConnectionTest do
   test "connect/1 successful with bolt version 4.4" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
+
     assert server_version == "Neo4j/4.4.27"
     assert client.bolt_version == 4.4
 
-    assert {:ok, %Connection{client: _, } = conn_data} =
-      Connection.checkin(conn_data)
+    assert {:ok, %Connection{client: _} = conn_data} =
+             Connection.checkin(conn_data)
 
     :ok = Connection.disconnect(:stop, conn_data)
   end
@@ -165,11 +179,12 @@ defmodule Boltx.ConnectionTest do
   test "connect/1 successful with bolt version 5.0" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
+
     assert server_version == "Neo4j/5.13.0"
     assert client.bolt_version == 5.0
 
-    assert {:ok, %Connection{client: _, } = conn_data} =
-      Connection.checkin(conn_data)
+    assert {:ok, %Connection{client: _} = conn_data} =
+             Connection.checkin(conn_data)
 
     :ok = Connection.disconnect(:stop, conn_data)
   end
@@ -178,11 +193,12 @@ defmodule Boltx.ConnectionTest do
   test "connect/1 successful with bolt version 5.1" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
+
     assert server_version == "Neo4j/5.13.0"
     assert client.bolt_version == 5.1
 
-    assert {:ok, %Connection{client: _, } = conn_data} =
-      Connection.checkin(conn_data)
+    assert {:ok, %Connection{client: _} = conn_data} =
+             Connection.checkin(conn_data)
 
     :ok = Connection.disconnect(:stop, conn_data)
   end
@@ -191,11 +207,12 @@ defmodule Boltx.ConnectionTest do
   test "connect/1 successful with bolt version 5.2" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
+
     assert server_version == "Neo4j/5.13.0"
     assert client.bolt_version == 5.2
 
-    assert {:ok, %Connection{client: _, } = conn_data} =
-      Connection.checkin(conn_data)
+    assert {:ok, %Connection{client: _} = conn_data} =
+             Connection.checkin(conn_data)
 
     :ok = Connection.disconnect(:stop, conn_data)
   end
@@ -204,11 +221,12 @@ defmodule Boltx.ConnectionTest do
   test "connect/1 successful with bolt version 5.3" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
+
     assert server_version == "Neo4j/5.13.0"
     assert client.bolt_version == 5.3
 
-    assert {:ok, %Connection{client: _, } = conn_data} =
-      Connection.checkin(conn_data)
+    assert {:ok, %Connection{client: _} = conn_data} =
+             Connection.checkin(conn_data)
 
     :ok = Connection.disconnect(:stop, conn_data)
   end
@@ -217,11 +235,12 @@ defmodule Boltx.ConnectionTest do
   test "connect/1 successful with bolt version 5.4" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
+
     assert server_version == "Neo4j/5.13.0"
     assert client.bolt_version == 5.4
 
-    assert {:ok, %Connection{client: _, } = conn_data} =
-      Connection.checkin(conn_data)
+    assert {:ok, %Connection{client: _} = conn_data} =
+             Connection.checkin(conn_data)
 
     :ok = Connection.disconnect(:stop, conn_data)
   end
@@ -230,15 +249,16 @@ defmodule Boltx.ConnectionTest do
   test "connect/1 successful with specific bolt version" do
     last_version = List.last(Versions.available_versions())
     opts = [versions: [last_version]] ++ @opts
+
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(opts)
+
     assert server_version == "Neo4j/5.13.0"
     assert client.bolt_version == last_version
 
-    assert {:ok, %Connection{client: _, } = conn_data} =
-      Connection.checkin(conn_data)
+    assert {:ok, %Connection{client: _} = conn_data} =
+             Connection.checkin(conn_data)
 
     :ok = Connection.disconnect(:stop, conn_data)
   end
-
 end

@@ -32,7 +32,11 @@ defmodule Boltx.Internals.Error do
     }
   end
 
-  def exception({:failure, %Boltx.Internals.Error{message: _message, code:  _code} = err}, _pid, _function) do
+  def exception(
+        {:failure, %Boltx.Internals.Error{message: _message, code: _code} = err},
+        _pid,
+        _function
+      ) do
     err
   end
 

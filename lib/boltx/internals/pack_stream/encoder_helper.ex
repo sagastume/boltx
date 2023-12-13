@@ -10,7 +10,6 @@ defmodule Boltx.Internals.PackStream.EncoderHelper do
   @available_bolt_versions BoltVersionHelper.available_versions()
   @last_version BoltVersionHelper.last()
 
-
   @doc """
   For the given `data_type` and `bolt_version`, determine the right enconding function
   and call it agains `data`
@@ -40,5 +39,4 @@ defmodule Boltx.Internals.PackStream.EncoderHelper do
       bolt_version: bolt_version,
       message: "Unsupported encoder version"
   end
-
 end

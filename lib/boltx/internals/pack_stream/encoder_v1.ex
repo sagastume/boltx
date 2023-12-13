@@ -3,7 +3,6 @@ defmodule Boltx.Internals.PackStream.EncoderV1 do
   alias Boltx.Internals.PackStream.EncoderHelper
   use Boltx.Internals.PackStream.Markers
 
-
   @doc """
   Encode an atom into Bolt binary format.
 
@@ -31,7 +30,7 @@ defmodule Boltx.Internals.PackStream.EncoderV1 do
       <<0x89, 0x67, 0x75, 0x74, 0x65, 0x6E, 0x5F, 0x74, 0x61, 0x67>>
   """
   @spec encode_atom(atom(), integer()) :: Boltx.Internals.PackStream.value()
-  def encode_atom(atom , bolt_version), do: EncoderHelper.call_encode(:atom, atom, bolt_version)
+  def encode_atom(atom, bolt_version), do: EncoderHelper.call_encode(:atom, atom, bolt_version)
 
   @doc """
   Encode a string into Bolt binary format.
@@ -55,8 +54,8 @@ defmodule Boltx.Internals.PackStream.EncoderV1 do
       <<0x89, 0x67, 0x75, 0x74, 0x65, 0x6E, 0x20, 0x74, 0x61, 0x67>>
   """
   @spec encode_string(String.t(), integer()) :: Boltx.Internals.PackStream.value()
-  def encode_string(string, bolt_version), do: EncoderHelper.call_encode(:string, string, bolt_version)
-
+  def encode_string(string, bolt_version),
+    do: EncoderHelper.call_encode(:string, string, bolt_version)
 
   @doc """
   Encode an integer into Bolt binary format.
@@ -83,7 +82,8 @@ defmodule Boltx.Internals.PackStream.EncoderV1 do
       <<0xCA, 0xFF, 0xFE, 0xDB, 0xDB>>
   """
   @spec encode_integer(integer(), integer()) :: Boltx.Internals.PackStream.value()
-  def encode_integer(integer, bolt_version), do: EncoderHelper.call_encode(:integer, integer, bolt_version)
+  def encode_integer(integer, bolt_version),
+    do: EncoderHelper.call_encode(:integer, integer, bolt_version)
 
   @doc """
   Encode a float into Bolt binary format.
@@ -101,7 +101,8 @@ defmodule Boltx.Internals.PackStream.EncoderV1 do
       <<0xC1, 0x40, 0x45, 0x35, 0xC2, 0x8F, 0x5C, 0x28, 0xF6>>
   """
   @spec encode_float(float(), integer()) :: Boltx.Internals.PackStream.value()
-  def encode_float(number, bolt_version), do: EncoderHelper.call_encode(:float, number, bolt_version)
+  def encode_float(number, bolt_version),
+    do: EncoderHelper.call_encode(:float, number, bolt_version)
 
   @doc """
   Encode a list into Bolt binary format.
@@ -154,7 +155,6 @@ defmodule Boltx.Internals.PackStream.EncoderV1 do
   @spec encode_map(map(), integer()) :: Boltx.Internals.PackStream.value()
   def encode_map(map, bolt_version), do: EncoderHelper.call_encode(:map, map, bolt_version)
 
-
   @doc """
   Encode a struct into Bolt binary format.
   This concerns Bolt Structs as defined in []().
@@ -179,5 +179,6 @@ defmodule Boltx.Internals.PackStream.EncoderV1 do
 
   """
   @spec encode_struct({integer(), list()}, integer()) :: Boltx.Internals.PackStream.value()
-  def encode_struct(struct, bolt_version) , do: EncoderHelper.call_encode(:struct, struct, bolt_version)
+  def encode_struct(struct, bolt_version),
+    do: EncoderHelper.call_encode(:struct, struct, bolt_version)
 end

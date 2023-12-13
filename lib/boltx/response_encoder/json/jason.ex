@@ -33,7 +33,8 @@ if Code.ensure_loaded?(Jason) do
       end
     end
 
-    defimpl Jason.Encoder, for: [Types.DateTimeWithTZOffset, Types.TimeWithTZOffset, Types.Duration] do
+    defimpl Jason.Encoder,
+      for: [Types.DateTimeWithTZOffset, Types.TimeWithTZOffset, Types.Duration] do
       @spec encode(struct(), Jason.Encode.opts()) :: iodata()
       def encode(data, opts) do
         data

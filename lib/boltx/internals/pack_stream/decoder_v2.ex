@@ -27,5 +27,4 @@ defmodule Boltx.Internals.PackStream.DecoderV2 do
   # Local Date
   @spec decode({integer(), binary(), integer()}, integer()) :: list() | {:error, :not_implemented}
   def decode(data, bolt_version), do: Decoder.decode(data, bolt_version)
-
 end

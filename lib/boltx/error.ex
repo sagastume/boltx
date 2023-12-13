@@ -1,5 +1,4 @@
 defmodule Boltx.Error do
-
   @error_map %{
     "Neo.ClientError.Security.Unauthorized" => :unauthorized,
     "Neo.ClientError.Request.Invalid" => :request_invalid,
@@ -9,7 +8,7 @@ defmodule Boltx.Error do
   @type t() :: %__MODULE__{
           module: module(),
           code: atom(),
-          bolt: %{code: binary(), message: binary() | nil} | nil,
+          bolt: %{code: binary(), message: binary() | nil} | nil
         }
 
   defexception [:module, :code, :bolt]
@@ -21,8 +20,8 @@ defmodule Boltx.Error do
   def wrap(module, code) when is_binary(code), do: wrap(module, to_atom(code))
 
   @spec wrap(module(), map()) :: t()
-  def wrap(module, bolt_error) when is_map(bolt_error), do: %__MODULE__{module: module, code: bolt_error.code |> to_atom(), bolt: bolt_error}
-
+  def wrap(module, bolt_error) when is_map(bolt_error),
+    do: %__MODULE__{module: module, code: bolt_error.code |> to_atom(), bolt: bolt_error}
 
   @doc """
   Return the code for the given error.

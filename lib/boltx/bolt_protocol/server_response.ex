@@ -9,6 +9,6 @@ defmodule Boltx.BoltProtocol.ServerResponse do
 
   defrecord :pull_result, [
     :records,
-    :success_data,
+    :success_data
   ]
 end

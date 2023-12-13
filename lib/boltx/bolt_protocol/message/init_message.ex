@@ -10,17 +10,24 @@ defmodule Boltx.BoltProtocol.Message.InitMessage do
   end
 
   def encode(_, _) do
-    {:error, %Boltx.Internals.Error{code: :unsupported_message_version, message: "Init message version not supported"}}
+    {:error,
+     %Boltx.Internals.Error{
+       code: :unsupported_message_version,
+       message: "Init message version not supported"
+     }}
   end
 
   def decode(_bolt_version, binary_messages) do
     messages = Enum.map(binary_messages, &Decoder.decode(&1, 1))
     response = hd(messages)
+
     case response do
       {:success, response} ->
         {:ok, response}
+
       {:failure, response} ->
-        {:error, Boltx.Error.wrap(__MODULE__, %{code: response["code"], message: response["message"]})}
+        {:error,
+         Boltx.Error.wrap(__MODULE__, %{code: response["code"], message: response["message"]})}
     end
   end
 end

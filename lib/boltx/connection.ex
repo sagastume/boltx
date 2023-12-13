@@ -13,13 +13,14 @@ defmodule Boltx.Connection do
   @impl true
   def connect(opts) do
     config = Client.Config.new(opts)
+
     with {:ok, %Client{} = client} <- Client.connect(config),
          {:ok, response_server_metadata} <- do_init(client, opts) do
-          state = getServerMetadataState(response_server_metadata)
-          connection_id = getConnectionId(response_server_metadata)
-          client = %Client{client | connection_id: connection_id }
-          state = %__MODULE__{state | client: client}
-          {:ok, state}
+      state = getServerMetadataState(response_server_metadata)
+      connection_id = getConnectionId(response_server_metadata)
+      client = %Client{client | connection_id: connection_id}
+      state = %__MODULE__{state | client: client}
+      {:ok, state}
     end
   end
 
@@ -30,7 +31,7 @@ defmodule Boltx.Connection do
   defp do_init(bolt_version, client, opts) when is_float(bolt_version) and bolt_version >= 5.1 do
     with {:ok, response_hello} <- Client.message_hello(client, opts),
          {:ok, _response_logon} <- Client.message_logon(client, opts) do
-          {:ok, response_hello}
+      {:ok, response_hello}
     end
   end
 
@@ -45,6 +46,7 @@ defmodule Boltx.Connection do
   defp getServerMetadataState(response_metadata) do
     patch_bolt = get_in(response_metadata, ["patch_bolt"])
     hints = get_in(response_metadata, ["hints"])
+
     %__MODULE__{
       client: nil,
       server_version: response_metadata["server"],

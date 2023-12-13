@@ -4,7 +4,8 @@ defmodule Boltx.Internals.BoltProtocolHelper do
   alias Boltx.Internals.PackStream.Message
   alias Boltx.Internals.Error
 
-  @recv_timeout :infinity #10_000
+  # 10_000
+  @recv_timeout :infinity
   @zero_chunk <<0x00, 0x00>>
   @summary ~w(success ignored failure)a
 
@@ -78,7 +79,7 @@ defmodule Boltx.Internals.BoltProtocolHelper do
 
   @spec do_receive_data(atom(), port(), Keyword.t()) :: {:ok, binary()}
   defp do_receive_data(transport, port, options) do
-    #recv_timeout = get_recv_timeout(options)
+    # recv_timeout = get_recv_timeout(options)
 
     case transport.recv(port, 2, :infinity) do
       {:ok, <<chunk_size::16>>} ->

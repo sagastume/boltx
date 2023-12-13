@@ -83,7 +83,7 @@ defmodule Boltx.BoltKitCase do
       with true <- File.exists?(script) do
         sport = Integer.to_string(port)
         porcelain = Porcelain.spawn("boltstub", [sport, script], opts)
-        wait_for_socket('127.0.0.1', port)
+        wait_for_socket(~c"127.0.0.1", port)
         {:ok, porcelain}
       else
         _ -> {:error, script <> ", not found."}
@@ -93,11 +93,10 @@ defmodule Boltx.BoltKitCase do
 
   @sock_opts [:binary, active: false]
   defp wait_for_socket(address, port) do
-      with {:ok, socket} <- :gen_tcp.connect(address, port, @sock_opts, 1000) do
-        socket
-      end
+    with {:ok, socket} <- :gen_tcp.connect(address, port, @sock_opts, 1000) do
+      socket
+    end
   end
-
 
   defp connect(url, prefix) do
     conf = [

@@ -21,8 +21,6 @@ defmodule Boltx.Internals.PackStreamError do
   end
 
   def message(%{data_type: data_type, data: data, message: message, bolt_version: bolt_version}) do
-    "#{message} [bolt_version: #{inspect(bolt_version)}, data_type: #{data_type}, data: #{
-      inspect(data)
-    }]"
+    "#{message} [bolt_version: #{inspect(bolt_version)}, data_type: #{data_type}, data: #{inspect(data)}]"
   end
 end
