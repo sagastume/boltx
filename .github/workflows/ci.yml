@@ -15,15 +15,15 @@ jobs:
 
       - uses: erlef/setup-beam@v1
         with:
-          otp-version: '25.1.2'
-          elixir-version: '1.14.0'
+          otp-version: '26.1'
+          elixir-version: '1.15.6'
 
       - uses: actions/cache@v2
         with:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-mix-'1.14.0'-'25.1.2'-${{ hashFiles('**/mix.lock') }}
+          key: ${{ runner.os }}-mix-'1.15.6'-'26.1'-${{ hashFiles('**/mix.lock') }}
 
       - run: mix deps.get
       - run: mix deps.compile
@@ -88,15 +88,15 @@ jobs:
 
       - uses: erlef/setup-beam@v1
         with:
-          otp-version: '25.1.2'
-          elixir-version: '1.14.0'
+          otp-version: '26.1'
+          elixir-version: '1.15.6'
       
       - uses: actions/cache@v2
         with:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-mix-'1.14.0'-'25.1.2'-${{ hashFiles('**/mix.lock') }}
+          key: ${{ runner.os }}-mix-1.15.6'-'26.1'-${{ hashFiles('**/mix.lock') }}
       
       - run: mix deps.get
       - run: mix deps.compile
