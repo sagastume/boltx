@@ -6,7 +6,16 @@ defmodule Boltx.Client do
 
   alias Boltx.BoltProtocol.Versions
   alias Boltx.Utils.Converters
-  alias Boltx.BoltProtocol.Message.{HelloMessage, InitMessage, LogonMessage, RunMessage, PullMessage}
+  alias Boltx.BoltProtocol.Message.{
+    HelloMessage,
+    InitMessage,
+    LogonMessage,
+    RunMessage,
+    PullMessage,
+    BeginMessage,
+    CommitMessage,
+    RollbackMessage
+  }
 
   defstruct [:sock, :connection_id, :bolt_version]
 
@@ -168,7 +177,55 @@ defmodule Boltx.Client do
   def run_statement(client, query, parameters, extra_parameters) do
     with {:ok, result_run} <- message_run(client, query, parameters, extra_parameters),
          {:ok, result_pull} <- message_pull(client, extra_parameters) do
-      statement_result(result_run: result_run, result_pull: result_pull, query: query)
+      {:ok, statement_result(result_run: result_run, result_pull: result_pull, query: query)}
+    end
+  end
+
+  def message_begin(client, _extra_parameters) when is_float(client.bolt_version) and client.bolt_version <= 2.0 do
+    case run_statement(client, "BEGIN", %{}, %{}) do
+      {:ok, pull_result(success_data: success_data )} ->
+        {:ok, success_data}
+      other ->
+        other
+    end
+  end
+
+  def message_begin(client, extra_parameters) do
+    payload = BeginMessage.encode(client.bolt_version, extra_parameters)
+    with :ok <- send_packet(client, payload) do
+      recv_packets(client, &BeginMessage.decode/2, :infinity)
+    end
+  end
+
+  def message_commit(client) when is_float(client.bolt_version) and client.bolt_version <= 2.0 do
+    case run_statement(client, "COMMIT", %{}, %{}) do
+      {:ok, pull_result(success_data: success_data )} ->
+        {:ok, success_data}
+      other ->
+        other
+    end
+  end
+
+  def message_commit(client) do
+    payload = CommitMessage.encode(client.bolt_version)
+    with :ok <- send_packet(client, payload) do
+      recv_packets(client, &CommitMessage.decode/2, :infinity)
+    end
+  end
+
+  def message_rollback(client) when is_float(client.bolt_version) and client.bolt_version <= 2.0 do
+    case run_statement(client, "ROLLBACK", %{}, %{}) do
+      {:ok, pull_result(success_data: success_data )} ->
+        {:ok, success_data}
+      other ->
+        other
+    end
+  end
+
+  def message_rollback(client) do
+    payload = RollbackMessage.encode(client.bolt_version)
+    with :ok <- send_packet(client, payload) do
+      recv_packets(client, &RollbackMessage.decode/2, :infinity)
     end
   end
 

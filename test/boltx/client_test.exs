@@ -100,10 +100,10 @@ defmodule Boltx.ClientTest do
       handle_handshake(client, @opts)
 
       query = "RETURN 1024 AS a, 2048 AS b"
-      statement_result(
+      {:ok, statement_result(
         result_run: result_run,
         result_pull: result_pull,
-        query: query_result) = Client.run_statement(client, query, %{}, %{})
+        query: query_result)} = Client.run_statement(client, query, %{}, %{})
 
       assert query_result == query
       assert %{"fields" => ["a", "b"], "t_first" => _} = result_run
@@ -119,10 +119,10 @@ defmodule Boltx.ClientTest do
       handle_handshake(client, @opts)
 
       query = "RETURN 4 + $number AS result"
-      statement_result(
+      {:ok, statement_result(
         result_run: result_run,
         result_pull: result_pull,
-        query: query_result) = Client.run_statement(client, query, %{number: 5}, %{})
+        query: query_result)} = Client.run_statement(client, query, %{number: 5}, %{})
 
       assert query_result == query
       assert %{"fields" => ["result"], "t_first" => _} = result_run
@@ -138,10 +138,10 @@ defmodule Boltx.ClientTest do
       handle_handshake(client, @opts)
 
       query = "UNWIND range(1, 10) AS n RETURN n"
-      statement_result(
+      {:ok, statement_result(
         result_run: result_run,
         result_pull: result_pull,
-        query: query_result) = Client.run_statement(client, query, %{}, %{})
+        query: query_result)} = Client.run_statement(client, query, %{}, %{})
 
       assert query_result == query
       assert %{"fields" => ["n"], "t_first" => _} = result_run
@@ -160,6 +160,62 @@ defmodule Boltx.ClientTest do
       query = "RETURN 1024 AS a, 2048 AS b"
       {:error, %Boltx.Error{code: :request_invalid}} = Client.run_statement(client, query, %{}, %{n: %{d: 4}})
     end
-
   end
+
+  describe "Explicit Transaction" do
+    @tag :core
+    test "simple begin message" do
+      assert {:ok, client} = Client.connect(@opts)
+      handle_handshake(client, @opts)
+      assert {:ok, _} = Client.message_begin(client, %{})
+    end
+
+    @tag :core
+    test "simple commit message" do
+      assert {:ok, client} = Client.connect(@opts)
+      handle_handshake(client, @opts)
+
+      assert {:ok, _} = Client.message_begin(client, %{})
+      assert {:ok, _} = Client.message_commit(client)
+    end
+
+    @tag :bolt_1_x
+    @tag :bolt_2_x
+    test "simple commit message without starting a transaction in menor bolt 2" do
+      assert {:ok, client} = Client.connect(@opts)
+      handle_handshake(client, @opts)
+
+      assert {:error, %Boltx.Error{code: :semantic_error}} = Client.message_commit(client)
+    end
+
+    @tag :bolt_3_x
+    @tag :bolt_4_x
+    @tag :bolt_5_x
+    test "simple commit message without starting a transaction mayor 3" do
+      assert {:ok, client} = Client.connect(@opts)
+      handle_handshake(client, @opts)
+
+      assert {:error, %Boltx.Error{code: :request_invalid}} = Client.message_commit(client)
+    end
+
+    @tag :core
+    test "simple rollback message" do
+      assert {:ok, client} = Client.connect(@opts)
+      handle_handshake(client, @opts)
+
+      assert {:ok, _} = Client.message_begin(client, %{})
+      assert {:ok, _} = Client.message_rollback(client)
+    end
+
+    @tag :bolt_3_x
+    @tag :bolt_4_x
+    @tag :bolt_5_x
+    test "simple rollback message without starting a transaction mayor 3" do
+      assert {:ok, client} = Client.connect(@opts)
+      handle_handshake(client, @opts)
+
+      assert {:error, %Boltx.Error{code: :request_invalid}} = Client.message_rollback(client)
+    end
+  end
+
 end

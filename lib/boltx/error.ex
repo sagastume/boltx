@@ -2,7 +2,8 @@ defmodule Boltx.Error do
 
   @error_map %{
     "Neo.ClientError.Security.Unauthorized" => :unauthorized,
-    "Neo.ClientError.Request.Invalid" => :request_invalid
+    "Neo.ClientError.Request.Invalid" => :request_invalid,
+    "Neo.ClientError.Statement.SemanticError" => :semantic_error
   }
 
   @type t() :: %__MODULE__{
