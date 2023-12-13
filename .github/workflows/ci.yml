@@ -76,6 +76,8 @@ jobs:
       
       - run: mix deps.get
       - run: mix deps.compile
+      - name: Check Code Formatting
+        run: mix format --check-formatted
       - name: Run Test Script
         run: |
           mix test
