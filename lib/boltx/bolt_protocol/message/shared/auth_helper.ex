@@ -19,13 +19,16 @@ defmodule Boltx.BoltProtocol.Message.Shared.AuthHelper do
   end
 
   def get_bolt_agent(fields) do
-    system_info = System.build_info
+    system_info = System.build_info()
     default_product = "boltx/" <> to_string(Application.spec(:boltx, :vsn))
     product = Keyword.get(fields, :bolt_agent, []) |> Keyword.get(:product, default_product)
-    %{bolt_agent: %{
-      product: product,
-      language: "Elixir/" <> system_info.version,
-      language_details: system_info.build,
-    }}
+
+    %{
+      bolt_agent: %{
+        product: product,
+        language: "Elixir/" <> system_info.version,
+        language_details: system_info.build
+      }
+    }
   end
 end

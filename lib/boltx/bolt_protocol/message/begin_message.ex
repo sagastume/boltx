@@ -1,15 +1,19 @@
 defmodule Boltx.BoltProtocol.Message.BeginMessage do
-
   alias Boltx.Internals.PackStream.Message.Encoder
   alias Boltx.Internals.PackStream.Message.Decoder
 
-  def encode(bolt_version, extra_parameters) when is_float(bolt_version) and bolt_version >= 3.0 do
+  def encode(bolt_version, extra_parameters)
+      when is_float(bolt_version) and bolt_version >= 3.0 do
     message = [get_extra_parameters(extra_parameters)]
     Encoder.do_encode(:begin, message, 3)
   end
 
   def encode(_, _) do
-    {:error, %Boltx.Internals.Error{code: :unsupported_message_version, message: "BEGIN message version not supported"}}
+    {:error,
+     %Boltx.Internals.Error{
+       code: :unsupported_message_version,
+       message: "BEGIN message version not supported"
+     }}
   end
 
   @spec decode(float(), <<_::16, _::_*8>>) :: {:error, Boltx.Error.t()} | {:ok, any()}
@@ -19,8 +23,10 @@ defmodule Boltx.BoltProtocol.Message.BeginMessage do
     case hd(messages) do
       {:success, response} ->
         {:ok, response}
+
       {:failure, response} ->
-        {:error, Boltx.Error.wrap(__MODULE__, %{code: response["code"], message: response["message"]})}
+        {:error,
+         Boltx.Error.wrap(__MODULE__, %{code: response["code"], message: response["message"]})}
     end
   end
 

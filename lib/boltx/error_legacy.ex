@@ -18,9 +18,7 @@ defmodule Boltx.ErrorLegacy do
      %ErrorLegacy{
        code: code,
        message:
-         "Details: #{message}; connection_id: #{inspect(cid)}, function: #{inspect(f)}, type: #{
-           inspect(t)
-         }"
+         "Details: #{message}; connection_id: #{inspect(cid)}, function: #{inspect(f)}, type: #{inspect(t)}"
      }}
   end
 

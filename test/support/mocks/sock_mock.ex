@@ -9,24 +9,27 @@ defmodule Boltx.Mocks.SockMock do
         send(from, {:reply, h})
         loop(t)
     end
+
     loop(state)
   end
+
   def start_link(state) do
-      spawn_link( __MODULE__ , :loop, [init(state)])
+    spawn_link(__MODULE__, :loop, [init(state)])
   end
 
   def init(state), do: state
 
   def push(pid, value) do
-      send(pid, {self(), :push, value})
-      :ok
+    send(pid, {self(), :push, value})
+    :ok
   end
 
   def pop(pid) do
-      send(pid, {self(), :pop})
-      receive do
-          {:reply, value} -> value
-      end
+    send(pid, {self(), :pop})
+
+    receive do
+      {:reply, value} -> value
+    end
   end
 
   def recv(pid, _length, _timeout) do

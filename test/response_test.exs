@@ -236,7 +236,7 @@ defmodule ResponseTest do
     end
 
     @unwind %Boltx.Response{
-      records: [[1], [2], [3], [4], [5], [6], '\a', '\b', '\t', '\n'],
+      records: [[1], [2], [3], [4], [5], [6], ~c"\a", ~c"\b", ~c"\t", ~c"\n"],
       results: [
         %{"n" => 1},
         %{"n" => 2},

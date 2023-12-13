@@ -36,7 +36,7 @@ defmodule Boltx.Mixfile do
 
   def application do
     [
-      extra_applications: [ :logger ]
+      extra_applications: [:logger]
     ]
   end
 
@@ -60,7 +60,7 @@ defmodule Boltx.Mixfile do
       ],
       licenses: ["Apache 2.0"],
       maintainers: [
-        "Luis Sagastume",
+        "Luis Sagastume"
       ],
       links: %{
         "Docs" => @url_docs,

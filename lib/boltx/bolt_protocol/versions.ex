@@ -10,8 +10,10 @@ defmodule Boltx.BoltProtocol.Versions do
   end
 
   def to_bytes(version) when is_float(version) do
-    [major | [minor]] = version |> Float.to_string() |> String.split(".") |> Enum.map(&String.to_integer/1)
-    <<0,0>> <> <<minor, major>>
+    [major | [minor]] =
+      version |> Float.to_string() |> String.split(".") |> Enum.map(&String.to_integer/1)
+
+    <<0, 0>> <> <<minor, major>>
   end
 
   def to_bytes(version) when is_integer(version) do

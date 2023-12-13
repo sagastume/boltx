@@ -22,7 +22,8 @@ defmodule Boltx.Internals.PackStream.EncoderV2 do
       <<0xB1, 0x74, 0xCB, 0x0, 0x0, 0x16, 0x9F, 0x11, 0xB9, 0xCB, 0x40>>
   """
   @spec encode_local_time(Time.t(), integer()) :: Boltx.Internals.PackStream.value()
-  def encode_local_time(local_time, bolt_version), do: EncoderHelper.call_encode(:local_time, local_time, bolt_version)
+  def encode_local_time(local_time, bolt_version),
+    do: EncoderHelper.call_encode(:local_time, local_time, bolt_version)
 
   @doc """
   Encode a TIME WITH TIMEZONE OFFSET (represented by TimeWithTZOffset) into Bolt binary format.
@@ -42,7 +43,13 @@ defmodule Boltx.Internals.PackStream.EncoderV2 do
       iex> :erlang.iolist_to_binary(Boltx.Internals.PackStream.EncoderV2.encode_time_with_tz(time_with_tz, 2))
       <<0xB2, 0x54, 0xCB, 0x0, 0x0, 0x16, 0x9F, 0x11, 0xB9, 0xCB, 0x40, 0xC9, 0xE, 0x10>>
   """
-  def encode_time_with_tz(%TimeWithTZOffset{time: time, timezone_offset: offset}, bolt_version), do: EncoderHelper.call_encode(:time_with_tz, %TimeWithTZOffset{time: time, timezone_offset: offset}, bolt_version )
+  def encode_time_with_tz(%TimeWithTZOffset{time: time, timezone_offset: offset}, bolt_version),
+    do:
+      EncoderHelper.call_encode(
+        :time_with_tz,
+        %TimeWithTZOffset{time: time, timezone_offset: offset},
+        bolt_version
+      )
 
   @doc """
   Encode a DATE (represented by Date) into Bolt binary format.
@@ -88,7 +95,8 @@ defmodule Boltx.Internals.PackStream.EncoderV2 do
   """
   @spec encode_local_datetime(Calendar.naive_datetime(), integer()) ::
           Boltx.Internals.PackStream.value()
-  def encode_local_datetime(local_datetime, bolt_version), do: EncoderHelper.call_encode(:local_datetime, local_datetime, bolt_version)
+  def encode_local_datetime(local_datetime, bolt_version),
+    do: EncoderHelper.call_encode(:local_datetime, local_datetime, bolt_version)
 
   @doc """
   Encode DATETIME WITH TIMEZONE ID (represented by Calendar.DateTime) into Bolt binary format.
@@ -117,7 +125,8 @@ defmodule Boltx.Internals.PackStream.EncoderV2 do
   """
   @spec encode_datetime_with_tz_id(Calendar.datetime(), integer()) ::
           Boltx.Internals.PackStream.value()
-  def encode_datetime_with_tz_id(datetime, bolt_version), do: EncoderHelper.call_encode(:datetime_with_tz_id, datetime, bolt_version)
+  def encode_datetime_with_tz_id(datetime, bolt_version),
+    do: EncoderHelper.call_encode(:datetime_with_tz_id, datetime, bolt_version)
 
   @doc """
   Encode DATETIME WITH TIMEZONE OFFSET (represented by DateTimeWithTZOffset) into Bolt binary format.
@@ -150,12 +159,13 @@ defmodule Boltx.Internals.PackStream.EncoderV2 do
   def encode_datetime_with_tz_offset(
         %DateTimeWithTZOffset{naive_datetime: ndt, timezone_offset: tz_offset},
         bolt_version
-  ), do: EncoderHelper.call_encode(:datetime_with_tz_offset,
-
-        %DateTimeWithTZOffset{naive_datetime: ndt, timezone_offset: tz_offset},
-        bolt_version
-  )
-
+      ),
+      do:
+        EncoderHelper.call_encode(
+          :datetime_with_tz_offset,
+          %DateTimeWithTZOffset{naive_datetime: ndt, timezone_offset: tz_offset},
+          bolt_version
+        )
 
   @doc """
   Encode DURATION (represented by Duration) into Bolt binary format.
@@ -195,8 +205,8 @@ defmodule Boltx.Internals.PackStream.EncoderV2 do
       <<0xB4, 0x45, 0x25, 0x35, 0xCA, 0x0, 0x0, 0xB7, 0x5D, 0xC9, 0x2, 0x2A>>
   """
   @spec encode_duration(Duration.t(), integer()) :: Boltx.Internals.PackStream.value()
-  def encode_duration(%Duration{} = duration, bolt_version), do: EncoderHelper.call_encode(:duration, duration, bolt_version)
-
+  def encode_duration(%Duration{} = duration, bolt_version),
+    do: EncoderHelper.call_encode(:duration, duration, bolt_version)
 
   @doc """
   Encode POINT 2D & 3D (represented by Point) into Bolt binary format.
@@ -258,7 +268,9 @@ defmodule Boltx.Internals.PackStream.EncoderV2 do
 
   """
   @spec encode_point(Point.t(), integer()) :: Boltx.Internals.PackStream.value()
-  def encode_point(%Point{z: nil} = point, bolt_version), do: EncoderHelper.call_encode(:point, point, bolt_version)
+  def encode_point(%Point{z: nil} = point, bolt_version),
+    do: EncoderHelper.call_encode(:point, point, bolt_version)
 
-  def encode_point(%Point{} = point, bolt_version), do: EncoderHelper.call_encode(:point, point, bolt_version)
+  def encode_point(%Point{} = point, bolt_version),
+    do: EncoderHelper.call_encode(:point, point, bolt_version)
 end

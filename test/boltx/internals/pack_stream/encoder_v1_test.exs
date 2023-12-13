@@ -21,16 +21,21 @@ defmodule Boltx.Internals.PackStream.EncoderV1Test do
   end
 
   test "encodes atom" do
-    assert :erlang.iolist_to_binary(EncoderV1.encode_atom(:hello, 1)) == <<0x85, 0x68, 0x65, 0x6C, 0x6C, 0x6F>>
+    assert :erlang.iolist_to_binary(EncoderV1.encode_atom(:hello, 1)) ==
+             <<0x85, 0x68, 0x65, 0x6C, 0x6C, 0x6F>>
   end
 
   test "encodes string" do
     assert :erlang.iolist_to_binary(EncoderV1.encode_string("", 1)) == <<0x80>>
-    assert :erlang.iolist_to_binary(EncoderV1.encode_string("Short", 1)) == <<0x85, 0x53, 0x68, 0x6F, 0x72, 0x74>>
+
+    assert :erlang.iolist_to_binary(EncoderV1.encode_string("Short", 1)) ==
+             <<0x85, 0x53, 0x68, 0x6F, 0x72, 0x74>>
 
     # 30 bytes due to umlauts
     long_8 = "This is a räther löng string"
-    assert <<0xD0, 0x1E, _::binary-size(30)>> = :erlang.iolist_to_binary(EncoderV1.encode_string(long_8, 1))
+
+    assert <<0xD0, 0x1E, _::binary-size(30)>> =
+             :erlang.iolist_to_binary(EncoderV1.encode_string(long_8, 1))
 
     long_16 = """
     For encoded string containing fewer than 16 bytes, including empty strings,
@@ -43,10 +48,13 @@ defmodule Boltx.Internals.PackStream.EncoderV1Test do
     size and the UTF-8 encoded data.
     """
 
-    assert <<0xD1, 0x01, 0xA5, _::binary-size(421)>> = :erlang.iolist_to_binary(EncoderV1.encode_string(long_16, 1))
+    assert <<0xD1, 0x01, 0xA5, _::binary-size(421)>> =
+             :erlang.iolist_to_binary(EncoderV1.encode_string(long_16, 1))
 
     long_32 = String.duplicate("a", 66_000)
-    assert <<0xD2, 66_000::32, _::binary-size(66_000)>> = :erlang.iolist_to_binary(EncoderV1.encode_string(long_32, 1))
+
+    assert <<0xD2, 66_000::32, _::binary-size(66_000)>> =
+             :erlang.iolist_to_binary(EncoderV1.encode_string(long_32, 1))
   end
 
   test "encodes integer" do
@@ -54,7 +62,9 @@ defmodule Boltx.Internals.PackStream.EncoderV1Test do
     assert :erlang.iolist_to_binary(EncoderV1.encode_integer(42, 1)) == <<0x2A>>
     assert :erlang.iolist_to_binary(EncoderV1.encode_integer(-42, 1)) == <<0xC8, 0xD6>>
     assert :erlang.iolist_to_binary(EncoderV1.encode_integer(420, 1)) == <<0xC9, 0x01, 0xA4>>
-    assert :erlang.iolist_to_binary(EncoderV1.encode_integer(33_000, 1)) == <<0xCA, 0x00, 0x00, 0x80, 0xE8>>
+
+    assert :erlang.iolist_to_binary(EncoderV1.encode_integer(33_000, 1)) ==
+             <<0xCA, 0x00, 0x00, 0x80, 0xE8>>
 
     assert :erlang.iolist_to_binary(EncoderV1.encode_integer(2_150_000_000, 1)) ==
              <<0xCB, 0x00, 0x00, 0x00, 0x00, 0x80, 0x26, 0x65, 0x80>>
@@ -72,13 +82,19 @@ defmodule Boltx.Internals.PackStream.EncoderV1Test do
     assert :erlang.iolist_to_binary(EncoderV1.encode_list([], 1)) == <<0x90>>
 
     list_8 = Stream.repeatedly(fn -> "a" end) |> Enum.take(16)
-    assert <<0xD4, 16::8, _::binary-size(32)>> = :erlang.iolist_to_binary(EncoderV1.encode_list(list_8, 1))
+
+    assert <<0xD4, 16::8, _::binary-size(32)>> =
+             :erlang.iolist_to_binary(EncoderV1.encode_list(list_8, 1))
 
     list_16 = Stream.repeatedly(fn -> "a" end) |> Enum.take(256)
-    assert <<0xD5, 256::16, _::binary-size(512)>> = :erlang.iolist_to_binary(EncoderV1.encode_list(list_16, 1))
+
+    assert <<0xD5, 256::16, _::binary-size(512)>> =
+             :erlang.iolist_to_binary(EncoderV1.encode_list(list_16, 1))
 
     list_32 = Stream.repeatedly(fn -> "a" end) |> Enum.take(66_000)
-    assert <<0xD6, 66_000::32, _::binary-size(132_000)>> = :erlang.iolist_to_binary(EncoderV1.encode_list(list_32, 1))
+
+    assert <<0xD6, 66_000::32, _::binary-size(132_000)>> =
+             :erlang.iolist_to_binary(EncoderV1.encode_list(list_32, 1))
   end
 
   test "encodes map" do
@@ -91,14 +107,18 @@ defmodule Boltx.Internals.PackStream.EncoderV1Test do
     assert <<0xD9, 256::16>> <> _rest = :erlang.iolist_to_binary(EncoderV1.encode_map(map_16, 1))
 
     map_32 = 1..66_000 |> Enum.map(&{&1, "a"}) |> Map.new()
-    assert <<0xDA, 66_000::32>> <> _rest = :erlang.iolist_to_binary(EncoderV1.encode_map(map_32, 1))
+
+    assert <<0xDA, 66_000::32>> <> _rest =
+             :erlang.iolist_to_binary(EncoderV1.encode_map(map_32, 1))
   end
 
   test "encodes a struct" do
     assert <<0xB2, 0x1, 0x85, 0x66, 0x69, 0x72, 0x73, 0x74, 0x86, 0x73, 0x65, 0x63, 0x6F, 0x6E,
-             0x64>> == :erlang.iolist_to_binary(EncoderV1.encode_struct({0x01, ["first", "second"]}, 1))
+             0x64>> ==
+             :erlang.iolist_to_binary(EncoderV1.encode_struct({0x01, ["first", "second"]}, 1))
 
-    assert <<0xDC, 0x6F, _::binary>> = :erlang.iolist_to_binary(EncoderV1.encode_struct({0x01, Enum.into(1..111, [])}, 1))
+    assert <<0xDC, 0x6F, _::binary>> =
+             :erlang.iolist_to_binary(EncoderV1.encode_struct({0x01, Enum.into(1..111, [])}, 1))
 
     assert <<0xDD, 0x1, 0x4D, _::binary>> =
              :erlang.iolist_to_binary(EncoderV1.encode_struct({0x01, Enum.into(1..333, [])}, 1))

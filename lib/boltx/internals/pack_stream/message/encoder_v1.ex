@@ -3,7 +3,6 @@ defmodule Boltx.Internals.PackStream.Message.EncoderV1 do
   use Boltx.Internals.PackStream.Message.Signatures
   alias Boltx.Internals.PackStream.Message.Encoder
 
-
   @doc """
   Encode INIT message without auth token
   """
