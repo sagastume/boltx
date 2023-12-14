@@ -245,4 +245,28 @@ defmodule Boltx.ClientTest do
       assert {:error, %Boltx.Error{code: :request_invalid}} = Client.message_rollback(client)
     end
   end
+
+  describe "ack_failure message" do
+    @tag :bolt_1_x
+    @tag :bolt_2_x
+    test "allows to recover from error with ack_failure" do
+      assert {:ok, client} = Client.connect(@opts)
+      handle_handshake(client, @opts)
+
+      assert {:error, _} = Client.run_statement(client, "Invalid cypher", %{}, %{})
+      assert {:ok, _} = Client.message_ack_failure(client)
+
+      assert {:ok, _} = Client.run_statement(client, "RETURN 1 as num", %{}, %{})
+    end
+
+    @tag :bolt_1_x
+    @tag :bolt_2_x
+    test "returns proper error when misusing ack_failure and reset" do
+      assert {:ok, client} = Client.connect(@opts)
+      handle_handshake(client, @opts)
+
+      {:error, %Boltx.Error{code: :request_invalid}} =
+        Client.message_ack_failure(client)
+    end
+  end
 end

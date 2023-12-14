@@ -15,7 +15,8 @@ defmodule Boltx.Client do
     PullMessage,
     BeginMessage,
     CommitMessage,
-    RollbackMessage
+    RollbackMessage,
+    AckFailureMessage
   }
 
   defstruct [:sock, :connection_id, :bolt_version]
@@ -249,6 +250,14 @@ defmodule Boltx.Client do
 
     with :ok <- send_packet(client, payload) do
       recv_packets(client, &RollbackMessage.decode/2, :infinity)
+    end
+  end
+
+  def message_ack_failure(client) do
+    payload = AckFailureMessage.encode(client.bolt_version)
+
+    with :ok <- send_packet(client, payload) do
+      recv_packets(client, &AckFailureMessage.decode/2, :infinity)
     end
   end
 
