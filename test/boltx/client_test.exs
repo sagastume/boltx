@@ -269,4 +269,30 @@ defmodule Boltx.ClientTest do
         Client.message_ack_failure(client)
     end
   end
+
+  describe "reset message" do
+    @tag :bolt_3_x
+    @tag :bolt_4_x
+    @tag :bolt_5_x
+    test "ok message_reset" do
+      assert {:ok, client} = Client.connect(@opts)
+      handle_handshake(client, @opts)
+
+      assert {:ok, _} = Client.run_statement(client, "RETURN 1 as num", %{}, %{})
+      assert {:ok, _} = Client.message_reset(client)
+    end
+
+    @tag :bolt_3_x
+    @tag :bolt_4_x
+    @tag :bolt_5_x
+    test "allows to recover from error with message_reset" do
+      assert {:ok, client} = Client.connect(@opts)
+      handle_handshake(client, @opts)
+
+      assert {:error, _} = Client.run_statement(client, "Invalid cypher", %{}, %{})
+      assert {:ok, _} = Client.message_reset(client)
+
+      assert {:ok, _} = Client.run_statement(client, "RETURN 1 as num", %{}, %{})
+    end
+  end
 end
