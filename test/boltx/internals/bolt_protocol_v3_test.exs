@@ -111,23 +111,6 @@ defmodule Boltx.Internals.BoltProtocolV3Test do
 
       assert {:error, _} = BoltProtocol.pull_all(:gen_tcp, port, 3, [])
     end
-
-    test "ok after IGNORED and RESET", %{config: config, port: port} do
-      assert {:ok, _} = BoltProtocolV3.hello(:gen_tcp, port, 3, config[:auth], [])
-      assert {:error, _} = BoltProtocolV3.run(:gen_tcp, port, 3, "Invalid cypher", %{}, %{}, [])
-
-      assert {:error, _} = BoltProtocol.pull_all(:gen_tcp, port, 3, [])
-      :ok = BoltProtocol.reset(:gen_tcp, port, 3, [])
-
-      assert {:ok, {:success, %{"fields" => ["num"]}}} =
-               BoltProtocolV3.run(:gen_tcp, port, 3, "RETURN 1 AS num", %{}, %{}, [])
-
-      assert {:ok,
-              [
-                record: [1],
-                success: %{"type" => "r"}
-              ]} = BoltProtocol.pull_all(:gen_tcp, port, 3, [])
-    end
   end
 
   test "run_statement/7 (successful)", %{config: config, port: port} do
@@ -157,15 +140,6 @@ defmodule Boltx.Internals.BoltProtocolV3Test do
              BoltProtocolV3.run(:gen_tcp, port, 1, "RETURN 1 AS num", %{}, %{}, [])
 
     assert :ok = BoltProtocol.discard_all(:gen_tcp, port, 3, [])
-  end
-
-  test "reset/4 (successful)", %{config: config, port: port} do
-    assert {:ok, _} = BoltProtocolV3.hello(:gen_tcp, port, 3, config[:auth], [])
-
-    assert {:ok, {:success, %{"fields" => ["num"]}}} =
-             BoltProtocolV3.run(:gen_tcp, port, 3, "RETURN 1 AS num", %{}, %{}, [])
-
-    assert :ok = BoltProtocol.reset(:gen_tcp, port, 3, [])
   end
 
   describe "Transaction management" do

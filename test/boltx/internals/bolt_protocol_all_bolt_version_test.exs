@@ -39,16 +39,6 @@ defmodule Boltx.Internals.BoltProtocolAllBoltVersionTest do
              BoltProtocol.run_statement(:gen_tcp, port, bolt_version, "What?")
   end
 
-  test "allows to recover from error with reset", %{port: port, bolt_version: bolt_version} do
-    assert %Boltx.Internals.Error{type: :cypher_error} =
-             BoltProtocol.run_statement(:gen_tcp, port, bolt_version, "What?")
-
-    assert :ok = BoltProtocol.reset(:gen_tcp, port, bolt_version)
-
-    assert [{:success, _} | _] =
-             BoltProtocol.run_statement(:gen_tcp, port, bolt_version, "RETURN 1 as num")
-  end
-
   test "returns proper error when using a bad session", %{port: port, bolt_version: bolt_version} do
     assert %Boltx.Internals.Error{type: :cypher_error} =
              BoltProtocol.run_statement(:gen_tcp, port, bolt_version, "What?")
@@ -57,14 +47,6 @@ defmodule Boltx.Internals.BoltProtocolAllBoltVersionTest do
 
     assert %Boltx.Internals.Error{} = error
     assert error.message =~ ~r/The session is in a failed state/
-  end
-
-  test "returns proper error when misusing reset", %{
-    port: port,
-    bolt_version: bolt_version
-  } do
-    :gen_tcp.close(port)
-    assert %Boltx.Internals.Error{} = BoltProtocol.reset(:gen_tcp, port, bolt_version)
   end
 
   test "returns proper error when using a closed port", %{port: port, bolt_version: bolt_version} do

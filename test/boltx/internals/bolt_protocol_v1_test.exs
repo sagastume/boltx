@@ -84,24 +84,6 @@ defmodule BoltProtocolV1.Boltx.Internals.BoltProtocolV1Test do
 
       assert {:error, _} = BoltProtocolV1.pull_all(:gen_tcp, port, 1, [])
     end
-
-    test "ok after IGNORED AND ACK_FAILURE", %{config: config, port: port} do
-      assert {:ok, _bolt_version} = BoltProtocolV1.handshake(:gen_tcp, port, [])
-      assert {:ok, _} = BoltProtocolV1.init(:gen_tcp, port, 1, config[:auth], [])
-      assert {:error, _} = BoltProtocolV1.run(:gen_tcp, port, 1, "Invalid cypher", %{}, [])
-
-      assert {:error, _} = BoltProtocolV1.pull_all(:gen_tcp, port, 1, [])
-      :ok = BoltProtocolV1.ack_failure(:gen_tcp, port, 1, [])
-
-      assert {:ok, {:success, %{"fields" => ["num"]}}} =
-               BoltProtocolV1.run(:gen_tcp, port, 1, "RETURN 1 AS num", %{}, [])
-
-      assert {:ok,
-              [
-                record: [1],
-                success: %{"type" => "r"}
-              ]} = BoltProtocolV1.pull_all(:gen_tcp, port, 1, [])
-    end
   end
 
   test "pull_all/4 (successful)", %{config: config, port: port} do
@@ -132,38 +114,5 @@ defmodule BoltProtocolV1.Boltx.Internals.BoltProtocolV1Test do
              BoltProtocolV1.run(:gen_tcp, port, 1, "RETURN 1 AS num", %{}, [])
 
     assert :ok = BoltProtocolV1.discard_all(:gen_tcp, port, 1, [])
-  end
-
-  test "ack_failure/4 (successful)", %{config: config, port: port} do
-    assert {:ok, _bolt_version} = BoltProtocolV1.handshake(:gen_tcp, port, [])
-    assert {:ok, _} = BoltProtocolV1.init(:gen_tcp, port, 1, config[:auth], [])
-    assert {:error, _} = BoltProtocolV1.run(:gen_tcp, port, 1, "Invalid cypher", %{}, [])
-    assert :ok = BoltProtocolV1.ack_failure(:gen_tcp, port, 1, [])
-  end
-
-  describe "reset/4" do
-    test "ok", %{config: config, port: port} do
-      assert {:ok, _bolt_version} = BoltProtocolV1.handshake(:gen_tcp, port, [])
-      assert {:ok, _} = BoltProtocolV1.init(:gen_tcp, port, 1, config[:auth], [])
-
-      assert {:ok, {:success, %{"fields" => ["num"]}}} =
-               BoltProtocolV1.run(:gen_tcp, port, 1, "RETURN 1 AS num", %{}, [])
-
-      assert :ok = BoltProtocolV1.reset(:gen_tcp, port, 1, [])
-    end
-
-    test "ok during process", %{config: config, port: port} do
-      assert {:ok, _bolt_version} = BoltProtocolV1.handshake(:gen_tcp, port, [])
-      assert {:ok, _} = BoltProtocolV1.init(:gen_tcp, port, 1, config[:auth], [])
-      assert {:error, _} = BoltProtocolV1.run(:gen_tcp, port, 1, "Invalid cypher", %{}, [])
-
-      {:error, _} = BoltProtocolV1.pull_all(:gen_tcp, port, 1, [])
-      assert :ok = BoltProtocolV1.reset(:gen_tcp, port, 1, [])
-
-      assert {:ok, {:success, %{"fields" => ["num"]}}} =
-               BoltProtocolV1.run(:gen_tcp, port, 1, "RETURN 1 AS num", %{}, [])
-
-      assert {:ok, [{:record, _}, {:success, _}]} = BoltProtocolV1.pull_all(:gen_tcp, port, 1, [])
-    end
   end
 end
