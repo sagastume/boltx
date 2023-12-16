@@ -29,18 +29,18 @@ defmodule Boltx.Connection do
   end
 
   defp do_init(bolt_version, client, opts) when is_float(bolt_version) and bolt_version >= 5.1 do
-    with {:ok, response_hello} <- Client.message_hello(client, opts),
-         {:ok, _response_logon} <- Client.message_logon(client, opts) do
+    with {:ok, response_hello} <- Client.send_hello(client, opts),
+         {:ok, _response_logon} <- Client.send_logon(client, opts) do
       {:ok, response_hello}
     end
   end
 
   defp do_init(bolt_version, client, opts) when is_float(bolt_version) and bolt_version >= 3.0 do
-    Client.message_hello(client, opts)
+    Client.send_hello(client, opts)
   end
 
   defp do_init(bolt_version, client, opts) when is_float(bolt_version) and bolt_version <= 2.0 do
-    Client.message_init(client, opts)
+    Client.send_init(client, opts)
   end
 
   defp getServerMetadataState(response_metadata) do

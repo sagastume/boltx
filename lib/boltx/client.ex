@@ -154,7 +154,7 @@ defmodule Boltx.Client do
     end
   end
 
-  def message_hello(client, fields) do
+  def send_hello(client, fields) do
     payload = HelloMessage.encode(client.bolt_version, fields)
 
     with :ok <- send_packet(client, payload) do
@@ -162,7 +162,7 @@ defmodule Boltx.Client do
     end
   end
 
-  def message_logon(client, fields) do
+  def send_logon(client, fields) do
     payload = LogonMessage.encode(client.bolt_version, fields)
 
     with :ok <- send_packet(client, payload) do
@@ -170,7 +170,7 @@ defmodule Boltx.Client do
     end
   end
 
-  def message_init(client, fields) do
+  def send_init(client, fields) do
     payload = InitMessage.encode(client.bolt_version, fields)
 
     with :ok <- send_packet(client, payload) do
@@ -178,7 +178,7 @@ defmodule Boltx.Client do
     end
   end
 
-  def message_run(client, query, parameters, extra_parameters) do
+  def send_run(client, query, parameters, extra_parameters) do
     payload = RunMessage.encode(client.bolt_version, query, parameters, extra_parameters)
 
     with :ok <- send_packet(client, payload) do
@@ -186,7 +186,7 @@ defmodule Boltx.Client do
     end
   end
 
-  def message_pull(client, extra_parameters) do
+  def send_pull(client, extra_parameters) do
     payload = PullMessage.encode(client.bolt_version, extra_parameters)
 
     with :ok <- send_packet(client, payload) do
@@ -195,13 +195,13 @@ defmodule Boltx.Client do
   end
 
   def run_statement(client, query, parameters, extra_parameters) do
-    with {:ok, result_run} <- message_run(client, query, parameters, extra_parameters),
-         {:ok, result_pull} <- message_pull(client, extra_parameters) do
+    with {:ok, result_run} <- send_run(client, query, parameters, extra_parameters),
+         {:ok, result_pull} <- send_pull(client, extra_parameters) do
       {:ok, statement_result(result_run: result_run, result_pull: result_pull, query: query)}
     end
   end
 
-  def message_begin(client, _extra_parameters)
+  def send_begin(client, _extra_parameters)
       when is_float(client.bolt_version) and client.bolt_version <= 2.0 do
     case run_statement(client, "BEGIN", %{}, %{}) do
       {:ok, pull_result(success_data: success_data)} ->
@@ -212,7 +212,7 @@ defmodule Boltx.Client do
     end
   end
 
-  def message_begin(client, extra_parameters) do
+  def send_begin(client, extra_parameters) do
     payload = BeginMessage.encode(client.bolt_version, extra_parameters)
 
     with :ok <- send_packet(client, payload) do
@@ -220,7 +220,7 @@ defmodule Boltx.Client do
     end
   end
 
-  def message_commit(client) when is_float(client.bolt_version) and client.bolt_version <= 2.0 do
+  def send_commit(client) when is_float(client.bolt_version) and client.bolt_version <= 2.0 do
     case run_statement(client, "COMMIT", %{}, %{}) do
       {:ok, pull_result(success_data: success_data)} ->
         {:ok, success_data}
@@ -230,7 +230,7 @@ defmodule Boltx.Client do
     end
   end
 
-  def message_commit(client) do
+  def send_commit(client) do
     payload = CommitMessage.encode(client.bolt_version)
 
     with :ok <- send_packet(client, payload) do
@@ -238,7 +238,7 @@ defmodule Boltx.Client do
     end
   end
 
-  def message_rollback(client)
+  def send_rollback(client)
       when is_float(client.bolt_version) and client.bolt_version <= 2.0 do
     case run_statement(client, "ROLLBACK", %{}, %{}) do
       {:ok, pull_result(success_data: success_data)} ->
@@ -249,7 +249,7 @@ defmodule Boltx.Client do
     end
   end
 
-  def message_rollback(client) do
+  def send_rollback(client) do
     payload = RollbackMessage.encode(client.bolt_version)
 
     with :ok <- send_packet(client, payload) do
@@ -257,7 +257,7 @@ defmodule Boltx.Client do
     end
   end
 
-  def message_ack_failure(client) do
+  def send_ack_failure(client) do
     payload = AckFailureMessage.encode(client.bolt_version)
 
     with :ok <- send_packet(client, payload) do
@@ -265,7 +265,7 @@ defmodule Boltx.Client do
     end
   end
 
-  def message_reset(client) do
+  def send_reset(client) do
     payload = ResetMessage.encode(client.bolt_version)
 
     with :ok <- send_packet(client, payload) do
@@ -273,7 +273,7 @@ defmodule Boltx.Client do
     end
   end
 
-  def message_discard(client, extra_parameters) do
+  def send_discard(client, extra_parameters) do
     payload = DiscardMessage.encode(client.bolt_version, extra_parameters)
 
     with :ok <- send_packet(client, payload) do
@@ -281,7 +281,7 @@ defmodule Boltx.Client do
     end
   end
 
-  def message_goodbye(client) do
+  def send_goodbye(client) do
     payload = GoodbyeMessage.encode(client.bolt_version)
 
     with {:error, :closed} <- send_packet(client, payload) do
@@ -299,7 +299,7 @@ defmodule Boltx.Client do
     end
   end
 
-  def message_logoff(client) do
+  def send_logoff(client) do
     payload = LogoffMessage.encode(client.bolt_version)
 
     with :ok <- send_packet(client, payload) do
