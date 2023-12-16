@@ -60,12 +60,6 @@ defmodule Boltx.Internals.BoltProtocolV3Test do
     end
   end
 
-  test "goodbye/5", %{config: config, port: port} do
-    assert {:ok, _} = BoltProtocolV3.hello(:gen_tcp, port, 3, config[:auth], [])
-
-    assert :ok = BoltProtocolV3.goodbye(:gen_tcp, port, 3)
-  end
-
   describe "run/7:" do
     test "ok without parameters nor metadata", %{config: config, port: port} do
       assert {:ok, _} = BoltProtocolV3.hello(:gen_tcp, port, 3, config[:auth], [])
