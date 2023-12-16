@@ -14,7 +14,7 @@ Boltx is a derivative of Bolt_Sips currently in development. No official release
 | BEGIN         | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4|
 | COMMIT        | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4|
 | ROLLBACK      | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4|
-| LOGOFF        | --                                      |
+| LOGOFF        | V3, V4.x, v5.1, v5.2, v5.3, v5.4        |
 | TELEMETRY     | --                                      |
 | GOODBYE       | V3, V4.x, v5.1, v5.2, v5.3, v5.4        |
 | RESET         | V3, V4.x, v5.1, v5.2, v5.3, v5.4        |

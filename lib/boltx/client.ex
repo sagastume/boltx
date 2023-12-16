@@ -19,7 +19,8 @@ defmodule Boltx.Client do
     AckFailureMessage,
     ResetMessage,
     GoodbyeMessage,
-    DiscardMessage
+    DiscardMessage,
+    LogoffMessage
   }
 
   defstruct [:sock, :connection_id, :bolt_version]
@@ -295,6 +296,14 @@ defmodule Boltx.Client do
              message: "Error closing port with goodbye message"
            })}
       end
+    end
+  end
+
+  def message_logoff(client) do
+    payload = LogoffMessage.encode(client.bolt_version)
+
+    with :ok <- send_packet(client, payload) do
+      recv_packets(client, &LogoffMessage.decode/2, :infinity)
     end
   end
 

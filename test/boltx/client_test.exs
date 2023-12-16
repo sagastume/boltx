@@ -319,4 +319,16 @@ defmodule Boltx.ClientTest do
       assert {:ok, %{"t_last" => _, "type" => "r"}} = Client.message_discard(client, %{})
     end
   end
+
+  describe "Logoff Message:" do
+    @tag bolt_version: "5.1"
+    test "message_logoff/1 (successful)" do
+      assert {:ok, client} = Client.connect(@opts)
+      Client.message_hello(client, @opts)
+      Client.message_logon(client, @opts)
+
+      assert {:ok, _} = Client.message_logoff(client)
+      assert {:ok, _} = Client.message_logon(client, @opts)
+    end
+  end
 end
