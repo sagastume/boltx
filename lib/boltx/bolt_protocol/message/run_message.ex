@@ -14,12 +14,12 @@ defmodule Boltx.BoltProtocol.Message.RunMessage do
     Encoder.do_encode(:run, message, 1)
   end
 
-  def encode(_, _) do
+  def encode(_, _, _, _) do
     {:error,
-     %Boltx.Internals.Error{
+     Boltx.Error.wrap(__MODULE__, %{
        code: :unsupported_message_version,
        message: "RUN message version not supported"
-     }}
+     })}
   end
 
   @spec decode(float(), <<_::16, _::_*8>>) :: {:error, Boltx.Error.t()} | {:ok, any()}

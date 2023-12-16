@@ -7,12 +7,12 @@ defmodule Boltx.BoltProtocol.Message.RollbackMessage do
     Encoder.do_encode(:rollback, message, 3)
   end
 
-  def encode(_, _) do
+  def encode(_) do
     {:error,
-     %Boltx.Internals.Error{
+     Boltx.Error.wrap(__MODULE__, %{
        code: :unsupported_message_version,
        message: "ROLLBACK message version not supported"
-     }}
+     })}
   end
 
   @spec decode(float(), <<_::16, _::_*8>>) :: {:error, Boltx.Error.t()} | {:ok, any()}

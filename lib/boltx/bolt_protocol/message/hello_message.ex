@@ -16,10 +16,10 @@ defmodule Boltx.BoltProtocol.Message.HelloMessage do
 
   def encode(_, _) do
     {:error,
-     %Boltx.Internals.Error{
+     Boltx.Error.wrap(__MODULE__, %{
        code: :unsupported_message_version,
        message: "HELLO message version not supported"
-     }}
+     })}
   end
 
   def decode(_bolt_version, binary_messages) do
