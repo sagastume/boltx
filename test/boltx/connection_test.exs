@@ -63,7 +63,7 @@ defmodule Boltx.ConnectionTest do
     {:error, %Boltx.Error{code: :timeout}} = Connection.connect(opts)
   end
 
-  @tag bolt_version: "1.0"
+  @tag :bolt_version_1_0
   test "connect/1 successful with bolt version 1.0" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
@@ -77,7 +77,7 @@ defmodule Boltx.ConnectionTest do
     :ok = Connection.disconnect(:stop, conn_data)
   end
 
-  @tag bolt_version: "2.0"
+  @tag :bolt_version_2_0
   test "connect/1 successful with bolt version 2.0" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
@@ -91,7 +91,7 @@ defmodule Boltx.ConnectionTest do
     :ok = Connection.disconnect(:stop, conn_data)
   end
 
-  @tag bolt_version: "3.0"
+  @tag :bolt_version_3_0
   test "connect/1 successful with bolt version 3.0" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
@@ -105,7 +105,7 @@ defmodule Boltx.ConnectionTest do
     :ok = Connection.disconnect(:stop, conn_data)
   end
 
-  @tag bolt_version: "4.0"
+  @tag :bolt_version_4_0
   test "connect/1 successful with bolt version 4.0" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
@@ -119,7 +119,7 @@ defmodule Boltx.ConnectionTest do
     :ok = Connection.disconnect(:stop, conn_data)
   end
 
-  @tag bolt_version: "4.1"
+  @tag :bolt_version_4_1
   test "connect/1 successful with bolt version 4.1" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
@@ -133,7 +133,7 @@ defmodule Boltx.ConnectionTest do
     :ok = Connection.disconnect(:stop, conn_data)
   end
 
-  @tag bolt_version: "4.2"
+  @tag :bolt_version_4_2
   test "connect/1 successful with bolt version 4.2" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
@@ -147,7 +147,7 @@ defmodule Boltx.ConnectionTest do
     :ok = Connection.disconnect(:stop, conn_data)
   end
 
-  @tag bolt_version: "4.3"
+  @tag :bolt_version_4_3
   test "connect/1 successful with bolt version 4.3" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
@@ -161,7 +161,7 @@ defmodule Boltx.ConnectionTest do
     :ok = Connection.disconnect(:stop, conn_data)
   end
 
-  @tag bolt_version: "4.4"
+  @tag :bolt_version_4_4
   test "connect/1 successful with bolt version 4.4" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
@@ -175,7 +175,7 @@ defmodule Boltx.ConnectionTest do
     :ok = Connection.disconnect(:stop, conn_data)
   end
 
-  @tag bolt_version: "5.0"
+  @tag :bolt_version_5_0
   test "connect/1 successful with bolt version 5.0" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
@@ -189,7 +189,7 @@ defmodule Boltx.ConnectionTest do
     :ok = Connection.disconnect(:stop, conn_data)
   end
 
-  @tag bolt_version: "5.1"
+  @tag :bolt_version_5_1
   test "connect/1 successful with bolt version 5.1" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
@@ -203,7 +203,7 @@ defmodule Boltx.ConnectionTest do
     :ok = Connection.disconnect(:stop, conn_data)
   end
 
-  @tag bolt_version: "5.2"
+  @tag :bolt_version_5_2
   test "connect/1 successful with bolt version 5.2" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
@@ -217,7 +217,7 @@ defmodule Boltx.ConnectionTest do
     :ok = Connection.disconnect(:stop, conn_data)
   end
 
-  @tag bolt_version: "5.3"
+  @tag :bolt_version_5_3
   test "connect/1 successful with bolt version 5.3" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)
@@ -231,7 +231,7 @@ defmodule Boltx.ConnectionTest do
     :ok = Connection.disconnect(:stop, conn_data)
   end
 
-  @tag bolt_version: "5.4"
+  @tag :bolt_version_5_4
   test "connect/1 successful with bolt version 5.4" do
     {:ok, %Connection{client: client, server_version: server_version} = conn_data} =
       Connection.connect(@opts)

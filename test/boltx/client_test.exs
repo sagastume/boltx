@@ -23,14 +23,14 @@ defmodule Boltx.ClientTest do
   end
 
   describe "connect" do
-    @tag bolt_version: "5.3"
+    @tag :bolt_version_5_3
     test "multiple versions specified" do
       opts = [versions: [5.3, 4, 3]] ++ @opts
       assert {:ok, client} = Client.connect(opts)
       assert 5.3 == client.bolt_version
     end
 
-    @tag bolt_version: "5.3"
+    @tag :bolt_version_5_3
     test "unordered versions specified" do
       opts = [versions: [4, 3, 5.3]] ++ @opts
       assert {:ok, client} = Client.connect(opts)
@@ -57,7 +57,7 @@ defmodule Boltx.ClientTest do
       {:error, %Boltx.Error{code: :version_negotiation_error}} = Client.connect(opts)
     end
 
-    @tag bolt_version: "1.0"
+    @tag :bolt_version_1_0
     test "one version specified" do
       opts = [versions: [1]] ++ @opts
       assert {:ok, client} = Client.connect(opts)
@@ -321,7 +321,10 @@ defmodule Boltx.ClientTest do
   end
 
   describe "Logoff Message:" do
-    @tag bolt_version: "5.1"
+    @tag :bolt_version_5_1
+    @tag :bolt_version_5_2
+    @tag :bolt_version_5_3
+    @tag :bolt_version_5_4
     test "message_logoff/1 (successful)" do
       assert {:ok, client} = Client.connect(@opts)
       Client.message_hello(client, @opts)

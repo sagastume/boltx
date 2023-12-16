@@ -21,18 +21,23 @@ env_versions =
 
 {include, exclude} =
   Enum.reduce(available_versions, {include, exclude}, fn version, {inc, exc} ->
-    bolt_version = {:bolt_version, Float.to_string(version)}
+    [major | [minor]] =
+      version |> Float.to_string() |> String.split(".") |> Enum.map(&String.to_integer/1)
+
+    bolt_version_atom =
+      String.to_atom("bolt_version_#{Integer.to_string(major)}_#{Integer.to_string(minor)}")
+
     bolt_version_x = String.to_atom("bolt_#{Integer.to_string(trunc(version))}_x")
 
     if version in env_versions do
       case version === List.last(available_versions) do
-        true -> {[:last_version, bolt_version, bolt_version_x | inc], exc}
-        false -> {[bolt_version, bolt_version_x | inc], exc}
+        true -> {[:last_version, bolt_version_x, bolt_version_atom | inc], exc}
+        false -> {[bolt_version_x, bolt_version_atom | inc], exc}
       end
     else
       case version !== List.last(available_versions) do
-        true -> {inc, [:last_version, bolt_version, bolt_version_x | exc]}
-        false -> {inc, [bolt_version, bolt_version_x | exc]}
+        true -> {inc, [:last_version, bolt_version_x, bolt_version_atom | exc]}
+        false -> {inc, [bolt_version_x, bolt_version_atom | exc]}
       end
     end
   end)
