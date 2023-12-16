@@ -17,10 +17,10 @@ defmodule Boltx.BoltProtocol.Message.PullMessage do
 
   def encode(_, _) do
     {:error,
-     %Boltx.Internals.Error{
+     Boltx.Error.wrap(__MODULE__, %{
        code: :unsupported_message_version,
-       message: "PUll message version not supported"
-     }}
+       message: "PULL message version not supported"
+     })}
   end
 
   @spec decode(float(), <<_::16, _::_*8>>) :: {:error, Boltx.Error.t()} | {:ok, any()}

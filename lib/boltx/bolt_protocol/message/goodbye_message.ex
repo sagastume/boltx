@@ -6,12 +6,12 @@ defmodule Boltx.BoltProtocol.Message.GoodbyeMessage do
     Encoder.do_encode(:goodbye, [], 3)
   end
 
-  def encode(_, _) do
+  def encode(_) do
     {:error,
-     %Boltx.Internals.Error{
+     Boltx.Error.wrap(__MODULE__, %{
        code: :unsupported_message_version,
        message: "GOODBYE message version not supported"
-     }}
+     })}
   end
 
   @spec decode(float(), <<_::16, _::_*8>>) :: {:error, Boltx.Error.t()} | {:ok, any()}

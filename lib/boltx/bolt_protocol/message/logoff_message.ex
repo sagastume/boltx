@@ -8,10 +8,10 @@ defmodule Boltx.BoltProtocol.Message.LogoffMessage do
 
   def encode(_) do
     {:error,
-     %Boltx.Internals.Error{
+     Boltx.Error.wrap(__MODULE__, %{
        code: :unsupported_message_version,
        message: "LOGOFF message version not supported"
-     }}
+     })}
   end
 
   @spec decode(float(), <<_::16, _::_*8>>) :: {:error, Boltx.Error.t()} | {:ok, any()}

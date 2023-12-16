@@ -11,14 +11,14 @@ defmodule Boltx.ClientTest do
   defp handle_handshake(client, opts) do
     case client.bolt_version do
       version when version >= 5.1 ->
-        Client.message_hello(client, opts)
-        Client.message_logon(client, opts)
+        Client.send_hello(client, opts)
+        Client.send_logon(client, opts)
 
       version when version >= 3.0 ->
-        Client.message_hello(client, opts)
+        Client.send_hello(client, opts)
 
       version when version <= 2.0 ->
-        Client.message_init(client, opts)
+        Client.send_init(client, opts)
     end
   end
 
@@ -195,7 +195,7 @@ defmodule Boltx.ClientTest do
     test "simple begin message" do
       assert {:ok, client} = Client.connect(@opts)
       handle_handshake(client, @opts)
-      assert {:ok, _} = Client.message_begin(client, %{})
+      assert {:ok, _} = Client.send_begin(client, %{})
     end
 
     @tag :core
@@ -203,8 +203,8 @@ defmodule Boltx.ClientTest do
       assert {:ok, client} = Client.connect(@opts)
       handle_handshake(client, @opts)
 
-      assert {:ok, _} = Client.message_begin(client, %{})
-      assert {:ok, _} = Client.message_commit(client)
+      assert {:ok, _} = Client.send_begin(client, %{})
+      assert {:ok, _} = Client.send_commit(client)
     end
 
     @tag :bolt_1_x
@@ -213,7 +213,7 @@ defmodule Boltx.ClientTest do
       assert {:ok, client} = Client.connect(@opts)
       handle_handshake(client, @opts)
 
-      assert {:error, %Boltx.Error{code: :semantic_error}} = Client.message_commit(client)
+      assert {:error, %Boltx.Error{code: :semantic_error}} = Client.send_commit(client)
     end
 
     @tag :bolt_3_x
@@ -223,7 +223,7 @@ defmodule Boltx.ClientTest do
       assert {:ok, client} = Client.connect(@opts)
       handle_handshake(client, @opts)
 
-      assert {:error, %Boltx.Error{code: :request_invalid}} = Client.message_commit(client)
+      assert {:error, %Boltx.Error{code: :request_invalid}} = Client.send_commit(client)
     end
 
     @tag :core
@@ -231,8 +231,8 @@ defmodule Boltx.ClientTest do
       assert {:ok, client} = Client.connect(@opts)
       handle_handshake(client, @opts)
 
-      assert {:ok, _} = Client.message_begin(client, %{})
-      assert {:ok, _} = Client.message_rollback(client)
+      assert {:ok, _} = Client.send_begin(client, %{})
+      assert {:ok, _} = Client.send_rollback(client)
     end
 
     @tag :bolt_3_x
@@ -242,7 +242,7 @@ defmodule Boltx.ClientTest do
       assert {:ok, client} = Client.connect(@opts)
       handle_handshake(client, @opts)
 
-      assert {:error, %Boltx.Error{code: :request_invalid}} = Client.message_rollback(client)
+      assert {:error, %Boltx.Error{code: :request_invalid}} = Client.send_rollback(client)
     end
   end
 
@@ -254,7 +254,7 @@ defmodule Boltx.ClientTest do
       handle_handshake(client, @opts)
 
       assert {:error, _} = Client.run_statement(client, "Invalid cypher", %{}, %{})
-      assert {:ok, _} = Client.message_ack_failure(client)
+      assert {:ok, _} = Client.send_ack_failure(client)
 
       assert {:ok, _} = Client.run_statement(client, "RETURN 1 as num", %{}, %{})
     end
@@ -266,7 +266,7 @@ defmodule Boltx.ClientTest do
       handle_handshake(client, @opts)
 
       {:error, %Boltx.Error{code: :request_invalid}} =
-        Client.message_ack_failure(client)
+        Client.send_ack_failure(client)
     end
   end
 
@@ -274,23 +274,23 @@ defmodule Boltx.ClientTest do
     @tag :bolt_3_x
     @tag :bolt_4_x
     @tag :bolt_5_x
-    test "ok message_reset" do
+    test "ok send_reset" do
       assert {:ok, client} = Client.connect(@opts)
       handle_handshake(client, @opts)
 
       assert {:ok, _} = Client.run_statement(client, "RETURN 1 as num", %{}, %{})
-      assert {:ok, _} = Client.message_reset(client)
+      assert {:ok, _} = Client.send_reset(client)
     end
 
     @tag :bolt_3_x
     @tag :bolt_4_x
     @tag :bolt_5_x
-    test "allows to recover from error with message_reset" do
+    test "allows to recover from error with send_reset" do
       assert {:ok, client} = Client.connect(@opts)
       handle_handshake(client, @opts)
 
       assert {:error, _} = Client.run_statement(client, "Invalid cypher", %{}, %{})
-      assert {:ok, _} = Client.message_reset(client)
+      assert {:ok, _} = Client.send_reset(client)
 
       assert {:ok, _} = Client.run_statement(client, "RETURN 1 as num", %{}, %{})
     end
@@ -304,7 +304,7 @@ defmodule Boltx.ClientTest do
       assert {:ok, client} = Client.connect(@opts)
       handle_handshake(client, @opts)
 
-      assert :ok = Client.message_goodbye(client)
+      assert :ok = Client.send_goodbye(client)
     end
   end
 
@@ -314,9 +314,9 @@ defmodule Boltx.ClientTest do
       assert {:ok, client} = Client.connect(@opts)
       handle_handshake(client, @opts)
 
-      {:ok, _} = Client.message_run(client, "RETURN 1 as num", %{}, %{})
+      {:ok, _} = Client.send_run(client, "RETURN 1 as num", %{}, %{})
 
-      assert {:ok, %{"t_last" => _, "type" => "r"}} = Client.message_discard(client, %{})
+      assert {:ok, %{"t_last" => _, "type" => "r"}} = Client.send_discard(client, %{})
     end
   end
 
@@ -325,13 +325,13 @@ defmodule Boltx.ClientTest do
     @tag :bolt_version_5_2
     @tag :bolt_version_5_3
     @tag :bolt_version_5_4
-    test "message_logoff/1 (successful)" do
+    test "send_logoff/1 (successful)" do
       assert {:ok, client} = Client.connect(@opts)
-      Client.message_hello(client, @opts)
-      Client.message_logon(client, @opts)
+      Client.send_hello(client, @opts)
+      Client.send_logon(client, @opts)
 
-      assert {:ok, _} = Client.message_logoff(client)
-      assert {:ok, _} = Client.message_logon(client, @opts)
+      assert {:ok, _} = Client.send_logoff(client)
+      assert {:ok, _} = Client.send_logon(client, @opts)
     end
   end
 end
