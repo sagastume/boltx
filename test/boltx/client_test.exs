@@ -322,6 +322,9 @@ defmodule Boltx.ClientTest do
 
   describe "Logoff Message:" do
     @tag :bolt_version_5_1
+    @tag :bolt_version_5_2
+    @tag :bolt_version_5_3
+    @tag :bolt_version_5_4
     test "message_logoff/1 (successful)" do
       assert {:ok, client} = Client.connect(@opts)
       Client.message_hello(client, @opts)
