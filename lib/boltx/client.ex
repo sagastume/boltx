@@ -17,7 +17,9 @@ defmodule Boltx.Client do
     CommitMessage,
     RollbackMessage,
     AckFailureMessage,
-    ResetMessage
+    ResetMessage,
+    GoodbyeMessage,
+    DiscardMessage
   }
 
   defstruct [:sock, :connection_id, :bolt_version]
@@ -267,6 +269,32 @@ defmodule Boltx.Client do
 
     with :ok <- send_packet(client, payload) do
       recv_packets(client, &ResetMessage.decode/2, :infinity)
+    end
+  end
+
+  def message_discard(client, extra_parameters) do
+    payload = DiscardMessage.encode(client.bolt_version, extra_parameters)
+
+    with :ok <- send_packet(client, payload) do
+      recv_packets(client, &DiscardMessage.decode/2, :infinity)
+    end
+  end
+
+  def message_goodbye(client) do
+    payload = GoodbyeMessage.encode(client.bolt_version)
+
+    with {:error, :closed} <- send_packet(client, payload) do
+      try do
+        disconnect(client)
+        :ok
+      rescue
+        ArgumentError ->
+          {:error,
+           Boltx.Error.wrap(__MODULE__, %{
+             code: :failed_port_close,
+             message: "Error closing port with goodbye message"
+           })}
+      end
     end
   end
 
