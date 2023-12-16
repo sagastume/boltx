@@ -7,7 +7,8 @@ defmodule Boltx.Connection do
     :client,
     :server_version,
     :hints,
-    :patch_bolt
+    :patch_bolt,
+    :connection_id
   ]
 
   @impl true
@@ -17,8 +18,6 @@ defmodule Boltx.Connection do
     with {:ok, %Client{} = client} <- Client.connect(config),
          {:ok, response_server_metadata} <- do_init(client, opts) do
       state = getServerMetadataState(response_server_metadata)
-      connection_id = getConnectionId(response_server_metadata)
-      client = %Client{client | connection_id: connection_id}
       state = %__MODULE__{state | client: client}
       {:ok, state}
     end
@@ -44,19 +43,17 @@ defmodule Boltx.Connection do
   end
 
   defp getServerMetadataState(response_metadata) do
-    patch_bolt = get_in(response_metadata, ["patch_bolt"])
-    hints = get_in(response_metadata, ["hints"])
+    patch_bolt = Map.get(response_metadata, "patch_bolt", "")
+    hints = Map.get(response_metadata, "hints", "")
+    connection_id = Map.get(response_metadata, "connection_id", "")
 
     %__MODULE__{
       client: nil,
       server_version: response_metadata["server"],
       patch_bolt: patch_bolt,
-      hints: hints
+      hints: hints,
+      connection_id: connection_id
     }
-  end
-
-  defp getConnectionId(response_metadata) do
-    get_in(response_metadata, ["connection_id"])
   end
 
   @impl true

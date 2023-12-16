@@ -23,7 +23,7 @@ defmodule Boltx.Client do
     LogoffMessage
   }
 
-  defstruct [:sock, :connection_id, :bolt_version]
+  defstruct [:sock, :bolt_version]
 
   defmodule Config do
     @moduledoc false
@@ -102,7 +102,7 @@ defmodule Boltx.Client do
     } = config
 
     buffer? = Keyword.has_key?(socket_options, :buffer)
-    client = %__MODULE__{connection_id: nil, sock: nil, bolt_version: nil}
+    client = %__MODULE__{sock: nil, bolt_version: nil}
 
     case :gen_tcp.connect(address, port, socket_options, connect_timeout) do
       {:ok, sock} when buffer? ->
