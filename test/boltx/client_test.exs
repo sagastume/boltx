@@ -307,4 +307,16 @@ defmodule Boltx.ClientTest do
       assert :ok = Client.message_goodbye(client)
     end
   end
+
+  describe "discard message" do
+    @tag :core
+    test "discard_all/2 (successful)" do
+      assert {:ok, client} = Client.connect(@opts)
+      handle_handshake(client, @opts)
+
+      {:ok, _} = Client.message_run(client, "RETURN 1 as num", %{}, %{})
+
+      assert {:ok, %{"t_last" => _, "type" => "r"}} = Client.message_discard(client, %{})
+    end
+  end
 end

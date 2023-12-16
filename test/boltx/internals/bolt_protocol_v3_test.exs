@@ -127,15 +127,6 @@ defmodule Boltx.Internals.BoltProtocolV3Test do
             ]} = BoltProtocol.pull_all(:gen_tcp, port, 3, [])
   end
 
-  test "discard_all/4 (successful)", %{config: config, port: port} do
-    assert {:ok, _} = BoltProtocolV3.hello(:gen_tcp, port, 3, config[:auth], [])
-
-    assert {:ok, {:success, %{"fields" => ["num"]}}} =
-             BoltProtocolV3.run(:gen_tcp, port, 1, "RETURN 1 AS num", %{}, %{}, [])
-
-    assert :ok = BoltProtocol.discard_all(:gen_tcp, port, 3, [])
-  end
-
   describe "Transaction management" do
     test "Open a transaction without metadata", %{config: config, port: port} do
       assert {:ok, _} = BoltProtocolV3.hello(:gen_tcp, port, 3, config[:auth], [])

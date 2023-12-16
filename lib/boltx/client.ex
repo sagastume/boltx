@@ -18,7 +18,8 @@ defmodule Boltx.Client do
     RollbackMessage,
     AckFailureMessage,
     ResetMessage,
-    GoodbyeMessage
+    GoodbyeMessage,
+    DiscardMessage
   }
 
   defstruct [:sock, :connection_id, :bolt_version]
@@ -268,6 +269,14 @@ defmodule Boltx.Client do
 
     with :ok <- send_packet(client, payload) do
       recv_packets(client, &ResetMessage.decode/2, :infinity)
+    end
+  end
+
+  def message_discard(client, extra_parameters) do
+    payload = DiscardMessage.encode(client.bolt_version, extra_parameters)
+
+    with :ok <- send_packet(client, payload) do
+      recv_packets(client, &DiscardMessage.decode/2, :infinity)
     end
   end
 

@@ -105,14 +105,4 @@ defmodule BoltProtocolV1.Boltx.Internals.BoltProtocolV1Test do
     assert {:ok, _} = BoltProtocolV1.init(:gen_tcp, port, 1, config[:auth], [])
     assert [_ | _] = BoltProtocolV1.run_statement(:gen_tcp, port, 1, "RETURN 1 AS num", %{}, [])
   end
-
-  test "discard_all/4 (successful)", %{config: config, port: port} do
-    assert {:ok, _bolt_version} = BoltProtocolV1.handshake(:gen_tcp, port, [])
-    assert {:ok, _} = BoltProtocolV1.init(:gen_tcp, port, 1, config[:auth], [])
-
-    assert {:ok, {:success, %{"fields" => ["num"]}}} =
-             BoltProtocolV1.run(:gen_tcp, port, 1, "RETURN 1 AS num", %{}, [])
-
-    assert :ok = BoltProtocolV1.discard_all(:gen_tcp, port, 1, [])
-  end
 end
