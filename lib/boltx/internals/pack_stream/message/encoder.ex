@@ -45,6 +45,7 @@ defmodule Boltx.Internals.PackStream.Message.Encoder do
   @rollback_signature 0x13
   @run_signature 0x10
   @logon_signature 0x6A
+  @logoff_signature 0x6B
 
   # OUT Signature
 
@@ -60,7 +61,8 @@ defmodule Boltx.Internals.PackStream.Message.Encoder do
     @reset_signature,
     @rollback_signature,
     @run_signature,
-    @logon_signature
+    @logon_signature,
+    @logoff_signature
   ]
 
   @valid_v1_signatures [
@@ -83,7 +85,8 @@ defmodule Boltx.Internals.PackStream.Message.Encoder do
     :pull_all,
     :reset,
     :run,
-    :logon
+    :logon,
+    :logoff
   ]
 
   @valid_v1_message_types [
@@ -110,6 +113,7 @@ defmodule Boltx.Internals.PackStream.Message.Encoder do
   defp signature(:run), do: @run_signature
   defp signature(:init), do: @init_signature
   defp signature(:logon), do: @logon_signature
+  defp signature(:logoff), do: @logoff_signature
 
   @doc """
   Return client name (based on boltx version)
