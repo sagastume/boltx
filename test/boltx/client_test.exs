@@ -308,7 +308,7 @@ defmodule Boltx.ClientTest do
     end
   end
 
-  describe "discard message" do
+  describe "discard message:" do
     @tag :core
     test "discard_all/2 (successful)" do
       assert {:ok, client} = Client.connect(@opts)

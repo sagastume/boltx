@@ -9,7 +9,7 @@ defmodule Boltx.BoltProtocol.Message.DiscardMessage do
   end
 
   def encode(bolt_version, _extra_parameters)
-      when is_float(bolt_version) and bolt_version <= 2.0 do
+      when is_float(bolt_version) and bolt_version <= 3.0 do
     Encoder.do_encode(:discard_all, [], 1)
   end
 
