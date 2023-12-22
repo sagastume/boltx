@@ -47,7 +47,13 @@ defmodule Boltx.Connection do
 
   @impl true
   def handle_execute(query, params, opts, state) do
-    execute(query, params, opts, state) |> result(query, state)
+    case execute(query, params, opts, state) do
+      {:ok, _} = result ->
+        result(result, query, state)
+
+      other ->
+        other
+    end
   end
 
   @impl true
@@ -95,14 +101,16 @@ defmodule Boltx.Connection do
       {:ok, statement_result} ->
         {:ok, statement_result}
 
-      %Boltx.Error{code: error_code} = error
-      when error_code in ~w(syntax_error semantic_error)a ->
-        action =
-          if client.bolt_version >= 3.0,
-            do: &Client.send_reset/1,
-            else: &Client.send_ack_failure/1
+      {:error, %Boltx.Error{code: error_code} = error} ->
+        if error_code in [:syntax_error, :semantic_error] do
+          action =
+            if client.bolt_version >= 3.0,
+              do: &Client.send_reset/1,
+              else: &Client.send_ack_failure/1
 
-        action.(client)
+          action.(client)
+        end
+
         {:error, error, state}
     end
   rescue
