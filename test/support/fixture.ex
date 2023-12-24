@@ -1,10 +1,10 @@
-defmodule Boltx.Fixture do
+defmodule Boltx.Test.Fixture do
   def create_graph(conn, :movie) do
-    Boltx.query!(conn, movie_cypher())
+    Boltx.query_many!(conn, movie_cypher())
   end
 
   def create_graph(conn, :boltx) do
-    Boltx.query!(conn, boltx_cypher())
+    Boltx.query_many!(conn, boltx_cypher())
   end
 
   def boltx_cypher() do

@@ -56,12 +56,13 @@ defmodule Boltx.Types do
       https://github.com/boltprotocol/boltprotocol/blob/master/v1/_serialization.asciidoc#node
     """
 
-    use Entity, labels: nil
+    use Entity, labels: nil, element_id: nil
 
     @type t :: %__MODULE__{
             id: integer,
             labels: [String.t()],
-            properties: map
+            properties: map,
+            element_id: String.t()
           }
   end
 
@@ -76,11 +77,20 @@ defmodule Boltx.Types do
       https://github.com/boltprotocol/boltprotocol/blob/master/v1/_serialization.asciidoc#relationship
     """
 
-    use Entity, start: nil, end: nil, type: nil
+    use Entity,
+      start: nil,
+      end: nil,
+      type: nil,
+      element_id: nil,
+      start_node_element_id: nil,
+      end_node_element_id: nil
 
     @type t :: %__MODULE__{
             id: integer,
-            properties: map
+            properties: map,
+            element_id: String.t(),
+            start_node_element_id: String.t(),
+            end_node_element_id: String.t()
           }
   end
 
@@ -93,11 +103,12 @@ defmodule Boltx.Types do
       https://github.com/boltprotocol/boltprotocol/blob/master/v1/_serialization.asciidoc#unboundrelationship
     """
 
-    use Entity, start: nil, end: nil, type: nil
+    use Entity, type: nil, element_id: nil
 
     @type t :: %__MODULE__{
             id: integer,
-            properties: map
+            properties: map,
+            element_id: String.t()
           }
   end
 

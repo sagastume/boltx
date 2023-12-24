@@ -1,443 +1,224 @@
 defmodule ResponseTest do
   use ExUnit.Case
 
+  import Boltx.BoltProtocol.ServerResponse
   alias Boltx.Response
-  @moduletag :legacy
-  # import ExUnit.CaptureLog
 
-  @explain [
-    success: %{"fields" => ["n"], "t_first" => 1},
-    success: %{
-      "bookmark" => "neo4j:bookmark:v1:tx13440",
-      "plan" => %{
-        "args" => %{
-          "EstimatedRows" => 1.0,
-          "planner" => "COST",
-          "planner-impl" => "IDP",
-          "planner-version" => "3.5",
-          "runtime" => "INTERPRETED",
-          "runtime-impl" => "INTERPRETED",
-          "runtime-version" => "3.5",
-          "version" => "CYPHER 3.5"
-        },
-        "children" => [
-          %{
-            "args" => %{"EstimatedRows" => 1.0},
-            "children" => [],
-            "identifiers" => ["n"],
-            "operatorType" => "Create"
-          }
-        ],
-        "identifiers" => ["n"],
-        "operatorType" => "ProduceResults"
+  @mock_plan %{
+    "plan" => %{
+      "args" => %{
+        "EstimatedRows" => 1.0,
+        "planner" => "COST",
+        "planner-impl" => "IDP",
+        "planner-version" => "3.5",
+        "runtime" => "INTERPRETED",
+        "runtime-impl" => "INTERPRETED",
+        "runtime-version" => "3.5",
+        "version" => "CYPHER 3.5"
       },
-      "t_last" => 0,
-      "type" => "rw"
-    }
-  ]
-
-  @notifications [
-    success: %{"fields" => ["n", "m"], "t_first" => 0},
-    success: %{
-      "bookmark" => "neo4j:bookmark:v1:tx13440",
-      "notifications" => [
+      "children" => [
         %{
-          "code" => "Neo.ClientNotification.Statement.CartesianProductWarning",
-          "description" => "bad juju",
-          "position" => %{"column" => 9, "line" => 1, "offset" => 8},
-          "severity" => "WARNING",
-          "title" => "This query builds a cartesian product between disconnected patterns."
+          "args" => %{"EstimatedRows" => 1.0},
+          "children" => [],
+          "identifiers" => ["n"],
+          "operatorType" => "Create"
         }
       ],
-      "plan" => %{
-        "args" => %{
-          "EstimatedRows" => 36.0,
-          "planner" => "COST",
-          "planner-impl" => "IDP",
-          "planner-version" => "3.5",
-          "runtime" => "INTERPRETED",
-          "runtime-impl" => "INTERPRETED",
-          "runtime-version" => "3.5",
-          "version" => "CYPHER 3.5"
-        },
-        "children" => [
-          %{
-            "args" => %{"EstimatedRows" => 36.0},
-            "children" => [
-              %{
-                "args" => %{"EstimatedRows" => 6.0},
-                "children" => [],
-                "identifiers" => ["n"],
-                "operatorType" => "AllNodesScan"
-              },
-              %{
-                "args" => %{"EstimatedRows" => 6.0},
-                "children" => [],
-                "identifiers" => ["m"],
-                "operatorType" => "AllNodesScan"
-              }
-            ],
-            "identifiers" => ["m", "n"],
-            "operatorType" => "CartesianProduct"
-          }
-        ],
-        "identifiers" => ["m", "n"],
-        "operatorType" => "ProduceResults"
-      },
-      "t_last" => 0,
-      "type" => "r"
+      "identifiers" => ["n"],
+      "operatorType" => "ProduceResults"
     }
-  ]
+  }
 
-  @profile_no_results [
-    success: %{"fields" => [], "t_first" => 20},
-    success: %{
-      "bookmark" => "neo4j:bookmark:v1:tx48642",
-      "profile" => %{
-        "args" => %{
-          "DbHits" => 0,
-          "EstimatedRows" => 1.0,
-          "PageCacheHitRatio" => 0.0,
-          "PageCacheHits" => 0,
-          "PageCacheMisses" => 0,
-          "Rows" => 0,
-          "planner" => "COST",
-          "planner-impl" => "IDP",
-          "planner-version" => "3.5",
-          "runtime" => "SLOTTED",
-          "runtime-impl" => "SLOTTED",
-          "runtime-version" => "3.5",
-          "version" => "CYPHER 3.5"
-        },
-        "children" => [
-          %{
-            "args" => %{
-              "DbHits" => 0,
-              "EstimatedRows" => 1.0,
-              "PageCacheHitRatio" => 0.0,
-              "PageCacheHits" => 0,
-              "PageCacheMisses" => 0,
-              "Rows" => 0
-            },
-            "children" => [
-              %{
-                "args" => %{
-                  "DbHits" => 3,
-                  "EstimatedRows" => 1.0,
-                  "PageCacheHitRatio" => 0.0,
-                  "PageCacheHits" => 0,
-                  "PageCacheMisses" => 0,
-                  "Rows" => 1
-                },
-                "children" => [],
-                "dbHits" => 3,
-                "identifiers" => ["n"],
-                "operatorType" => "Create",
-                "pageCacheHitRatio" => 0.0,
-                "pageCacheHits" => 0,
-                "pageCacheMisses" => 0,
-                "rows" => 1
-              }
-            ],
-            "dbHits" => 0,
-            "identifiers" => ["n"],
-            "operatorType" => "EmptyResult",
-            "pageCacheHitRatio" => 0.0,
-            "pageCacheHits" => 0,
-            "pageCacheMisses" => 0,
-            "rows" => 0
-          }
-        ],
-        "dbHits" => 0,
-        "identifiers" => ["n"],
-        "operatorType" => "ProduceResults",
-        "pageCacheHitRatio" => 0.0,
-        "pageCacheHits" => 0,
-        "pageCacheMisses" => 0,
-        "rows" => 0
-      },
-      "stats" => %{
-        "labels-added" => 1,
-        "nodes-created" => 1,
-        "properties-set" => 1
-      },
-      "t_last" => 0,
-      "type" => "w"
+  @mock_notification %{
+    "notifications" => [
+      %{
+        "code" => "Neo.ClientNotification.Statement.CartesianProductWarning",
+        "description" => "bad juju",
+        "position" => %{"column" => 9, "line" => 1, "offset" => 8},
+        "severity" => "WARNING",
+        "title" => "This query builds a cartesian product between disconnected patterns."
+      }
+    ]
+  }
+
+  @mock_bookmark %{"bookmark" => "neo4j:bookmark:v1:tx13440"}
+
+  @mock_profile %{
+    "profile" => %{
+      "args" => %{
+        "DbHits" => 0,
+        "EstimatedRows" => 1.0,
+        "PageCacheHitRatio" => 0.0,
+        "PageCacheHits" => 0,
+        "PageCacheMisses" => 0,
+        "Rows" => 0,
+        "planner" => "COST",
+        "planner-impl" => "IDP",
+        "planner-version" => "3.5",
+        "runtime" => "SLOTTED",
+        "runtime-impl" => "SLOTTED",
+        "runtime-version" => "3.5",
+        "version" => "CYPHER 3.5"
+      }
     }
-  ]
+  }
 
-  @profile_results [
-    success: %{"fields" => ["num"], "t_first" => 1},
-    record: [1],
-    success: %{
-      "bookmark" => "neo4j:bookmark:v1:tx48642",
-      "profile" => %{
-        "args" => %{
-          "DbHits" => 0,
-          "EstimatedRows" => 1.0,
-          "PageCacheHitRatio" => 0.0,
-          "PageCacheHits" => 0,
-          "PageCacheMisses" => 0,
-          "Rows" => 1,
-          "Time" => 25980,
-          "planner" => "COST",
-          "planner-impl" => "IDP",
-          "planner-version" => "3.5",
-          "runtime" => "COMPILED",
-          "runtime-impl" => "COMPILED",
-          "runtime-version" => "3.5",
-          "version" => "CYPHER 3.5"
-        },
-        "children" => [
-          %{
-            "args" => %{
-              "DbHits" => 0,
-              "EstimatedRows" => 1.0,
-              "Expressions" => "{num : $`  AUTOINT0`}",
-              "PageCacheHitRatio" => 0.0,
-              "PageCacheHits" => 0,
-              "PageCacheMisses" => 0,
-              "Rows" => 1,
-              "Time" => 42285
-            },
-            "children" => [],
-            "dbHits" => 0,
-            "identifiers" => ["num"],
-            "operatorType" => "Projection",
-            "pageCacheHitRatio" => 0.0,
-            "pageCacheHits" => 0,
-            "pageCacheMisses" => 0,
-            "rows" => 1
-          }
-        ],
-        "dbHits" => 0,
-        "identifiers" => ["num"],
-        "operatorType" => "ProduceResults",
-        "pageCacheHitRatio" => 0.0,
-        "pageCacheHits" => 0,
-        "pageCacheMisses" => 0,
-        "rows" => 1
-      },
-      "t_last" => 0,
-      "type" => "r"
+  @mock_stats %{
+    "stats" => %{
+      "labels-added" => 1,
+      "nodes-created" => 1,
+      "properties-set" => 1
     }
-  ]
+  }
 
-  describe "Response as Enumerable" do
-    test "a simple query" do
-      conn = Boltx.conn()
-      response = Boltx.query!(conn, "RETURN 300 AS r")
+  describe "Response new/1" do
+    @tag :core
+    test "create a new response from the run_statement with a single field" do
+      result =
+        statement_result(
+          result_run: %{"fields" => ["r"], "t_first" => 24},
+          result_pull: {:pull_result, [[300]], %{"t_last" => 2, "type" => "r"}},
+          query: ""
+        )
 
-      assert %Response{results: [%{"r" => 300}]} = response
-      assert response |> Enum.member?("r")
-      assert 1 = response |> Enum.count()
-      assert [%{"r" => 300}] = response |> Enum.take(1)
-      assert %{"r" => 300} = response |> Response.first()
+      assert %Response{results: results, fields: fields, records: records} = Response.new(result)
+      assert results == [%{"r" => 300}]
+      assert fields == ["r"]
+      assert records == [[300]]
     end
 
-    @unwind %Boltx.Response{
-      records: [[1], [2], [3], [4], [5], [6], ~c"\a", ~c"\b", ~c"\t", ~c"\n"],
-      results: [
-        %{"n" => 1},
-        %{"n" => 2},
-        %{"n" => 3},
-        %{"n" => 4},
-        %{"n" => 5},
-        %{"n" => 6},
-        %{"n" => 7},
-        %{"n" => 8},
-        %{"n" => 9},
-        %{"n" => 10}
-      ]
-    }
+    @tag :core
+    test "create a new response from the run_statement with a many field" do
+      result =
+        statement_result(
+          result_run: %{"fields" => ["price", "name", "cost"], "t_first" => 24},
+          result_pull: {:pull_result, [[50, "Galletas", 20]], %{"t_last" => 2, "type" => "r"}},
+          query: ""
+        )
 
-    test "reduce: UNWIND range(1, 10) AS n RETURN n" do
-      sum = Enum.reduce(@unwind, 0, &(&1["n"] + &2))
-      assert 55 == sum
+      assert %Response{results: results, fields: fields, records: records} = Response.new(result)
+      assert results == [%{"price" => 50, "name" => "Galletas", "cost" => 20}]
+      assert fields == ["price", "name", "cost"]
+      assert records == [[50, "Galletas", 20]]
     end
 
-    test "slice: UNWIND range(1, 10) AS n RETURN n" do
-      slice = Enum.slice(@unwind, 0..2)
-      assert [%{"n" => 1}, %{"n" => 2}, %{"n" => 3}] == slice
-    end
-  end
+    @tag :core
+    test "create a new response from the run_statement with a many records" do
+      result =
+        statement_result(
+          result_run: %{"fields" => ["price", "name", "cost"], "t_first" => 24},
+          result_pull:
+            {:pull_result, [[50, "Galletas", 20], [10, "Pastillas", 5]],
+             %{"t_last" => 2, "type" => "r"}},
+          query: ""
+        )
 
-  describe "Success" do
-    test "with valid EXPLAIN" do
-      assert %Response{
-               bookmark: nil,
-               fields: ["n"],
-               notifications: [],
-               plan: %{
-                 "args" => %{
-                   "EstimatedRows" => 1.0,
-                   "planner" => "COST",
-                   "planner-impl" => "IDP",
-                   "planner-version" => "3.5",
-                   "runtime" => "INTERPRETED",
-                   "runtime-impl" => "INTERPRETED",
-                   "runtime-version" => "3.5",
-                   "version" => "CYPHER 3.5"
-                 },
-                 "children" => [
-                   %{
-                     "args" => %{"EstimatedRows" => 1.0},
-                     "children" => [],
-                     "identifiers" => ["n"],
-                     "operatorType" => "Create"
-                   }
-                 ],
-                 "identifiers" => ["n"],
-                 "operatorType" => "ProduceResults"
-               },
-               profile: nil,
-               records: [],
-               results: [],
-               stats: [],
-               type: "rw"
-             } = Response.transform!(@explain)
+      assert %Response{results: results, fields: fields, records: records} = Response.new(result)
+
+      assert results == [
+               %{"price" => 50, "name" => "Galletas", "cost" => 20},
+               %{"price" => 10, "name" => "Pastillas", "cost" => 5}
+             ]
+
+      assert fields == ["price", "name", "cost"]
+      assert records == [[50, "Galletas", 20], [10, "Pastillas", 5]]
     end
 
-    test "with Notifications" do
-      %Response{notifications: [notifications | _rest]} = Response.transform!(@notifications)
+    @tag :core
+    test "creating a response from the run_statement with empty result" do
+      result =
+        statement_result(
+          result_run: %{"fields" => ["price", "name", "cost"], "t_first" => 24},
+          result_pull: {:pull_result, [], %{"t_last" => 2, "type" => "r"}},
+          query: ""
+        )
 
-      assert %{
-               "code" => "Neo.ClientNotification.Statement.CartesianProductWarning",
-               "description" => "bad juju",
-               "position" => %{"column" => 9, "line" => 1, "offset" => 8},
-               "severity" => "WARNING",
-               "title" => "This query builds a cartesian product between disconnected patterns."
-             } = notifications
+      assert %Response{results: results, fields: fields, records: records} = Response.new(result)
+      assert results == []
+      assert fields == ["price", "name", "cost"]
+      assert records == []
     end
 
-    test "with Profile (without results)" do
-      %Response{plan: nil, profile: profile, stats: stats} =
-        Response.transform!(@profile_no_results)
+    @tag :core
+    test "creating a response from the run_statement with plan" do
+      result =
+        statement_result(
+          result_run: %{"fields" => ["price", "name", "cost"], "t_first" => 24},
+          result_pull: {:pull_result, [], Map.merge(%{"t_last" => 2, "type" => "r"}, @mock_plan)},
+          query: ""
+        )
 
-      assert %{
-               "args" => %{
-                 "DbHits" => 0,
-                 "EstimatedRows" => 1.0,
-                 "PageCacheHitRatio" => 0.0,
-                 "PageCacheHits" => 0,
-                 "PageCacheMisses" => 0,
-                 "Rows" => 0,
-                 "planner" => "COST",
-                 "planner-impl" => "IDP",
-                 "planner-version" => "3.5",
-                 "runtime" => "SLOTTED",
-                 "runtime-impl" => "SLOTTED",
-                 "runtime-version" => "3.5",
-                 "version" => "CYPHER 3.5"
-               },
-               "children" => [
-                 %{
-                   "args" => %{
-                     "DbHits" => 0,
-                     "EstimatedRows" => 1.0,
-                     "PageCacheHitRatio" => 0.0,
-                     "PageCacheHits" => 0,
-                     "PageCacheMisses" => 0,
-                     "Rows" => 0
-                   },
-                   "children" => [
-                     %{
-                       "args" => %{
-                         "DbHits" => 3,
-                         "EstimatedRows" => 1.0,
-                         "PageCacheHitRatio" => 0.0,
-                         "PageCacheHits" => 0,
-                         "PageCacheMisses" => 0,
-                         "Rows" => 1
-                       },
-                       "children" => [],
-                       "dbHits" => 3,
-                       "identifiers" => ["n"],
-                       "operatorType" => "Create",
-                       "pageCacheHitRatio" => 0.0,
-                       "pageCacheHits" => 0,
-                       "pageCacheMisses" => 0,
-                       "rows" => 1
-                     }
-                   ],
-                   "dbHits" => 0,
-                   "identifiers" => ["n"],
-                   "operatorType" => "EmptyResult",
-                   "pageCacheHitRatio" => 0.0,
-                   "pageCacheHits" => 0,
-                   "pageCacheMisses" => 0,
-                   "rows" => 0
-                 }
-               ],
-               "dbHits" => 0,
-               "identifiers" => ["n"],
-               "operatorType" => "ProduceResults",
-               "pageCacheHitRatio" => 0.0,
-               "pageCacheHits" => 0,
-               "pageCacheMisses" => 0,
-               "rows" => 0
-             } = profile
-
-      assert %{
-               "labels-added" => 1,
-               "nodes-created" => 1,
-               "properties-set" => 1
-             } = stats
+      assert %Response{plan: plan} = Response.new(result)
+      assert plan == Map.get(@mock_plan, "plan")
     end
 
-    test "with Profile (with results)" do
-      %Response{plan: nil, profile: profile, stats: [], records: _records, results: results} =
-        Response.transform!(@profile_results)
+    @tag :core
+    test "creating a response from the run_statement with notifications" do
+      result =
+        statement_result(
+          result_run: %{"fields" => ["price", "name", "cost"], "t_first" => 24},
+          result_pull:
+            {:pull_result, [], Map.merge(%{"t_last" => 2, "type" => "r"}, @mock_notification)},
+          query: ""
+        )
 
-      assert %{
-               "args" => %{
-                 "DbHits" => 0,
-                 "EstimatedRows" => 1.0,
-                 "PageCacheHitRatio" => 0.0,
-                 "PageCacheHits" => 0,
-                 "PageCacheMisses" => 0,
-                 "Rows" => 1,
-                 "Time" => 25980,
-                 "planner" => "COST",
-                 "planner-impl" => "IDP",
-                 "planner-version" => "3.5",
-                 "runtime" => "COMPILED",
-                 "runtime-impl" => "COMPILED",
-                 "runtime-version" => "3.5",
-                 "version" => "CYPHER 3.5"
-               },
-               "children" => [
-                 %{
-                   "args" => %{
-                     "DbHits" => 0,
-                     "EstimatedRows" => 1.0,
-                     "Expressions" => "{num : $`  AUTOINT0`}",
-                     "PageCacheHitRatio" => 0.0,
-                     "PageCacheHits" => 0,
-                     "PageCacheMisses" => 0,
-                     "Rows" => 1,
-                     "Time" => 42285
-                   },
-                   "children" => [],
-                   "dbHits" => 0,
-                   "identifiers" => ["num"],
-                   "operatorType" => "Projection",
-                   "pageCacheHitRatio" => 0.0,
-                   "pageCacheHits" => 0,
-                   "pageCacheMisses" => 0,
-                   "rows" => 1
-                 }
-               ],
-               "dbHits" => 0,
-               "identifiers" => ["num"],
-               "operatorType" => "ProduceResults",
-               "pageCacheHitRatio" => 0.0,
-               "pageCacheHits" => 0,
-               "pageCacheMisses" => 0,
-               "rows" => 1
-             } = profile
+      assert %Response{notifications: notifications} = Response.new(result)
+      assert notifications == Map.get(@mock_notification, "notifications")
+    end
 
-      assert [%{"num" => 1}] = results
+    @tag :core
+    test "creating a response from the run_statement with bookmark" do
+      result =
+        statement_result(
+          result_run: %{"fields" => ["price", "name", "cost"], "t_first" => 24},
+          result_pull:
+            {:pull_result, [], Map.merge(%{"t_last" => 2, "type" => "r"}, @mock_bookmark)},
+          query: ""
+        )
+
+      assert %Response{bookmark: bookmark} = Response.new(result)
+      assert bookmark == Map.get(@mock_bookmark, "bookmark")
+    end
+
+    @tag :core
+    test "creating a response from the run_statement with profile" do
+      result =
+        statement_result(
+          result_run: %{"fields" => ["price", "name", "cost"], "t_first" => 24},
+          result_pull:
+            {:pull_result, [], Map.merge(%{"t_last" => 2, "type" => "r"}, @mock_profile)},
+          query: ""
+        )
+
+      assert %Response{profile: profile} = Response.new(result)
+      assert profile == Map.get(@mock_profile, "profile")
+    end
+
+    @tag :core
+    test "creating a response from the run_statement with stats" do
+      result =
+        statement_result(
+          result_run: %{"fields" => ["price", "name", "cost"], "t_first" => 24},
+          result_pull:
+            {:pull_result, [], Map.merge(%{"t_last" => 2, "type" => "r"}, @mock_stats)},
+          query: ""
+        )
+
+      assert %Response{stats: stats} = Response.new(result)
+      assert stats == Map.get(@mock_stats, "stats")
+    end
+
+    @tag :core
+    test "creating a response from the run_statement with type" do
+      result =
+        statement_result(
+          result_run: %{"fields" => ["price", "name", "cost"], "t_first" => 24},
+          result_pull: {:pull_result, [], %{"t_last" => 2, "type" => "r"}},
+          query: ""
+        )
+
+      assert %Response{type: type} = Response.new(result)
+      assert type == "r"
     end
   end
 end

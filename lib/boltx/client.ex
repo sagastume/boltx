@@ -201,6 +201,35 @@ defmodule Boltx.Client do
     end
   end
 
+  def run_statement(client, %Boltx.Query{} = query, parameters) do
+    %Boltx.Query{statement: statement, extra: extra_parameters} = query
+
+    run_statement(client, statement, parameters, extra_parameters)
+  end
+
+  def run_statement(client, %Boltx.Queries{} = queries, parameters) do
+    %Boltx.Queries{statement: statement, extra: extra_parameters} = queries
+
+    cypher_seps = ~r/;(.){0,1}\n/
+
+    statements =
+      statement
+      |> String.split(cypher_seps, trim: true)
+      |> Enum.map(&String.trim/1)
+      |> Enum.filter(&(String.length(&1) > 0))
+
+    {:ok,
+     Enum.reduce(statements, [], fn statement, acc ->
+       case Boltx.Client.run_statement(client, statement, parameters, extra_parameters) do
+         {:ok, result} ->
+           [result | acc]
+
+         _ ->
+           acc
+       end
+     end)}
+  end
+
   def send_begin(client, _extra_parameters)
       when is_float(client.bolt_version) and client.bolt_version <= 2.0 do
     case run_statement(client, "BEGIN", %{}, %{}) do

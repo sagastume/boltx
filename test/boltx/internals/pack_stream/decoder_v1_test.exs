@@ -158,10 +158,8 @@ defmodule Boltx.Internals.PackStream.DecoderV1Test do
           ],
           relationships: [
             %Boltx.Types.UnboundRelationship{
-              end: nil,
               id: 19,
               properties: %{},
-              start: nil,
               type: "KNOWS"
             }
           ],

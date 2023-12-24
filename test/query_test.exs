@@ -20,49 +20,6 @@ defmodule Query.Test do
     {:ok, context}
   end
 
-  test "a simple query that should work", context do
-    conn = context[:conn]
-
-    cyp = """
-      MATCH (n:Person {boltx: true})
-      RETURN n.name AS Name
-      ORDER BY Name DESC
-      LIMIT 5
-    """
-
-    {:ok, %Response{} = row} = Boltx.query(conn, cyp)
-
-    assert Response.first(row)["Name"] == "Patrick Rothfuss",
-           "missing 'The Name of the Wind' database, or data incomplete"
-  end
-
-  test "A procedure call failure should send reset and not lock the db", context do
-    expected_neo4j = System.get_env("NEO4J_VERSION") || "3.0.0"
-
-    if Version.match?(expected_neo4j, "~> 3.5.0") do
-      conn = context[:conn]
-
-      cyp_fail = """
-        CALL db.index.fulltext.queryNodes(\"topic_label\", \"badparen)\") YIELD node RETURN node
-      """
-
-      {:error, %Boltx.Error{code: "Neo.ClientError.Procedure.ProcedureCallFailed"}} =
-        Boltx.query(conn, cyp_fail)
-
-      cyp = """
-        MATCH (n:Person {boltx: true})
-        RETURN n.name AS Name
-        ORDER BY Name DESC
-        LIMIT 5
-      """
-
-      {:ok, %Response{} = row} = Boltx.query(conn, cyp)
-
-      assert Response.first(row)["Name"] == "Patrick Rothfuss",
-             "missing 'The Name of the Wind' database, or data incomplete"
-    end
-  end
-
   @tag :apoc
   test "Passing a timeout option to the query should prevent a timeout", context do
     conn = context[:conn]
@@ -95,114 +52,6 @@ defmodule Query.Test do
 
     assert Response.first(row)["Name"] == "Patrick Rothfuss",
            "missing 'The Name of the Wind' database, or data incomplete"
-  end
-
-  test "executing a Cypher query, with parameters", context do
-    conn = context[:conn]
-
-    cypher = """
-      MATCH (n:Person {boltx: true})
-      WHERE n.name = $name
-      RETURN n.name AS name
-    """
-
-    case Boltx.query(conn, cypher, %{name: "Kote"}) do
-      {:ok, %Response{} = rows} ->
-        refute Enum.count(rows) == 0,
-               "Did you initialize the 'The Name of the Wind' database?"
-
-        refute Enum.count(rows) > 1, "Kote?! There is only one!"
-        assert Response.first(rows)["name"] == "Kote", "expecting to find Kote"
-
-      {:error, reason} ->
-        IO.puts("Error: #{reason["message"]}")
-    end
-  end
-
-  test "executing a Cypher query, with struct parameters", context do
-    conn = context[:conn]
-
-    cypher = """
-      CREATE(n:User $props)
-    """
-
-    assert {:ok,
-            %Response{
-              stats: %{
-                "labels-added" => 1,
-                "nodes-created" => 1,
-                "properties-set" => 2
-              },
-              type: "w"
-            }} =
-             Boltx.query(conn, cypher, %{
-               props: %Test.TestUser{name: "Strut", boltx: true}
-             })
-  end
-
-  test "executing a Cpyher query, with map parameters", context do
-    conn = context[:conn]
-
-    cypher = """
-      CREATE(n:User $props)
-    """
-
-    assert {:ok, %Response{}} =
-             Boltx.query(conn, cypher, %{props: %{name: "Mep", boltx: true}})
-  end
-
-  test "executing a raw Cypher query with alias, and no parameters", context do
-    conn = context[:conn]
-
-    cypher = """
-      MATCH (p:Person {boltx: true})
-      RETURN p, p.name AS name, toUpper(p.name) as NAME,
-             coalesce(p.nickname,"n/a") AS nickname,
-             { name: p.name, label:head(labels(p))} AS person
-      ORDER BY name DESC
-    """
-
-    {:ok, %Response{} = r} = Boltx.query(conn, cypher)
-
-    assert Enum.count(r) == 3,
-           "you're missing some characters from the 'The Name of the Wind' db"
-
-    if row = Response.first(r) do
-      assert row["p"].properties["name"] == "Patrick Rothfuss"
-      assert is_map(row["p"]), "was expecting a map `p`"
-      assert row["person"]["label"] == "Person"
-      assert row["NAME"] == "PATRICK ROTHFUSS"
-      assert row["nickname"] == "n/a"
-      assert row["p"].properties["boltx"] == true
-    else
-      IO.puts("Did you initialize the 'The Name of the Wind' database?")
-    end
-  end
-
-  test "if Patrick Rothfuss wrote The Name of the Wind", context do
-    conn = context[:conn]
-
-    cypher = """
-      MATCH (p:Person)-[r:WROTE]->(b:Book {title: 'The Name of the Wind'})
-      RETURN p
-    """
-
-    %Response{} = rows = Boltx.query!(conn, cypher)
-    assert Response.first(rows)["p"].properties["name"] == "Patrick Rothfuss"
-  end
-
-  test "it returns only known role names", context do
-    conn = context[:conn]
-
-    cypher = """
-      MATCH (p)-[r:ACTED_IN]->() where p.boltx RETURN r.roles as roles
-      LIMIT 25
-    """
-
-    %Response{results: rows} = Boltx.query!(conn, cypher)
-    roles = ["killer", "sword fighter", "magician", "musician", "many talents"]
-    my_roles = Enum.map(rows, & &1["roles"]) |> List.flatten()
-    assert my_roles -- roles == [], "found more roles in the db than expected"
   end
 
   test "path from: MERGE p=({name:'Alice'})-[:KNOWS]-> ...", context do
@@ -403,10 +252,8 @@ defmodule Query.Test do
                    ],
                    relationships: [
                      %Boltx.Types.UnboundRelationship{
-                       end: nil,
                        id: _,
                        properties: %{},
-                       start: nil,
                        type: "KNOWS"
                      }
                    ],

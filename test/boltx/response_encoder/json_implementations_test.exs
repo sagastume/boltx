@@ -61,12 +61,10 @@ defmodule Boltx.JsonImplementationsTest do
       ],
       relationships: [
         %UnboundRelationship{
-          end: nil,
           id: 58,
           properties: %{
             creation_time: TimeWithTZOffset.create(~T[12:34:56], 7200)
           },
-          start: nil,
           type: "KNOWS"
         },
         %Relationship{

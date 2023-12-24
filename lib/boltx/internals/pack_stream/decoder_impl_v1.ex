@@ -166,9 +166,11 @@ defmodule Boltx.Internals.PackStream.DecoderImplV1 do
       # Node
       def decode({@node_marker, struct, struct_size}, bolt_version)
           when bolt_version <= @last_version do
-        {[id, labels, props], rest} = decode_struct(struct, struct_size, bolt_version)
+        {structure_data, rest} = decode_struct(struct, struct_size, bolt_version)
 
-        node = %Types.Node{id: id, labels: labels, properties: props}
+        field_names = [:id, :labels, :properties, :element_id]
+        node_data = Enum.zip([field_names, structure_data])
+        node = struct(Types.Node, node_data)
 
         [node | rest]
       end
@@ -176,16 +178,22 @@ defmodule Boltx.Internals.PackStream.DecoderImplV1 do
       # Relationship
       def decode({@relationship_marker, struct, struct_size}, bolt_version)
           when bolt_version <= @last_version do
-        {[id, start_node, end_node, type, props], rest} =
+        {structure_data, rest} =
           decode_struct(struct, struct_size, bolt_version)
 
-        relationship = %Types.Relationship{
-          id: id,
-          start: start_node,
-          end: end_node,
-          type: type,
-          properties: props
-        }
+        field_names = [
+          :id,
+          :start,
+          :end,
+          :type,
+          :properties,
+          :element_id,
+          :start_node_element_id,
+          :end_node_element_id
+        ]
+
+        relationship_data = Enum.zip([field_names, structure_data])
+        relationship = struct(Types.Relationship, relationship_data)
 
         [relationship | rest]
       end
@@ -193,13 +201,11 @@ defmodule Boltx.Internals.PackStream.DecoderImplV1 do
       # UnboundedRelationship
       def decode({@unbounded_relationship_marker, struct, struct_size}, bolt_version)
           when bolt_version <= @last_version do
-        {[id, type, props], rest} = decode_struct(struct, struct_size, bolt_version)
+        {structure_data, rest} = decode_struct(struct, struct_size, bolt_version)
 
-        unbounded_relationship = %Types.UnboundRelationship{
-          id: id,
-          type: type,
-          properties: props
-        }
+        field_names = [:id, :type, :properties, :element_id]
+        unbounded_relationship_data = Enum.zip([field_names, structure_data])
+        unbounded_relationship = struct(Types.UnboundRelationship, unbounded_relationship_data)
 
         [unbounded_relationship | rest]
       end
@@ -207,14 +213,12 @@ defmodule Boltx.Internals.PackStream.DecoderImplV1 do
       # Path
       def decode({@path_marker, struct, struct_size}, bolt_version)
           when bolt_version <= @last_version do
-        {[nodes, relationships, sequence], rest} =
+        {structure_data, rest} =
           decode_struct(struct, struct_size, bolt_version)
 
-        path = %Types.Path{
-          nodes: nodes,
-          relationships: relationships,
-          sequence: sequence
-        }
+        field_names = [:nodes, :relationships, :sequence]
+        path_data = Enum.zip([field_names, structure_data])
+        path = struct(Types.Path, path_data)
 
         [path | rest]
       end
