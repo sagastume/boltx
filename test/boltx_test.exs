@@ -35,7 +35,7 @@ defmodule BoltxTest do
     end
 
     @tag :core
-    test "a simple query to get nodes", c do
+    test "a simple query to get persons", c do
       self = self()
 
       query = """
@@ -54,7 +54,7 @@ defmodule BoltxTest do
     end
 
     @tag :core
-    test "a simple queries to get nodes with many queries", c do
+    test "a simple queries to get persons with many queries", c do
       self = self()
 
       query = """
@@ -157,6 +157,17 @@ defmodule BoltxTest do
       roles = ["killer", "sword fighter", "magician", "musician", "many talents"]
       my_roles = Enum.map(rows, & &1["roles"]) |> List.flatten()
       assert my_roles -- roles == [], "found more roles in the db than expected"
+    end
+
+    @tag :core
+    test "if Patrick Rothfuss wrote The Name of the Wind", c do
+      cypher = """
+        MATCH (p:Person)-[r:WROTE]->(b:Book {title: 'The Name of the Wind'})
+        RETURN p
+      """
+
+      %Response{} = rows = Boltx.query!(c.conn, cypher)
+      assert Response.first(rows)["p"].properties["name"] == "Patrick Rothfuss"
     end
   end
 

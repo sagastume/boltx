@@ -166,9 +166,11 @@ defmodule Boltx.Internals.PackStream.DecoderImplV1 do
       # Node
       def decode({@node_marker, struct, struct_size}, bolt_version)
           when bolt_version <= @last_version do
-        {[id, labels, props], rest} = decode_struct(struct, struct_size, bolt_version)
+        {structure_data, rest} = decode_struct(struct, struct_size, bolt_version)
 
-        node = %Types.Node{id: id, labels: labels, properties: props}
+        field_names = [:id, :labels, :properties, :element_id]
+        node_data = Enum.zip([field_names, structure_data])
+        node = struct(Types.Node, node_data)
 
         [node | rest]
       end

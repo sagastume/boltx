@@ -56,12 +56,13 @@ defmodule Boltx.Types do
       https://github.com/boltprotocol/boltprotocol/blob/master/v1/_serialization.asciidoc#node
     """
 
-    use Entity, labels: nil
+    use Entity, labels: nil, element_id: nil
 
     @type t :: %__MODULE__{
             id: integer,
             labels: [String.t()],
-            properties: map
+            properties: map,
+            element_id: String.t()
           }
   end
 
