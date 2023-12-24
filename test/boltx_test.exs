@@ -169,6 +169,48 @@ defmodule BoltxTest do
       %Response{} = rows = Boltx.query!(c.conn, cypher)
       assert Response.first(rows)["p"].properties["name"] == "Patrick Rothfuss"
     end
+
+    @tag :core
+    test "executing a raw Cypher query with alias, and no parameters", c do
+      cypher = """
+        MATCH (p:Person {boltx: true})
+        RETURN p, p.name AS name, toUpper(p.name) as NAME,
+               coalesce(p.nickname,"n/a") AS nickname,
+               { name: p.name, label:head(labels(p))} AS person
+        ORDER BY name DESC
+      """
+
+      {:ok, %Response{} = r} = Boltx.query(c.conn, cypher)
+
+      assert Enum.count(r) == 3,
+             "you're missing some characters from the 'The Name of the Wind' db"
+
+      if row = Response.first(r) do
+        assert row["p"].properties["name"] == "Patrick Rothfuss"
+        assert is_map(row["p"]), "was expecting a map `p`"
+        assert row["person"]["label"] == "Person"
+        assert row["NAME"] == "PATRICK ROTHFUSS"
+        assert row["nickname"] == "n/a"
+        assert row["p"].properties["boltx"] == true
+      else
+        IO.puts("Did you initialize the 'The Name of the Wind' database?")
+      end
+    end
+
+    @tag :core
+    test "path from: MERGE p=({name:'Alice'})-[:KNOWS]-> ...", c do
+      cypher = """
+      MERGE p = ({name:'Alice', boltx: true})-[:KNOWS]->({name:'Bob', boltx: true})
+      RETURN p
+      """
+
+      path =
+        Boltx.query!(c.conn, cypher)
+        |> Response.first()
+        |> Map.get("p")
+
+      assert {2, 1} == {length(path.nodes), length(path.relationships)}
+    end
   end
 
   defp connect(c) do

@@ -54,56 +54,6 @@ defmodule Query.Test do
            "missing 'The Name of the Wind' database, or data incomplete"
   end
 
-  test "if Patrick Rothfuss wrote The Name of the Wind", c do
-    cypher = """
-      MATCH (p:Person)-[r:WROTE]->(b:Book {title: 'The Name of the Wind'})
-      RETURN p
-    """
-
-    %Response{} = rows = Boltx.query!(c.conn, cypher)
-    assert Response.first(rows)["p"].properties["name"] == "Patrick Rothfuss"
-  end
-
-  test "executing a raw Cypher query with alias, and no parameters", c do
-    cypher = """
-      MATCH (p:Person {boltx: true})
-      RETURN p, p.name AS name, toUpper(p.name) as NAME,
-             coalesce(p.nickname,"n/a") AS nickname,
-             { name: p.name, label:head(labels(p))} AS person
-      ORDER BY name DESC
-    """
-
-    {:ok, %Response{} = r} = Boltx.query(c.conn, cypher)
-
-    assert Enum.count(r) == 3,
-           "you're missing some characters from the 'The Name of the Wind' db"
-
-    if row = Response.first(r) do
-      assert row["p"].properties["name"] == "Patrick Rothfuss"
-      assert is_map(row["p"]), "was expecting a map `p`"
-      assert row["person"]["label"] == "Person"
-      assert row["NAME"] == "PATRICK ROTHFUSS"
-      assert row["nickname"] == "n/a"
-      assert row["p"].properties["boltx"] == true
-    else
-      IO.puts("Did you initialize the 'The Name of the Wind' database?")
-    end
-  end
-
-  test "it returns only known role names", context do
-    conn = context[:conn]
-
-    cypher = """
-      MATCH (p)-[r:ACTED_IN]->() where p.boltx RETURN r.roles as roles
-      LIMIT 25
-    """
-
-    %Response{results: rows} = Boltx.query!(conn, cypher)
-    roles = ["killer", "sword fighter", "magician", "musician", "many talents"]
-    my_roles = Enum.map(rows, & &1["roles"]) |> List.flatten()
-    assert my_roles -- roles == [], "found more roles in the db than expected"
-  end
-
   test "path from: MERGE p=({name:'Alice'})-[:KNOWS]-> ...", context do
     conn = context[:conn]
 
@@ -302,10 +252,8 @@ defmodule Query.Test do
                    ],
                    relationships: [
                      %Boltx.Types.UnboundRelationship{
-                       end: nil,
                        id: _,
                        properties: %{},
-                       start: nil,
                        type: "KNOWS"
                      }
                    ],

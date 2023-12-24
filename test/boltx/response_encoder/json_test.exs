@@ -81,12 +81,10 @@ defmodule Boltx.ResponseEncode.JsonTest do
 
   test "Encode a UnboundRelationship" do
     r = %UnboundRelationship{
-      end: 30,
       id: 5,
       properties: %{
         is_valid: true
       },
-      start: 69,
       type: "UPDATED_TO"
     }
 
@@ -110,10 +108,8 @@ defmodule Boltx.ResponseEncode.JsonTest do
       ],
       relationships: [
         %UnboundRelationship{
-          end: nil,
           id: 58,
           properties: %{},
-          start: nil,
           type: "KNOWS"
         }
       ],
