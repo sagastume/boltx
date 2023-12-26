@@ -32,7 +32,7 @@ iex> {:ok, conn} = Boltx.start_link(@opts)
 {:ok, #PID<0.237.0>}
 
 iex> Boltx.query!(conn, "return 1 as n") |>
-...> Bolt.Sips.Response.first()
+...> Boltx.Response.first()
 %{"n" => 1}
 ```
 
