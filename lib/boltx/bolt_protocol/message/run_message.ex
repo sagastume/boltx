@@ -11,7 +11,7 @@ defmodule Boltx.BoltProtocol.Message.RunMessage do
   def encode(bolt_version, query, parameters, _extra_parameters)
       when is_float(bolt_version) and bolt_version <= 2.0 do
     message = [query, parameters]
-    Encoder.do_encode(:run, message, 1)
+    Encoder.do_encode(:run, message, 3)
   end
 
   def encode(_, _, _, _) do
@@ -24,7 +24,7 @@ defmodule Boltx.BoltProtocol.Message.RunMessage do
 
   @spec decode(float(), <<_::16, _::_*8>>) :: {:error, Boltx.Error.t()} | {:ok, any()}
   def decode(bolt_version, binary_messages) do
-    messages = Enum.map(binary_messages, &Decoder.decode(&1, 1))
+    messages = Enum.map(binary_messages, &Decoder.decode(&1, 3))
 
     case hd(messages) do
       {:success, response} ->

@@ -4,6 +4,7 @@ defmodule BoltxTest do
   import ExUnit.CaptureLog
 
   alias Boltx.Response
+  alias Boltx.Types.{Duration, DateTimeWithTZOffset, Point, TimeWithTZOffset}
 
   @opts Boltx.TestHelper.opts()
 
@@ -401,6 +402,66 @@ defmodule BoltxTest do
             |> Map.get("operatorType")
         )
       end
+    end
+
+    @tag :bolt_2_x
+    @tag :bolt_3_x
+    @tag :bolt_4_x
+    @tag :bolt_5_x
+    test "transform Point in cypher-compliant data", c do
+      query = "RETURN point($point_data) AS pt"
+      params = %{point_data: Point.create(:cartesian, 50, 60.5)}
+
+      assert {:ok, %Response{results: res}} = Boltx.query(c.conn, query, params)
+
+      assert res == [
+               %{
+                 "pt" => %Boltx.Types.Point{
+                   crs: "cartesian",
+                   height: nil,
+                   latitude: nil,
+                   longitude: nil,
+                   srid: 7203,
+                   x: 50.0,
+                   y: 60.5,
+                   z: nil
+                 }
+               }
+             ]
+    end
+
+    @tag :bolt_2_x
+    @tag :bolt_3_x
+    @tag :bolt_4_x
+    @tag :bolt_5_x
+    test "transform Duration in cypher-compliant data", c do
+      query = "RETURN duration($d) AS d"
+
+      params = %{
+        d: %Duration{
+          days: 0,
+          hours: 0,
+          minutes: 54,
+          months: 12,
+          nanoseconds: 0,
+          seconds: 65,
+          weeks: 0,
+          years: 1
+        }
+      }
+
+      expected = %Duration{
+        days: 0,
+        hours: 0,
+        minutes: 55,
+        months: 0,
+        nanoseconds: 0,
+        seconds: 5,
+        weeks: 0,
+        years: 2
+      }
+
+      assert {:ok, %Response{results: [%{"d" => ^expected}]}} = Boltx.query(c.conn, query, params)
     end
   end
 

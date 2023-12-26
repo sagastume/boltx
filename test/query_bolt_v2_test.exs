@@ -12,60 +12,6 @@ defmodule Boltx.QueryBoltV2Test do
     {:ok, [conn: conn]}
   end
 
-  test "transform Point in cypher-compliant data", context do
-    conn = context[:conn]
-    query = "RETURN point($point_data) AS pt"
-    params = %{point_data: Point.create(:cartesian, 50, 60.5)}
-
-    assert {:ok, %Response{results: res}} = Boltx.query(conn, query, params)
-
-    assert res == [
-             %{
-               "pt" => %Boltx.Types.Point{
-                 crs: "cartesian",
-                 height: nil,
-                 latitude: nil,
-                 longitude: nil,
-                 srid: 7203,
-                 x: 50.0,
-                 y: 60.5,
-                 z: nil
-               }
-             }
-           ]
-  end
-
-  test "transform Duration in cypher-compliant data", context do
-    conn = context[:conn]
-    query = "RETURN duration($d) AS d"
-
-    params = %{
-      d: %Duration{
-        days: 0,
-        hours: 0,
-        minutes: 54,
-        months: 12,
-        nanoseconds: 0,
-        seconds: 65,
-        weeks: 0,
-        years: 1
-      }
-    }
-
-    expected = %Duration{
-      days: 0,
-      hours: 0,
-      minutes: 55,
-      months: 0,
-      nanoseconds: 0,
-      seconds: 5,
-      weeks: 0,
-      years: 2
-    }
-
-    assert {:ok, %Response{results: [%{"d" => ^expected}]}} = Boltx.query(conn, query, params)
-  end
-
   test "transform Date in cypher-compliant data", context do
     conn = context[:conn]
     query = "RETURN date($d) AS d"
