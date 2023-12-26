@@ -1,10 +1,8 @@
 defmodule BoltxTest do
   use ExUnit.Case, async: true
 
-  import ExUnit.CaptureLog
-
   alias Boltx.Response
-  alias Boltx.Types.{Duration, DateTimeWithTZOffset, Point, TimeWithTZOffset}
+  alias Boltx.Types.{Duration, Point}
 
   @opts Boltx.TestHelper.opts()
 
@@ -268,7 +266,7 @@ defmodule BoltxTest do
 
     @tag :core
     test "create a Bob node and check it was deleted afterwards", c do
-      assert %Response{stats: stats, plan: plan} =
+      assert %Response{stats: stats} =
                Boltx.query!(c.conn, "CREATE (a:Person {name:'Bob'})")
 
       assert stats["labels-added"] == 1

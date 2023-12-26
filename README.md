@@ -11,10 +11,10 @@ Currently, the focus is on refactoring Bolt Sips to enhance the way Bolt message
 | Feature               | Implemented |
 | --------------------- | ------------ |
 | Querys                | YES          |
-| Routing               | NO           |
+| Transactions          | NO           |
 | Multi tenancy         | NO           |
 | Stream capabilities   | NO           |
-| Transactions          | NO           |
+| Routing               | NO           |
 
 ### Basic usage
 ```elixir
@@ -32,7 +32,7 @@ iex> {:ok, conn} = Boltx.start_link(@opts)
 {:ok, #PID<0.237.0>}
 
 iex> Boltx.query!(conn, "return 1 as n") |>
-...> Bolt.Sips.Response.first()
+...> Boltx.Response.first()
 %{"n" => 1}
 ```
 
