@@ -45,8 +45,6 @@ env_versions =
 ExUnit.start(capture_log: true, assert_receive_timeout: 500, exclude: exclude, include: include)
 Application.ensure_started(:porcelain)
 
-Code.require_file("test_support.exs", __DIR__)
-
 defmodule Boltx.TestHelper do
   def opts() do
     [
