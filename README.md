@@ -11,10 +11,10 @@ Currently, the focus is on refactoring Bolt Sips to enhance the way Bolt message
 | Feature               | Implemented |
 | --------------------- | ------------ |
 | Querys                | YES          |
-| Routing               | NO           |
+| Transactions          | NO           |
 | Multi tenancy         | NO           |
 | Stream capabilities   | NO           |
-| Transactions          | NO           |
+| Routing               | NO           |
 
 ### Basic usage
 ```elixir
