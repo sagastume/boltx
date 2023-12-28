@@ -22,7 +22,7 @@ Currently, the focus is on refactoring Bolt Sips to enhance the way Bolt message
 opts = [
     address: "127.0.0.1",
     auth: [username: "neo4j", password: ""],
-    bolt_agent: [product: "boltxTest/1"],
+    user_agent: "boltxTest/1",
     pool_size: 15,
     max_overflow: 3,
     prefix: :default

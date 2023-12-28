@@ -69,28 +69,11 @@ defmodule Boltx.Mixfile do
     }
   end
 
-  defp docs do
+  defp docs() do
     [
-      name: "Boltx",
-      logo: "assets/boltx_white_transparent.png",
-      assets: "assets",
       source_ref: "v#{@version}",
-      source_url: @url_github,
-      main: "Boltx",
-      extra_section: "guides",
-      extras: [
-        "README.md",
-        "CHANGELOG.md",
-        "docs/getting-started.md",
-        "docs/features/configuration.md",
-        "docs/features/using-cypher.md",
-        "docs/features/using-temporal-and-spatial-types.md",
-        "docs/features/about-transactions.md",
-        "docs/features/about-encoding.md",
-        "docs/features/routing.md",
-        "docs/features/multi-tenancy.md",
-        "docs/features/using-with-phoenix.md"
-      ]
+      main: "readme",
+      extras: ["README.md"]
     ]
   end
 

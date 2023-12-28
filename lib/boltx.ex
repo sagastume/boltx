@@ -5,8 +5,65 @@ defmodule Boltx do
 
   @type conn() :: DBConnection.conn()
 
+  @typedoc """
+  The basic authentication scheme relies on traditional username and password
+
+  * `:username` - Username (default: `USER` env variable)
+
+  * `:password` - Password (default: `BOLT_PWD` env variable, then `nil`)
+  """
+  @type basic_auth() ::
+          {:username, String.t()}
+          | {:password, String.t() | nil}
+
+  @type start_option() ::
+          {:address, String.t()}
+          | {:port, :inet.port_number()}
+          | {:versions, list(float())}
+          | {:auth, basic_auth()}
+          | {:user_agent, String.t()}
+          | {:notifications_minimum_severity, String.t()}
+          | {:notifications_disabled_categories, list(String.t())}
+          | {:connect_timeout, timeout()}
+          | {:socket_options, [:gen_tcp.connect_option()]}
+          | DBConnection.start_option()
+
+  @type option() :: DBConnection.option()
   alias Boltx.{Types}
 
+  @doc """
+  Starts the connection process and connects to a Bolt/Neo4j server.
+
+  ## Options
+
+  * `:versions` - List of bolt versions you want to be negotiated with the server.
+
+  * `:auth` - The basic authentication scheme
+
+  * `:user_agent` - Optionally override the default user agent name. (Default: 'boltx/<version>')
+
+  * `:notifications_minimum_severity` - Set the minimum severity for notifications the server
+   should send to the client. Disabling severities allows the server to skip analysis for those,
+  which can speed up query execution. (default: nil) _New in neo4j v5.7 and Bolt v5.2_
+
+  * `:notifications_disabled_categories` - Set categories of notifications the server should not
+   send to the client. Disabling categories allows the server to skip analysis for those, which
+  can speed up query execution. (default: nil) _New in neo4j v5.7 and Bolt v5.2_
+
+  * `:connect_timeout` - Socket connect timeout in milliseconds (default:
+      `15_000`)
+
+  The given options are passed down to DBConnection, some of the most commonly used ones are
+   documented below:
+
+  * `:after_connect` - A function to run after the connection has been established, either a
+      1-arity fun, a `{module, function, args}` tuple, or `nil` (default: `nil`)
+
+  * `:pool` - The pool module to use, defaults to built-in pool provided by DBconnection
+
+   * `:pool_size` - The size of the pool
+  """
+  @spec start_link([start_option()]) :: {:ok, pid()} | {:error, Boltx.Error.t()}
   def start_link(options) do
     DBConnection.start_link(Boltx.Connection, options)
   end
