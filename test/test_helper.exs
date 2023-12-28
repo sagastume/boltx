@@ -50,7 +50,7 @@ defmodule Boltx.TestHelper do
     [
       address: "127.0.0.1",
       auth: [username: "neo4j", password: "boltxPassword"],
-      bolt_agent: [product: "boltxTest/1"],
+      user_agent: "boltxTest/1",
       pool_size: 1,
       prefix: :default
     ]
@@ -59,7 +59,7 @@ defmodule Boltx.TestHelper do
   def opts_without_auth() do
     [
       address: "127.0.0.1",
-      bolt_agent: [product: "boltxTest/1"],
+      user_agent: "boltxTest/1",
       pool_size: 1,
       max_overflow: 3,
       prefix: :default
