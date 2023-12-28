@@ -28,7 +28,7 @@ defmodule Boltx.Client do
   defmodule Config do
     @moduledoc false
 
-    @default_timeout 5_000
+    @default_timeout 15_000
 
     defstruct [
       :address,
@@ -53,7 +53,7 @@ defmodule Boltx.Client do
         port: port,
         username:
           Keyword.get(opts, :username, System.get_env("USER")) || raise(":username is missing"),
-        password: Keyword.get(opts, :password),
+        password: Keyword.get(opts, :password, System.get_env("BOLT_PWD")),
         connect_timeout: Keyword.get(opts, :connect_timeout, @default_timeout),
         socket_options:
           Keyword.merge([mode: :binary, packet: :raw, active: false], opts[:socket_options] || []),
