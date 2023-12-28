@@ -23,7 +23,7 @@ defmodule Boltx do
           | {:auth, basic_auth()}
           | {:user_agent, String.t()}
           | {:notifications_minimum_severity, String.t()}
-          | {:notifications_disabled_categories, String.t()}
+          | {:notifications_disabled_categories, list(String.t())}
           | {:connect_timeout, timeout()}
           | {:socket_options, [:gen_tcp.connect_option()]}
           | DBConnection.start_option()
