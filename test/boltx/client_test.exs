@@ -22,6 +22,69 @@ defmodule Boltx.ClientTest do
     end
   end
 
+  describe "Client configuration" do
+    @describetag :core
+
+    test "parsing the host, schema and the port, from a uri string config parameter" do
+      opts = [
+        uri: "bolt://hobby-happyHoHoHo.dbs.graphenedb.com:24786",
+        auth: [username: "usertest"]
+      ]
+
+      config = Client.Config.new(opts)
+
+      assert config.hostname == "hobby-happyHoHoHo.dbs.graphenedb.com"
+      assert config.scheme == "bolt"
+      assert config.port == 24786
+      assert config.username == "usertest"
+    end
+
+    test "standard Boltx default configuration for port, hostname and schema" do
+      opts = [
+        auth: [username: "usertest"]
+      ]
+
+      config = Client.Config.new(opts)
+
+      assert config.hostname == "localhost"
+      assert config.scheme == "bolt"
+      assert config.username == "usertest"
+    end
+
+    test "parsing the host, scheme and the port without uri" do
+      opts = [
+        hostname: "hobby-happyHoHoHo.dbs.com",
+        scheme: "bolts",
+        port: 7689,
+        auth: [username: "usertests"]
+      ]
+
+      config = Client.Config.new(opts)
+
+      assert config.hostname == "hobby-happyHoHoHo.dbs.com"
+      assert config.scheme == "bolts"
+      assert config.port == 7689
+      assert config.username == "usertests"
+    end
+
+    test "passing port, scheme and host along with uri" do
+      opts = [
+        uri: "bolt://hobby-happyHoHoHo.dbs.graphenedb.com:24786",
+        hostname: "happy.com",
+        scheme: "bolts",
+        port: 7689,
+        auth: [username: "usertests"]
+      ]
+
+      config = Client.Config.new(opts)
+
+      assert config.hostname == "hobby-happyHoHoHo.dbs.graphenedb.com"
+      assert config.scheme == "bolt"
+      assert config.port == 24786
+      assert config.username == "usertests"
+    end
+  end
+
   describe "connect" do
     @tag :bolt_version_5_3
     test "multiple versions specified" do
