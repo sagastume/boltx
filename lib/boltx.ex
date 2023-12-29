@@ -20,7 +20,7 @@ defmodule Boltx do
           {:uri, String.t()}
           | {:hostname, String.t()}
           | {:port, :inet.port_number()}
-          | {:schema, :inet.port_number()}
+          | {:scheme, :inet.port_number()}
           | {:versions, list(float())}
           | {:auth, basic_auth()}
           | {:user_agent, String.t()}
@@ -38,14 +38,14 @@ defmodule Boltx do
 
   ## Options
 
-  * `:uri` - Connection URI. The uri configuration takes priority over the hostname, port, and schema options.
+  * `:uri` - Connection URI. The uri configuration takes priority over the hostname, port, and scheme options.
    URI has the form: `<SCHEME>://<HOST>[:<PORT>[?policy=<POLICY-NAME>]]`
 
   * `:hostname` - Server hostname (default: `BOLT_HOST` env variable, then `"localhost"`)
 
   * `:port` - Server port (default: `BOLT_TCP_PORT` env variable, then `7687`)
 
-  * `:schema` - Is one among neo4j, neo4j+s, neo4j+ssc, bolt, bolt+s, bolt+ssc.
+  * `:scheme` - Is one among neo4j, neo4j+s, neo4j+ssc, bolt, bolt+s, bolt+ssc.
 
   * `:versions` - List of bolt versions you want to be negotiated with the server.
 

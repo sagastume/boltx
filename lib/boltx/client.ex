@@ -33,7 +33,7 @@ defmodule Boltx.Client do
     defstruct [
       :hostname,
       :port,
-      :schema,
+      :scheme,
       :username,
       :password,
       :connect_timeout,
@@ -49,7 +49,7 @@ defmodule Boltx.Client do
       %__MODULE__{
         hostname: hostname,
         port: port,
-        schema: get_schema(opts),
+        scheme: get_schema(opts),
         username: username,
         password: password,
         connect_timeout: Keyword.get(opts, :connect_timeout, @default_timeout),

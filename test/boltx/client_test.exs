@@ -22,7 +22,7 @@ defmodule Boltx.ClientTest do
     end
   end
 
-  @tag :debug
+  @tag :core
   describe "Client configuration" do
     test "parsing the host, schema and the port, from a uri string config parameter" do
       opts = [
@@ -33,10 +33,39 @@ defmodule Boltx.ClientTest do
       config = Client.Config.new(opts)
 
       assert config.hostname == "hobby-happyHoHoHo.dbs.graphenedb.com"
-      assert config.schema == "bolt"
+      assert config.scheme == "bolt"
       assert config.port == 24786
       assert config.username == "usertest"
     end
+  end
+
+  test "standard Boltx default configuration for port, hostname and schema" do
+    opts = [
+      auth: [username: "usertest"]
+    ]
+
+    config = Client.Config.new(opts)
+
+    assert config.hostname == "localhost"
+    assert config.scheme == "bolt"
+    assert config.port == 7687
+    assert config.username == "usertest"
+  end
+
+  test "parsing the host, scheme and the port without uri" do
+    opts = [
+      hostname: "hobby-happyHoHoHo.dbs.com",
+      scheme: "bolts",
+      port: 7689,
+      auth: [username: "usertests"]
+    ]
+
+    config = Client.Config.new(opts)
+
+    assert config.hostname == "hobby-happyHoHoHo.dbs.com"
+    assert config.scheme == "bolts"
+    assert config.port == 7689
+    assert config.username == "usertests"
   end
 
   describe "connect" do
