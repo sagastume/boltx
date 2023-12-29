@@ -69,7 +69,8 @@ defmodule Boltx.ConnectionTest do
   test "connect/1 fails when connection is not available" do
     opts = [
       hostname: "192.0.0.198",
-      connect_timeout: 1
+      connect_timeout: 1,
+      auth: [username: "baduser"]
     ]
 
     {:error, %Boltx.Error{code: :timeout}} = Connection.connect(opts)

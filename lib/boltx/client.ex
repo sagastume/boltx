@@ -131,7 +131,7 @@ defmodule Boltx.Client do
     buffer? = Keyword.has_key?(socket_options, :buffer)
     client = %__MODULE__{sock: nil, bolt_version: nil}
 
-    case :gen_tcp.connect(hostname, port, socket_options, connect_timeout) do
+    case :gen_tcp.connect(String.to_charlist(hostname), port, socket_options, connect_timeout) do
       {:ok, sock} when buffer? ->
         {:ok, %{client | sock: {:gen_tcp, sock}}}
 
