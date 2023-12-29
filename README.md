@@ -20,7 +20,7 @@ Currently, the focus is on refactoring Bolt Sips to enhance the way Bolt message
 ```elixir
 
 opts = [
-    address: "127.0.0.1",
+    hostname: "127.0.0.1",
     auth: [username: "neo4j", password: ""],
     user_agent: "boltxTest/1",
     pool_size: 15,

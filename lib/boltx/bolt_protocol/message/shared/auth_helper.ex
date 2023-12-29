@@ -18,7 +18,7 @@ defmodule Boltx.BoltProtocol.Message.Shared.AuthHelper do
     %{user_agent: user_agent}
   end
 
-  def get_bolt_agent(fields) do
+  def get_bolt_agent(_fields) do
     system_info = System.build_info()
     product = "boltx/" <> to_string(Application.spec(:boltx, :vsn))
 

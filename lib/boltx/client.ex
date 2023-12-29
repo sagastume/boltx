@@ -31,8 +31,9 @@ defmodule Boltx.Client do
     @default_timeout 15_000
 
     defstruct [
-      :address,
+      :hostname,
       :port,
+      :schema,
       :username,
       :password,
       :connect_timeout,
@@ -41,24 +42,50 @@ defmodule Boltx.Client do
     ]
 
     def new(opts) do
-      address = Keyword.get(opts, :address, System.get_env("BOLT_HOST"))
-      address = String.to_charlist(address || "localhost")
+      {hostname, port} = get_hostname_and_port(opts)
+      {username, password} = get_user_and_pass(opts)
       versions = get_versions(opts)
 
-      default_port = String.to_integer(System.get_env("BOLT_TCP_PORT") || "7687")
-      port = Keyword.get(opts, :port, default_port)
-
       %__MODULE__{
-        address: address,
+        hostname: hostname,
         port: port,
-        username:
-          Keyword.get(opts, :username, System.get_env("USER")) || raise(":username is missing"),
-        password: Keyword.get(opts, :password, System.get_env("BOLT_PWD")),
+        schema: get_schema(opts),
+        username: username,
+        password: password,
         connect_timeout: Keyword.get(opts, :connect_timeout, @default_timeout),
         socket_options:
           Keyword.merge([mode: :binary, packet: :raw, active: false], opts[:socket_options] || []),
         versions: versions
       }
+    end
+
+    defp get_user_and_pass(opts) do
+      basic_auth = Keyword.get(opts, :auth, [])
+
+      username =
+        System.get_env("BOLT_USER") || Keyword.get(basic_auth, :username, nil) ||
+          raise(":username is missing")
+
+      password = System.get_env("BOLT_PWD") || Keyword.get(basic_auth, :password)
+
+      {username, password}
+    end
+
+    defp get_hostname_and_port(opts) do
+      uri = Keyword.get(opts, :uri, nil) |> to_string() |> URI.parse()
+      port_default = String.to_integer(System.get_env("BOLT_TCP_PORT") || "7687")
+
+      hostname =
+        uri.host || Keyword.get(opts, :hostname, nil) || System.get_env("BOLT_HOST") ||
+          "localhost"
+
+      port = uri.port || Keyword.get(opts, :port, port_default)
+      {hostname, port}
+    end
+
+    defp get_schema(opts) do
+      uri = Keyword.get(opts, :uri, nil) |> to_string() |> URI.parse()
+      uri.scheme || Keyword.get(opts, :scheme, nil) || "bolt"
     end
 
     def get_versions(opts) do
@@ -95,7 +122,7 @@ defmodule Boltx.Client do
 
   def do_connect(config) do
     %{
-      address: address,
+      hostname: hostname,
       port: port,
       socket_options: socket_options,
       connect_timeout: connect_timeout
@@ -104,7 +131,7 @@ defmodule Boltx.Client do
     buffer? = Keyword.has_key?(socket_options, :buffer)
     client = %__MODULE__{sock: nil, bolt_version: nil}
 
-    case :gen_tcp.connect(address, port, socket_options, connect_timeout) do
+    case :gen_tcp.connect(hostname, port, socket_options, connect_timeout) do
       {:ok, sock} when buffer? ->
         {:ok, %{client | sock: {:gen_tcp, sock}}}
 

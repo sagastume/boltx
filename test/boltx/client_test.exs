@@ -22,6 +22,23 @@ defmodule Boltx.ClientTest do
     end
   end
 
+  @tag :debug
+  describe "Client configuration" do
+    test "parsing the host, schema and the port, from a uri string config parameter" do
+      opts = [
+        uri: "bolt://hobby-happyHoHoHo.dbs.graphenedb.com:24786",
+        auth: [username: "usertest"]
+      ]
+
+      config = Client.Config.new(opts)
+
+      assert config.hostname == "hobby-happyHoHoHo.dbs.graphenedb.com"
+      assert config.schema == "bolt"
+      assert config.port == 24786
+      assert config.username == "usertest"
+    end
+  end
+
   describe "connect" do
     @tag :bolt_version_5_3
     test "multiple versions specified" do

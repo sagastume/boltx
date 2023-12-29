@@ -48,7 +48,7 @@ Application.ensure_started(:porcelain)
 defmodule Boltx.TestHelper do
   def opts() do
     [
-      address: "127.0.0.1",
+      hostname: "127.0.0.1",
       auth: [username: "neo4j", password: "boltxPassword"],
       user_agent: "boltxTest/1",
       pool_size: 1,
@@ -58,7 +58,7 @@ defmodule Boltx.TestHelper do
 
   def opts_without_auth() do
     [
-      address: "127.0.0.1",
+      hostname: "127.0.0.1",
       user_agent: "boltxTest/1",
       pool_size: 1,
       max_overflow: 3,
