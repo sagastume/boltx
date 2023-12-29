@@ -29,7 +29,8 @@ defmodule Boltx.Connection do
 
   @impl true
   def handle_begin(opts, %__MODULE__{client: client} = state) do
-    {:ok, _} = Client.send_begin(client, opts)
+    extra_parameters = opts[:extra_parameters] || %{}
+    {:ok, _} = Client.send_begin(client, extra_parameters)
     {:ok, :began, state}
   end
 

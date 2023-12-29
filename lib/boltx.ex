@@ -30,7 +30,13 @@ defmodule Boltx do
           | {:socket_options, [:gen_tcp.connect_option()]}
           | DBConnection.start_option()
 
-  @type option() :: DBConnection.option()
+  @type option :: %{
+          bookmarks: list(),
+          mode: String.t(),
+          db: String.t() | nil,
+          tx_metadata: map() | nil
+        }
+
   alias Boltx.{Types}
 
   @doc """
@@ -114,6 +120,16 @@ defmodule Boltx do
       {:error, exception} -> raise exception
     end
   end
+
+  @spec transaction(conn, (DBConnection.t() -> result), [DBConnection.option()], option) ::
+          {:ok, result} | {:error, any}
+        when result: var
+  def transaction(conn, fun, opts \\ [], extra_parameters \\ %{}) do
+    DBConnection.transaction(conn, fun, opts ++ [extra_parameters: extra_parameters])
+  end
+
+  @spec rollback(DBConnection.t(), any()) :: no_return()
+  defdelegate rollback(conn, reason), to: DBConnection
 
   defp do_query(conn, query, params, options) do
     case DBConnection.prepare_execute(conn, query, params, options) do
