@@ -1,4 +1,6 @@
 defmodule Boltx.BoltProtocol.Message.DiscardMessage do
+  @moduledoc false
+
   alias Boltx.Internals.PackStream.Message.Encoder
   alias Boltx.Internals.PackStream.Message.Decoder
 

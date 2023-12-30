@@ -1,4 +1,6 @@
 defmodule Boltx.TypesHelper do
+  @moduledoc false
+
   @doc """
   Decompose an amount seconds into the tuple {hours, minutes, seconds}
   """

@@ -1,4 +1,6 @@
 defmodule Boltx.BoltProtocol.Message.PullMessage do
+  @moduledoc false
+
   import Boltx.BoltProtocol.ServerResponse
 
   alias Boltx.Internals.PackStream.Message.Encoder

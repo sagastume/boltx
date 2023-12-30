@@ -1,4 +1,6 @@
 defmodule Boltx.Internals.PackStream.DecoderImplV1 do
+  @moduledoc false
+
   alias Boltx.Types
 
   defmacro __using__(_options) do

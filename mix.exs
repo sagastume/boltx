@@ -1,7 +1,7 @@
 defmodule Boltx.Mixfile do
   use Mix.Project
 
-  @version "0.0.1"
+  @version "0.0.2"
   @url_docs "https://hexdocs.pm/boltx"
   @url_github "https://github.com/sagastume/boltx"
 

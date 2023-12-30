@@ -1,4 +1,5 @@
 defmodule Boltx.Internals.PackStream.V2 do
+  @moduledoc false
   alias Boltx.Types.{TimeWithTZOffset, DateTimeWithTZOffset, Duration, Point}
   alias Boltx.Internals.PackStream.Encoder
 

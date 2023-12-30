@@ -1,4 +1,6 @@
 defmodule Boltx.Utils.Converters do
+  @moduledoc false
+
   def to_float(value) when is_float(value), do: value
   def to_float(value) when is_integer(value), do: value + 0.0
 

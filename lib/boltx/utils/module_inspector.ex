@@ -1,4 +1,6 @@
 defmodule Boltx.Utils.ModuleInspector do
+  @moduledoc false
+
   def match_modules(hint) do
     Enum.map(get_modules(), &Atom.to_string/1)
     |> :lists.usort()

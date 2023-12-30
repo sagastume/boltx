@@ -1,4 +1,6 @@
 defmodule Boltx.Internals.PackStream.DecoderImplV2 do
+  @moduledoc false
+
   alias Boltx.Types.{TimeWithTZOffset, DateTimeWithTZOffset, Duration, Point}
 
   defmacro __using__(_options) do

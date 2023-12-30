@@ -1,4 +1,6 @@
 defmodule Boltx.BoltProtocol.Versions do
+  @moduledoc false
+
   @available_bolt_versions [1.0, 2.0, 3.0, 4.0, 4.1, 4.2, 4.3, 4.4, 5.0, 5.1, 5.2, 5.3, 5.4]
 
   def available_versions() do
