@@ -1,4 +1,6 @@
 defmodule Boltx.BoltProtocol.Message.Shared.AuthHelper do
+  @moduledoc false
+
   def get_auth_params(fields) do
     %{
       scheme: "basic",

@@ -1,4 +1,6 @@
 defmodule Boltx.Internals.PackStream.Utils do
+  @moduledoc false
+
   alias Boltx.Internals.PackStream.Encoder
   alias Boltx.Types.Duration
   alias Boltx.Internals.PackStreamError

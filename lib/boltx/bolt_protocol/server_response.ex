@@ -1,4 +1,6 @@
 defmodule Boltx.BoltProtocol.ServerResponse do
+  @moduledoc false
+
   import Record
 
   defrecord :statement_result, [

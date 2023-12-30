@@ -1,4 +1,6 @@
 defmodule Boltx.BoltProtocol.Message.HelloMessage do
+  @moduledoc false
+
   import Boltx.BoltProtocol.Message.Shared.AuthHelper
 
   alias Boltx.Internals.PackStream.Message.Encoder

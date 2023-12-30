@@ -1,4 +1,6 @@
 defmodule Boltx.Client do
+  @moduledoc false
+
   @handshake_bytes_identifier <<0x60, 0x60, 0xB0, 0x17>>
   @noop_chunk <<0x00, 0x00>>
 

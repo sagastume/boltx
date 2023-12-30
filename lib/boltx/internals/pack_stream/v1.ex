@@ -1,4 +1,5 @@
 defmodule Boltx.Internals.PackStream.V1 do
+  @moduledoc false
   defmacro __using__(_options) do
     quote do
       import unquote(__MODULE__)

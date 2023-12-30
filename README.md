@@ -1,12 +1,15 @@
 # Boltx
 
-`Boltx` is a derivative of Bolt_Sips currently in development. Is an Elixir driver for [Neo4j](https://neo4j.com/developer/graph-database/), providing many useful features:
-- using the Bolt protocol, the Elixir implementation - the Neo4j's newest network protocol, designed for high-performance; latest Bolt versions, are supported.
-- Supports Neo4j versions: 3.0.x/3.1.x/3.2.x/3.4.x/3.5.x/4.0.x/4.1.x/4.2.x/5.12.0, 5.13.0
+`Boltx` is an Elixir driver for [Neo4j](https://neo4j.com/developer/graph-database/)/Bolt Protocol.
+
+- Supports Neo4j versions: 3.0.x/3.1.x/3.2.x/3.4.x/3.5.x/4.x/5.9 -5.13.0
+- Supports Bolt version: 1.0/2.0/3.0/4.x/5.0/5.1/5.2/5.3/5.4
+- Supports transactions, prepared queries, streaming, pooling and more via DBConnection
+- Automatic decoding and encoding of Elixir values
+
+Documentation: [https://hexdocs.pm/boltx](https://hexdocs.pm/boltx/)
 
 ## Features
-
-Currently, the focus is on refactoring Bolt Sips to enhance the way Bolt messages are implemented, making it easier to implement new versions of Bolt in the future.
 
 | Feature               | Implemented |
 | --------------------- | ------------ |
@@ -16,7 +19,20 @@ Currently, the focus is on refactoring Bolt Sips to enhance the way Bolt message
 | Stream capabilities   | NO           |
 | Routing               | NO           |
 
-### Basic usage
+### Usage
+
+Add :boltx to your dependencies:
+
+```elixir
+def deps() do
+  [
+    {:boltx, "~> 0.0.2"}
+  ]
+end
+```
+
+Using the latest version.
+
 ```elixir
 
 opts = [
@@ -31,28 +47,33 @@ opts = [
 iex> {:ok, conn} = Boltx.start_link(opts)
 {:ok, #PID<0.237.0>}
 
-iex> Boltx.query!(conn, "return 1 as n") |>
-...> Boltx.Response.first()
+iex> Boltx.query!(conn, "return 1 as n") |> Boltx.Response.first()
 %{"n" => 1}
+
+# Commit is performed automatically if everythings went fine
+Boltx.transaction(conn, fn conn ->
+  result = Boltx.query!(conn, "CREATE (m:Movie {title: "Matrix"}) RETURN m")
+end)
+
 ```
 
-## Implemented messages
+## Bolt Protocol message
 
-| Message       | Bolt Version                            |
-| ------------- | --------------------------------------- |
-| INIT          | V1, V2                                  |
-| HELLO         | V3, V4.x, v5.1, v5.2, v5.3, v5.4        |
-| LOGON         | V3, V4.x, v5.1, v5.2, v5.3, v5.4        |
-| RUN           | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4|
-| PULL          | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4|
-| BEGIN         | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4|
-| COMMIT        | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4|
-| ROLLBACK      | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4|
-| LOGOFF        | V3, V4.x, v5.1, v5.2, v5.3, v5.4        |
-| TELEMETRY     | --                                      |
-| GOODBYE       | V3, V4.x, v5.1, v5.2, v5.3, v5.4        |
-| RESET         | V3, V4.x, v5.1, v5.2, v5.3, v5.4        |
-| DISCARD       | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4|
-| ROUTE         | --                                      |
-| ACK_FAILURE   | V1, V2                                  |
+| Message       | Bolt Version                            | Implemented |
+| ------------- | --------------------------------------- | ----------- |
+| INIT          | V1, V2                                  | YES         |
+| HELLO         | V3, V4.x, v5.1, v5.2, v5.3, v5.4        | YES         |
+| LOGON         | V3, V4.x, v5.1, v5.2, v5.3, v5.4        | YES         |
+| RUN           | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4| YES         |
+| PULL          | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4| YES         |
+| BEGIN         | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4| YES         |
+| COMMIT        | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4| YES         |
+| ROLLBACK      | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4| YES         |
+| LOGOFF        | V3, V4.x, v5.1, v5.2, v5.3, v5.4        | YES         |
+| TELEMETRY     | V5.4                                    | NO          |
+| GOODBYE       | V3, V4.x, v5.1, v5.2, v5.3, v5.4        | YES         |
+| RESET         | V3, V4.x, v5.1, v5.2, v5.3, v5.4        | YES         |
+| DISCARD       | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4| YES         |
+| ROUTE         | V4.x, v5.1, v5.2, v5.3, v5.4            | NO          |
+| ACK_FAILURE   | V1, V2                                  | YES         |
 

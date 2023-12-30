@@ -1,4 +1,6 @@
 defmodule Boltx.Error do
+  @moduledoc false
+
   @error_map %{
     "Neo.ClientError.Security.Unauthorized" => :unauthorized,
     "Neo.ClientError.Request.Invalid" => :request_invalid,
