@@ -7,7 +7,7 @@
 - Supports transactions, prepared queries, streaming, pooling and more via DBConnection
 - Automatic decoding and encoding of Elixir values
 
-Documentation: [https://hexdocs.pm/boltx](https://hexdocs.pm/boltx/)
+Documentation: [https://hexdocs.pm/boltx](https://hexdocs.pm/boltx)
 
 ## Features
 
