@@ -1,5 +1,4 @@
 version: "3.0"
-name: boltx
 
 services:
   neo4j-3.4.0:
@@ -32,11 +31,15 @@ services:
       - 7690:7687
     environment:
       - NEO4J_AUTH=neo4j/boltxPassword
-  memgraph-2.11.0:
-    image: "memgraph/memgraph:2.11.0"
+  memgraph-2.13.0:
+    image: "memgraph/memgraph:2.13.0"
     labels:
         - "boltVersions=5.0,5.1,5.2"
         - "database=memgraph"
     ports:
       - "7691:7687"
+    environment:
+      MEMGRAPH_USER: "neo4j"
+      MEMGRAPH_PASSWORD: "boltxPassword"
+    command: ["--also-log-to-stderr=true", "--bolt-server-name-for-init=Neo4j/5.2.0"]
     entrypoint: ["/usr/lib/memgraph/memgraph", "--log-level=TRACE"]
