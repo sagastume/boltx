@@ -1,6 +1,16 @@
 defmodule Boltx.PackStream.Unpacker do
-  use Boltx.Internals.PackStream.Markers
-  alias Boltx.Types
+  use Boltx.PackStream.Markers
+
+  alias Boltx.Types.{
+    TimeWithTZOffset,
+    DateTimeWithTZOffset,
+    Duration,
+    Point,
+    Relationship,
+    UnboundRelationship,
+    Node,
+    Path
+  }
 
   # Null
   def unpack(<<@null_marker, rest::binary>>) do
@@ -93,7 +103,7 @@ defmodule Boltx.PackStream.Unpacker do
 
     field_names = [:id, :labels, :properties, :element_id]
     node_data = Enum.zip([field_names, structure_data])
-    node = struct(Types.Node, node_data)
+    node = struct(Node, node_data)
 
     [node | rest]
   end
@@ -115,7 +125,7 @@ defmodule Boltx.PackStream.Unpacker do
     ]
 
     relationship_data = Enum.zip([field_names, structure_data])
-    relationship = struct(Types.Relationship, relationship_data)
+    relationship = struct(Relationship, relationship_data)
 
     [relationship | rest]
   end
@@ -126,7 +136,7 @@ defmodule Boltx.PackStream.Unpacker do
 
     field_names = [:id, :type, :properties, :element_id]
     unbounded_relationship_data = Enum.zip([field_names, structure_data])
-    unbounded_relationship = struct(Types.UnboundRelationship, unbounded_relationship_data)
+    unbounded_relationship = struct(UnboundRelationship, unbounded_relationship_data)
 
     [unbounded_relationship | rest]
   end
@@ -138,7 +148,7 @@ defmodule Boltx.PackStream.Unpacker do
 
     field_names = [:nodes, :relationships, :sequence]
     path_data = Enum.zip([field_names, structure_data])
-    path = struct(Types.Path, path_data)
+    path = struct(Path, path_data)
 
     [path | rest]
   end
@@ -165,6 +175,101 @@ defmodule Boltx.PackStream.Unpacker do
 
   def unpack(<<int::signed-integer, rest::binary>>) do
     [int | unpack(rest)]
+  end
+
+  # Local Date
+  def unpack({@date_signature, struct, @date_struct_size}) do
+    {[date], rest} = decode_struct(struct, @date_struct_size)
+    [Date.add(~D[1970-01-01], date) | rest]
+  end
+
+  # Local Time
+  def unpack({@local_time_signature, struct, @local_time_struct_size}) do
+    {[time], rest} = decode_struct(struct, @local_time_struct_size)
+
+    [Time.add(~T[00:00:00.000000], time, :nanosecond) | rest]
+  end
+
+  # Local DateTime
+  def unpack({@local_datetime_signature, struct, @local_datetime_struct_size}) do
+    {[seconds, nanoseconds], rest} =
+      decode_struct(struct, @local_datetime_struct_size)
+
+    ndt =
+      NaiveDateTime.add(
+        ~N[1970-01-01 00:00:00.000000000],
+        seconds * 1_000_000_000 + nanoseconds,
+        :nanosecond
+      )
+
+    [ndt | rest]
+  end
+
+  # Time with Zone Offset
+  def unpack({@time_with_tz_signature, struct, @time_with_tz_struct_size}) do
+    {[time, offset], rest} = decode_struct(struct, @time_with_tz_struct_size)
+
+    t = TimeWithTZOffset.create(Time.add(~T[00:00:00.000000], time, :nanosecond), offset)
+    [t | rest]
+  end
+
+  # Datetime with zone Id
+  def unpack({@datetime_with_zone_id_signature, struct, @datetime_with_zone_id_struct_size}) do
+    {[seconds, nanoseconds, zone_id], rest} =
+      decode_struct(struct, @datetime_with_zone_id_struct_size)
+
+    naive_dt =
+      NaiveDateTime.add(
+        ~N[1970-01-01 00:00:00.000000],
+        seconds * 1_000_000_000 + nanoseconds,
+        :nanosecond
+      )
+
+    dt = Boltx.TypesHelper.datetime_with_micro(naive_dt, zone_id)
+    [dt | rest]
+  end
+
+  # Datetime with zone offset
+  def unpack(
+        {@datetime_with_zone_offset_signature, struct, @datetime_with_zone_offset_struct_size}
+      ) do
+    {[seconds, nanoseconds, zone_offset], rest} =
+      decode_struct(struct, @datetime_with_zone_id_struct_size)
+
+    naive_dt =
+      NaiveDateTime.add(
+        ~N[1970-01-01 00:00:00.000000],
+        seconds * 1_000_000_000 + nanoseconds,
+        :nanosecond
+      )
+
+    dt = DateTimeWithTZOffset.create(naive_dt, zone_offset)
+    [dt | rest]
+  end
+
+  # Duration
+  def unpack({@duration_signature, struct, @duration_struct_size}) do
+    {[months, days, seconds, nanoseconds], rest} =
+      decode_struct(struct, @duration_struct_size)
+
+    duration = Duration.create(months, days, seconds, nanoseconds)
+    [duration | rest]
+  end
+
+  # Point2D
+  def unpack({@point2d_signature, struct, @point2d_struct_size}) do
+    {[srid, x, y], rest} = decode_struct(struct, @point2d_struct_size)
+    point = Point.create(srid, x, y)
+
+    [point | rest]
+  end
+
+  # Point3D
+  def unpack({@point3d_signature, struct, @point3d_struct_size}) do
+    {[srid, x, y, z], rest} = decode_struct(struct, @point3d_struct_size)
+    point = Point.create(srid, x, y, z)
+
+    [point | rest]
   end
 
   # Private

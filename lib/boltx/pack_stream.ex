@@ -30,10 +30,15 @@ defmodule Boltx.PackStream do
     end
   end
 
-  def unpack(iodata) do
+  @spec unpack(binary()) :: list()
+  def unpack(iodata) when is_bitstring(iodata) do
     iodata
-      |> IO.iodata_to_binary()
-      |> Unpacker.unpack()
+    |> IO.iodata_to_binary()
+    |> Unpacker.unpack()
+  end
+
+  def unpack({signature, struct_binary, struct_size}) do
+    Unpacker.unpack({signature, IO.iodata_to_binary(struct_binary), struct_size})
   end
 
   def unpack!(iodata) do

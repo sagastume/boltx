@@ -128,12 +128,10 @@ defmodule Boltx.PackStreamTest do
                PackStream.pack!(~T[17:34:45.654321])
     end
 
-    test "date post 1970-01-01" do
+    test "Date" do
       assert <<0xB1, 0x44, 0xC9, 0x45, 0x4D>> == PackStream.pack!(~D[2018-07-29])
-    end
-
-    test "date pre 1970-01-01" do
       assert <<0xB1, 0x44, 0xC9, 0xB6, 0xA0>> == PackStream.pack!(~D[1918-07-29])
+      assert <<0xB1, 0x44, _::binary>> = PackStream.pack!(~D[2013-05-06])
     end
 
     test "local datetime" do
@@ -216,7 +214,7 @@ defmodule Boltx.PackStreamTest do
   end
 
   describe "Decode data types" do
-    @describetag :debug
+    @describetag :core
 
     test "decode a nil" do
       assert PackStream.unpack!(<<0xC0>>) == [nil]
@@ -233,6 +231,8 @@ defmodule Boltx.PackStreamTest do
 
       assert PackStream.unpack!(positive) == [1.1]
       assert PackStream.unpack!(negative) == [-1.1]
+
+      assert [7.7] == PackStream.unpack!(<<0xC1, 0x40, 0x1E, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCD>>)
     end
 
     test "decodes strings" do
@@ -248,11 +248,16 @@ defmodule Boltx.PackStreamTest do
       assert PackStream.unpack!(<<0x81, 0x61>>) == ["a"]
       assert PackStream.unpack!(longstr) == ["abcdefghijklmnopqrstuvwxyz"]
       assert PackStream.unpack!(specialcharstr) == ["En å flöt över ängen"]
+
+      assert ["hello"] == PackStream.unpack!(<<0x85, 0x68, 0x65, 0x6C, 0x6C, 0x6F>>)
     end
 
     test "decodes lists" do
       assert PackStream.unpack!(<<0x90>>) == [[]]
       assert PackStream.unpack!(<<0x93, 0x01, 0x02, 0x03>>) == [[1, 2, 3]]
+
+      assert [[]] == PackStream.unpack!(<<0x90>>)
+      assert [[2, 4]] == PackStream.unpack!(<<0x92, 0x2, 0x4>>)
 
       list_8 =
         <<0xD4, 16::8>> <> (1..16 |> Enum.map(&PackStream.pack!(&1)) |> Enum.join())
@@ -390,6 +395,293 @@ defmodule Boltx.PackStreamTest do
           }
         ]
       ] = PackStream.unpack!(path)
+    end
+  end
+
+  describe "Decode temporal data:" do
+    @describetag :core
+
+    test "date post 1970-01-01" do
+      assert [~D[2018-07-29]] == PackStream.unpack!({0x44, <<0xC9, 0x45, 0x4D>>, 1})
+    end
+
+    test "date pre 1970-01-01" do
+      assert [~D[1918-07-29]] == PackStream.unpack!({0x44, <<0xC9, 0xB6, 0xA0>>, 1})
+    end
+
+    test "Local Date" do
+      assert [~D[2013-12-15]] == PackStream.unpack!(<<0xB1, 0x44, 0xC9, 0x3E, 0xB6>>)
+    end
+
+    test "local time" do
+      assert [~T[13:25:01.952456]] ==
+               PackStream.unpack!(
+                 {0x74, <<0xCB, 0x0, 0x0, 0x2B, 0xEE, 0x2C, 0xB7, 0xD5, 0x40>>, 1}
+               )
+
+      assert [~T[09:34:23.654321]] ==
+               PackStream.unpack!(
+                 <<0xB1, 0x74, 0xCB, 0x0, 0x0, 0x1F, 0x58, 0x31, 0xDF, 0x9B, 0x68>>
+               )
+    end
+
+    test "local datetime" do
+      assert [~N[2014-11-30 16:15:01.435432]] ==
+               PackStream.unpack!(
+                 {0x64, <<0xCA, 0x54, 0x7B, 0x42, 0x85, 0xCA, 0x19, 0xF4, 0x2A, 0x40>>, 2}
+               )
+
+      assert [~N[2018-04-05 12:34:00.654321]] ==
+               PackStream.unpack!(
+                 <<0xB2, 0x64, 0xCA, 0x5A, 0xC6, 0x17, 0xB8, 0xCA, 0x27, 0x0, 0x25, 0x68>>
+               )
+    end
+
+    test "Time with timezone offzet" do
+      assert [%TimeWithTZOffset{time: ~T[04:45:32.123456], timezone_offset: 7200}] ==
+               PackStream.unpack!(
+                 {0x54, <<0xCB, 0x0, 0x0, 0xF, 0x94, 0xE2, 0x22, 0x2, 0x0, 0xC9, 0x1C, 0x20>>, 2}
+               )
+
+      ttz = TimeWithTZOffset.create(~T[12:45:30.654321], 3600)
+
+      assert [ttz] ==
+               PackStream.unpack!(
+                 <<0xB2, 0x54, 0xCB, 0x0, 0x0, 0x29, 0xC6, 0x10, 0x55, 0xC9, 0x68, 0xC9, 0xE,
+                   0x10>>
+               )
+    end
+
+    test "Datetime with zone id" do
+      dt =
+        Boltx.TypesHelper.datetime_with_micro(~N[1998-03-18 06:25:12.123456], "Europe/Paris")
+
+      assert [dt] ==
+               PackStream.unpack!(
+                 {0x66,
+                  <<0xCA, 0x35, 0xF, 0x68, 0xC8, 0xCA, 0x7, 0x5B, 0xCA, 0x0, 0x8C, 0x45, 0x75,
+                    0x72, 0x6F, 0x70, 0x65, 0x2F, 0x50, 0x61, 0x72, 0x69, 0x73>>, 3}
+               )
+
+      dt =
+        Boltx.TypesHelper.datetime_with_micro(
+          ~N[2016-05-24 13:26:08.654321],
+          "Europe/Berlin"
+        )
+
+      assert [dt] ==
+               PackStream.unpack!(
+                 <<0xB3, 0x66, 0xCA, 0x57, 0x44, 0x56, 0x70, 0xCA, 0x27, 0x0, 0x25, 0x68, 0x8D,
+                   0x45, 0x75, 0x72, 0x6F, 0x70, 0x65, 0x2F, 0x42, 0x65, 0x72, 0x6C, 0x69, 0x6E>>
+               )
+    end
+
+    test "Datetime with zone offset" do
+      assert [
+               %DateTimeWithTZOffset{
+                 naive_datetime: ~N[1998-03-18 06:25:12.123456],
+                 timezone_offset: 7200
+               }
+             ] ==
+               PackStream.unpack!(
+                 {0x46,
+                  <<0xCA, 0x35, 0xF, 0x68, 0xC8, 0xCA, 0x7, 0x5B, 0xCA, 0x0, 0xC9, 0x1C, 0x20>>,
+                  3}
+               )
+
+      assert [
+               %DateTimeWithTZOffset{
+                 naive_datetime: ~N[2016-05-24 13:26:08.654321],
+                 timezone_offset: 7200
+               }
+             ] =
+               PackStream.unpack!(
+                 <<0xB3, 0x46, 0xCA, 0x57, 0x44, 0x56, 0x70, 0xCA, 0x27, 0x0, 0x25, 0x68, 0xC9,
+                   0x1C, 0x20>>
+               )
+    end
+
+    test "Duration" do
+      assert [
+               %Duration{
+                 days: 11,
+                 hours: 15,
+                 minutes: 0,
+                 months: 8,
+                 nanoseconds: 5550,
+                 seconds: 21,
+                 weeks: 0,
+                 years: 3
+               }
+             ] ==
+               PackStream.unpack!(
+                 {0x45, <<0x2C, 0xB, 0xCA, 0x0, 0x0, 0xD3, 0x5, 0xC9, 0x15, 0xAE>>, 4}
+               )
+
+      assert [
+               %Duration{
+                 years: 1,
+                 months: 3,
+                 days: 34,
+                 hours: 2,
+                 minutes: 32,
+                 seconds: 54,
+                 nanoseconds: 5550
+               }
+             ] ==
+               PackStream.unpack!(<<0xB4, 0x45, 0xF, 0x22, 0xC9, 0x23, 0xD6, 0xC9, 0x15, 0xAE>>)
+    end
+
+    test "Point2D (cartesian)" do
+      assert [
+               %Point{
+                 crs: "cartesian",
+                 height: nil,
+                 latitude: nil,
+                 longitude: nil,
+                 srid: 7203,
+                 x: 45.0003,
+                 y: 34.5434,
+                 z: nil
+               }
+             ] ==
+               PackStream.unpack!(
+                 {0x58,
+                  <<0xC9, 0x1C, 0x23, 0xC1, 0x40, 0x46, 0x80, 0x9, 0xD4, 0x95, 0x18, 0x2B, 0xC1,
+                    0x40, 0x41, 0x45, 0x8E, 0x21, 0x96, 0x52, 0xBD>>, 3}
+               )
+
+      assert [
+               %Point{
+                 crs: "cartesian",
+                 height: nil,
+                 latitude: nil,
+                 longitude: nil,
+                 srid: 7203,
+                 x: 40.0,
+                 y: 45.0,
+                 z: nil
+               }
+             ] =
+               PackStream.unpack!(
+                 <<0xB3, 0x58, 0xC9, 0x1C, 0x23, 0xC1, 0x40, 0x44, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                   0xC1, 0x40, 0x46, 0x80, 0x0, 0x0, 0x0, 0x0, 0x0>>
+               )
+    end
+
+    test "Point2D (geographic)" do
+      assert [
+               %Point{
+                 crs: "wgs-84",
+                 height: nil,
+                 latitude: 15.00943,
+                 longitude: 20.45352,
+                 srid: 4326,
+                 x: 20.45352,
+                 y: 15.00943,
+                 z: nil
+               }
+             ] ==
+               PackStream.unpack!(
+                 {0x58,
+                  <<0xC9, 0x10, 0xE6, 0xC1, 0x40, 0x34, 0x74, 0x19, 0xE3, 0x0, 0x14, 0xF9, 0xC1,
+                    0x40, 0x2E, 0x4, 0xD4, 0x2, 0x4B, 0x33, 0xDB>>, 3}
+               )
+
+      assert [
+               %Point{
+                 crs: "wgs-84",
+                 height: nil,
+                 latitude: 45.0,
+                 longitude: 40.0,
+                 srid: 4326,
+                 x: 40.0,
+                 y: 45.0,
+                 z: nil
+               }
+             ] =
+               PackStream.unpack!(
+                 <<0xB3, 0x58, 0xC9, 0x10, 0xE6, 0xC1, 0x40, 0x44, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                   0xC1, 0x40, 0x46, 0x80, 0x0, 0x0, 0x0, 0x0, 0x0>>
+               )
+    end
+
+    test "Point3D (cartesian)" do
+      assert [
+               %Point{
+                 crs: "cartesian-3d",
+                 height: nil,
+                 latitude: nil,
+                 longitude: nil,
+                 srid: 9157,
+                 x: 48.8354,
+                 y: 12.72468,
+                 z: 50.004
+               }
+             ] ==
+               PackStream.unpack!(
+                 {0x59,
+                  <<0xC9, 0x23, 0xC5, 0xC1, 0x40, 0x48, 0x6A, 0xEE, 0x63, 0x1F, 0x8A, 0x9, 0xC1,
+                    0x40, 0x29, 0x73, 0x9, 0x41, 0xC8, 0x21, 0x6C, 0xC1, 0x40, 0x49, 0x0, 0x83,
+                    0x12, 0x6E, 0x97, 0x8D>>, 4}
+               )
+
+      assert [
+               %Point{
+                 crs: "cartesian-3d",
+                 height: nil,
+                 latitude: nil,
+                 longitude: nil,
+                 srid: 9157,
+                 x: 40.0,
+                 y: 45.0,
+                 z: 150.0
+               }
+             ] =
+               PackStream.unpack!(
+                 <<0xB4, 0x59, 0xC9, 0x23, 0xC5, 0xC1, 0x40, 0x44, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                   0xC1, 0x40, 0x46, 0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0xC1, 0x40, 0x62, 0xC0, 0x0,
+                   0x0, 0x0, 0x0, 0x0>>
+               )
+    end
+
+    test "Point3D (geographic)" do
+      assert [
+               %Point{
+                 crs: "wgs-84-3d",
+                 height: -123.0004,
+                 latitude: 70.40958,
+                 longitude: 13.39538,
+                 srid: 4979,
+                 x: 13.39538,
+                 y: 70.40958,
+                 z: -123.0004
+               }
+             ] ==
+               PackStream.unpack!(
+                 {0x59,
+                  <<0xC9, 0x13, 0x73, 0xC1, 0x40, 0x2A, 0xCA, 0x6F, 0x3F, 0x52, 0xFC, 0x26, 0xC1,
+                    0x40, 0x51, 0x9A, 0x36, 0x8F, 0x8, 0x46, 0x20, 0xC1, 0xC0, 0x5E, 0xC0, 0x6,
+                    0x8D, 0xB8, 0xBA, 0xC7>>, 4}
+               )
+
+      assert [
+               %Point{
+                 crs: "wgs-84-3d",
+                 height: 150.0,
+                 latitude: 45.0,
+                 longitude: 40.0,
+                 srid: 4979,
+                 x: 40.0,
+                 y: 45.0,
+                 z: 150.0
+               }
+             ] =
+               PackStream.unpack!(
+                 <<0xB4, 0x59, 0xC9, 0x13, 0x73, 0xC1, 0x40, 0x44, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+                   0xC1, 0x40, 0x46, 0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0xC1, 0x40, 0x62, 0xC0, 0x0,
+                   0x0, 0x0, 0x0, 0x0>>
+               )
     end
   end
 end
