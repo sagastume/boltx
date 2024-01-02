@@ -1,0 +1,205 @@
+defmodule Boltx.PackStream.Unpacker do
+  use Boltx.Internals.PackStream.Markers
+  alias Boltx.Types
+
+  # Null
+  def unpack(<<@null_marker, rest::binary>>) do
+    [nil | unpack(rest)]
+  end
+
+  # Boolean
+  def unpack(<<@true_marker, rest::binary>>) do
+    [true | unpack(rest)]
+  end
+
+  def unpack(<<@false_marker, rest::binary>>) do
+    [false | unpack(rest)]
+  end
+
+  # Float
+  def unpack(<<@float_marker, number::float, rest::binary>>) do
+    [number | unpack(rest)]
+  end
+
+  # Strings
+  def unpack(<<@tiny_bitstring_marker::4, str_length::4, rest::bytes>>) do
+    decode_string(rest, str_length)
+  end
+
+  def unpack(<<@bitstring8_marker, str_length, rest::bytes>>) do
+    decode_string(rest, str_length)
+  end
+
+  def unpack(<<@bitstring16_marker, str_length::16, rest::bytes>>) do
+    decode_string(rest, str_length)
+  end
+
+  def unpack(<<@bitstring32_marker, str_length::32, rest::binary>>) do
+    decode_string(rest, str_length)
+  end
+
+  # Lists
+  def unpack(<<@tiny_list_marker::4, list_size::4>> <> bin) do
+    decode_list(bin, list_size)
+  end
+
+  def unpack(<<@list8_marker, list_size::8>> <> bin) do
+    decode_list(bin, list_size)
+  end
+
+  def unpack(<<@list16_marker, list_size::16>> <> bin) do
+    decode_list(bin, list_size)
+  end
+
+  def unpack(<<@list32_marker, list_size::32>> <> bin) do
+    decode_list(bin, list_size)
+  end
+
+  # Maps
+  def unpack(<<@tiny_map_marker::4, entries::4>> <> bin) do
+    decode_map(bin, entries)
+  end
+
+  def unpack(<<@map8_marker, entries::8>> <> bin) do
+    decode_map(bin, entries)
+  end
+
+  def unpack(<<@map16_marker, entries::16>> <> bin) do
+    decode_map(bin, entries)
+  end
+
+  def unpack(<<@map32_marker, entries::32>> <> bin) do
+    decode_map(bin, entries)
+  end
+
+  # Struct
+  def unpack(<<@tiny_struct_marker::4, struct_size::4, sig::8>> <> struct) do
+    unpack({sig, struct, struct_size})
+  end
+
+  def unpack(<<@struct8_marker, struct_size::8, sig::8>> <> struct) do
+    unpack({sig, struct, struct_size})
+  end
+
+  def unpack(<<@struct16_marker, struct_size::16, sig::8>> <> struct) do
+    unpack({sig, struct, struct_size})
+  end
+
+  ######### SPECIAL STRUCTS
+
+  # Node
+  def unpack({@node_marker, struct, struct_size}) do
+    {structure_data, rest} = decode_struct(struct, struct_size)
+
+    field_names = [:id, :labels, :properties, :element_id]
+    node_data = Enum.zip([field_names, structure_data])
+    node = struct(Types.Node, node_data)
+
+    [node | rest]
+  end
+
+  # Relationship
+  def unpack({@relationship_marker, struct, struct_size}) do
+    {structure_data, rest} =
+      decode_struct(struct, struct_size)
+
+    field_names = [
+      :id,
+      :start,
+      :end,
+      :type,
+      :properties,
+      :element_id,
+      :start_node_element_id,
+      :end_node_element_id
+    ]
+
+    relationship_data = Enum.zip([field_names, structure_data])
+    relationship = struct(Types.Relationship, relationship_data)
+
+    [relationship | rest]
+  end
+
+  # UnboundedRelationship
+  def unpack({@unbounded_relationship_marker, struct, struct_size}) do
+    {structure_data, rest} = decode_struct(struct, struct_size)
+
+    field_names = [:id, :type, :properties, :element_id]
+    unbounded_relationship_data = Enum.zip([field_names, structure_data])
+    unbounded_relationship = struct(Types.UnboundRelationship, unbounded_relationship_data)
+
+    [unbounded_relationship | rest]
+  end
+
+  # Path
+  def unpack({@path_marker, struct, struct_size}) do
+    {structure_data, rest} =
+      decode_struct(struct, struct_size)
+
+    field_names = [:nodes, :relationships, :sequence]
+    path_data = Enum.zip([field_names, structure_data])
+    path = struct(Types.Path, path_data)
+
+    [path | rest]
+  end
+
+  # Manage the end of data
+  def unpack(<<>>), do: []
+
+  # Integer
+  def unpack(<<@int8_marker, int::signed-integer, rest::binary>>) do
+    [int | unpack(rest)]
+  end
+
+  def unpack(<<@int16_marker, int::signed-integer-16, rest::binary>>) do
+    [int | unpack(rest)]
+  end
+
+  def unpack(<<@int32_marker, int::signed-integer-32, rest::binary>>) do
+    [int | unpack(rest)]
+  end
+
+  def unpack(<<@int64_marker, int::signed-integer-64, rest::binary>>) do
+    [int | unpack(rest)]
+  end
+
+  def unpack(<<int::signed-integer, rest::binary>>) do
+    [int | unpack(rest)]
+  end
+
+  # Private
+  @spec decode_string(binary(), integer()) :: list()
+  defp decode_string(bytes, str_length) do
+    <<string::binary-size(str_length), rest::binary>> = bytes
+
+    [string | unpack(rest)]
+  end
+
+  @spec decode_list(binary(), integer()) :: list()
+  defp decode_list(list, list_size) do
+    {list, rest} = list |> unpack() |> Enum.split(list_size)
+    [list | rest]
+  end
+
+  @spec decode_map(binary(), integer()) :: list()
+  defp decode_map(map, entries) do
+    {map, rest} = map |> unpack() |> Enum.split(entries * 2)
+
+    [to_map(map) | rest]
+  end
+
+  @spec decode_struct(binary(), integer()) :: {list(), list()}
+  def decode_struct(struct, struct_size) do
+    struct
+    |> unpack()
+    |> Enum.split(struct_size)
+  end
+
+  @spec to_map(list()) :: map()
+  defp to_map(map) do
+    map
+    |> Enum.chunk_every(2)
+    |> Enum.map(&List.to_tuple/1)
+    |> Map.new()
+  end
+end

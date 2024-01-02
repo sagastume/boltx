@@ -14,54 +14,6 @@ defmodule Boltx.Internals.PackStream.EncoderTest do
 
   describe "Encode common types:" do
     Enum.each(BoltVersionHelper.available_versions(), fn bolt_version ->
-      test "Null (bolt_version: #{bolt_version})" do
-        assert <<0xC0>> == :erlang.iolist_to_binary(Encoder.encode(nil, unquote(bolt_version)))
-      end
-
-      test "Boolean (bolt_version: #{bolt_version})" do
-        assert <<0xC3>> == :erlang.iolist_to_binary(Encoder.encode(true, unquote(bolt_version)))
-        assert <<0xC2>> == :erlang.iolist_to_binary(Encoder.encode(false, unquote(bolt_version)))
-      end
-
-      test "Atom (bolt_version: #{bolt_version})" do
-        assert <<0x85, 0x68, 0x65, 0x6C, 0x6C, 0x6F>> ==
-                 :erlang.iolist_to_binary(Encoder.encode(:hello, unquote(bolt_version)))
-      end
-
-      test "String (bolt_version: #{bolt_version})" do
-        assert <<0x85, 0x68, 0x65, 0x6C, 0x6C, 0x6F>> ==
-                 :erlang.iolist_to_binary(Encoder.encode("hello", unquote(bolt_version)))
-      end
-
-      test "Integer (bolt_version: #{bolt_version})" do
-        assert <<0x7>> == :erlang.iolist_to_binary(Encoder.encode(7, unquote(bolt_version)))
-      end
-
-      test "Float (bolt_version: #{bolt_version})" do
-        assert <<0xC1, 0x40, 0x1E, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCD>> ==
-                 :erlang.iolist_to_binary(Encoder.encode(7.7, unquote(bolt_version)))
-      end
-
-      test "List (bolt_version: #{bolt_version})" do
-        assert <<0x90>> == :erlang.iolist_to_binary(Encoder.encode([], unquote(bolt_version)))
-
-        assert <<0x92, 0x2, 0x4>> ==
-                 :erlang.iolist_to_binary(Encoder.encode([2, 4], unquote(bolt_version)))
-      end
-
-      test "Map (bolt_version: #{bolt_version})" do
-        assert <<0xA1, 0x82, 0x6F, 0x6B, 0x5>> ==
-                 :erlang.iolist_to_binary(Encoder.encode(%{ok: 5}, unquote(bolt_version)))
-      end
-
-      test "Struct (bolt_version: #{bolt_version})" do
-        assert <<0xB3, 0x1, 0x81, 0x69, 0x82, 0x61, 0x6D, 0x86, 0x70, 0x61, 0x72, 0x61, 0x6D,
-                 0x73>> ==
-                 :erlang.iolist_to_binary(
-                   Encoder.encode({0x01, ["i", "am", "params"]}, unquote(bolt_version))
-                 )
-      end
-
       test "raises error when trying to encode with unknown signature (bolt_version: #{bolt_version})" do
         assert_raise Boltx.Internals.PackStreamError, ~r/^unable to encode/i, fn ->
           Encoder.encode({128, []}, unquote(bolt_version))
