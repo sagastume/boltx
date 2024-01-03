@@ -11,10 +11,11 @@ defmodule Boltx.Error do
   @type t() :: %__MODULE__{
           module: module(),
           code: atom(),
-          bolt: %{code: binary(), message: binary() | nil} | nil
+          bolt: %{code: binary(), message: binary() | nil} | nil,
+          packstream: %{bits: any() | nil} | nil
         }
 
-  defexception [:module, :code, :bolt]
+  defexception [:module, :code, :bolt, :packstream]
 
   @spec wrap(module(), atom()) :: t()
   def wrap(module, code) when is_atom(code), do: %__MODULE__{module: module, code: code}
@@ -25,6 +26,9 @@ defmodule Boltx.Error do
   @spec wrap(module(), map()) :: t()
   def wrap(module, bolt_error) when is_map(bolt_error),
     do: %__MODULE__{module: module, code: bolt_error.code |> to_atom(), bolt: bolt_error}
+
+  def wrap(module, code, packstream),
+    do: %__MODULE__{module: module, code: code, packstream: packstream}
 
   @doc """
   Return the code for the given error.

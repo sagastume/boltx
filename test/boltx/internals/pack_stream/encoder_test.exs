@@ -3,8 +3,6 @@ defmodule Boltx.Internals.PackStream.EncoderTest do
 
   alias Boltx.Internals.PackStream.Encoder
   alias Boltx.Internals.BoltVersionHelper
-  alias Boltx.Types
-  alias Boltx.TypesHelper
 
   @moduletag :legacy
 

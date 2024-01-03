@@ -8,8 +8,11 @@ defmodule Boltx.PackStream do
     try do
       Packer.pack(term)
     catch
-      :throw, reason ->
-        {:error, %{reason: reason}}
+      :throw, error ->
+        {:error, error}
+
+      :error, %Protocol.UndefinedError{protocol: Boltx.PackStream.Packer} = exception ->
+        {:error, exception}
     else
       iodata when iodata? ->
         {:ok, iodata}
@@ -31,17 +34,26 @@ defmodule Boltx.PackStream do
   end
 
   @spec unpack(binary()) :: list()
-  def unpack(iodata) when is_bitstring(iodata) do
-    iodata
-    |> IO.iodata_to_binary()
-    |> Unpacker.unpack()
-  end
-
-  def unpack({signature, struct_binary, struct_size}) do
-    Unpacker.unpack({signature, IO.iodata_to_binary(struct_binary), struct_size})
+  def unpack(iodata) do
+    try do
+      iodata
+      |> Unpacker.unpack()
+    catch
+      :throw, error ->
+        {:error, error}
+    else
+      value ->
+        {:ok, value}
+    end
   end
 
   def unpack!(iodata) do
-    unpack(iodata)
+    case unpack(iodata) do
+      {:ok, value} ->
+        value
+
+      {:error, exception} ->
+        raise exception
+    end
   end
 end

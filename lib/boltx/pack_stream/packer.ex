@@ -29,7 +29,7 @@ defimpl Boltx.PackStream.Packer, for: BitString do
   end
 
   def pack(bits) do
-    throw({:not_encodable, bits})
+    throw(Boltx.Error.wrap(__MODULE__, :not_encodable, bits: bits))
   end
 
   defp marker(binary) do
@@ -40,7 +40,7 @@ defimpl Boltx.PackStream.Packer, for: BitString do
       size <= 255 -> <<@bitstring8_marker, size::8>>
       size <= 65_535 -> <<@bitstring16_marker, size::16>>
       size <= 4_294_967_295 -> <<@bitstring32_marker, size::32>>
-      true -> throw({:too_big, binary})
+      true -> throw(Boltx.Error.wrap(__MODULE__, :not_encodable_too_big, bits: binary))
     end
   end
 end
@@ -92,7 +92,7 @@ defimpl Boltx.PackStream.Packer, for: List do
       length <= 255 -> <<@list8_marker, length::8>>
       length <= 65_535 -> <<@list16_marker, length::16>>
       length <= 4_294_967_295 -> <<@list32_marker, length::32>>
-      true -> throw({:too_big, list})
+      true -> throw(Boltx.Error.wrap(__MODULE__, :not_encodable_too_big, bits: list))
     end
   end
 end
@@ -112,7 +112,7 @@ defimpl Boltx.PackStream.Packer, for: Map do
       length <= 255 -> <<@map8_marker, length::8>>
       length <= 65_535 -> <<@map16_marker, length::16>>
       length <= 4_294_967_295 -> <<@map32_marker, length::32>>
-      true -> throw({:too_big, map})
+      true -> throw(Boltx.Error.wrap(__MODULE__, :not_encodable_too_big, bits: map))
     end
   end
 
