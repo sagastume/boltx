@@ -2,7 +2,7 @@ defmodule Boltx.BoltProtocol.Message.RollbackMessage do
   @moduledoc false
 
   alias Boltx.Internals.PackStream.Message.Encoder
-  alias Boltx.Internals.PackStream.Message.Decoder
+  alias Boltx.BoltProtocol.MessageDecoder
 
   def encode(bolt_version) when is_float(bolt_version) and bolt_version >= 3.0 do
     message = []
@@ -19,7 +19,7 @@ defmodule Boltx.BoltProtocol.Message.RollbackMessage do
 
   @spec decode(float(), <<_::16, _::_*8>>) :: {:error, Boltx.Error.t()} | {:ok, any()}
   def decode(_bolt_version, binary_messages) do
-    messages = Enum.map(binary_messages, &Decoder.decode(&1, 1))
+    messages = Enum.map(binary_messages, &MessageDecoder.decode(&1))
 
     case hd(messages) do
       {:success, response} ->

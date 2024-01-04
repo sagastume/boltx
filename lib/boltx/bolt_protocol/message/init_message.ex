@@ -4,7 +4,7 @@ defmodule Boltx.BoltProtocol.Message.InitMessage do
   import Boltx.BoltProtocol.Message.Shared.AuthHelper
 
   alias Boltx.Internals.PackStream.Message.Encoder
-  alias Boltx.Internals.PackStream.Message.Decoder
+  alias Boltx.BoltProtocol.MessageDecoder
 
   def encode(bolt_version, fields) when is_float(bolt_version) and bolt_version >= 1.0 do
     message = [get_user_agent(fields), get_auth_params(fields)]
@@ -20,7 +20,7 @@ defmodule Boltx.BoltProtocol.Message.InitMessage do
   end
 
   def decode(_bolt_version, binary_messages) do
-    messages = Enum.map(binary_messages, &Decoder.decode(&1, 1))
+    messages = Enum.map(binary_messages, &MessageDecoder.decode(&1))
     response = hd(messages)
 
     case response do

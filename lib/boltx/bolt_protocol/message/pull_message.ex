@@ -4,7 +4,7 @@ defmodule Boltx.BoltProtocol.Message.PullMessage do
   import Boltx.BoltProtocol.ServerResponse
 
   alias Boltx.Internals.PackStream.Message.Encoder
-  alias Boltx.Internals.PackStream.Message.Decoder
+  alias Boltx.BoltProtocol.MessageDecoder
 
   def encode(bolt_version, extra_parameters)
       when is_float(bolt_version) and bolt_version >= 4.0 do
@@ -27,7 +27,7 @@ defmodule Boltx.BoltProtocol.Message.PullMessage do
 
   @spec decode(float(), <<_::16, _::_*8>>) :: {:error, Boltx.Error.t()} | {:ok, any()}
   def decode(bolt_version, binary_messages) do
-    messages = Enum.map(binary_messages, &Decoder.decode(&1, 3))
+    messages = Enum.map(binary_messages, &MessageDecoder.decode(&1))
     records = Enum.reduce(messages, [], &group_record/2)
 
     case List.keymember?(messages, :failure, 0) do
