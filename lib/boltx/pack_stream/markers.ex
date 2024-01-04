@@ -1,4 +1,4 @@
-defmodule Boltx.Internals.PackStream.Markers do
+defmodule Boltx.PackStream.Markers do
   @moduledoc false
   defmacro __using__(_opts) do
     quote do
@@ -20,6 +20,14 @@ defmodule Boltx.Internals.PackStream.Markers do
       @int16_marker 0xC9
       @int32_marker 0xCA
       @int64_marker 0xCB
+
+      @int8 -128..-17
+      @int16_low -32_768..-129
+      @int16_high 128..32_767
+      @int32_low -2_147_483_648..-32_769
+      @int32_high 32_768..2_147_483_647
+      @int64_low -9_223_372_036_854_775_808..-2_147_483_649
+      @int64_high 2_147_483_648..9_223_372_036_854_775_807
 
       # Float
       @float_marker 0xC1
@@ -89,28 +97,5 @@ defmodule Boltx.Internals.PackStream.Markers do
       @point3d_signature 0x59
       @point3d_struct_size 4
     end
-  end
-end
-
-defmodule Boltx.Internals.PackStream.MarkersHelper do
-  @moduledoc false
-  use Boltx.Internals.PackStream.Markers
-
-  @doc """
-  Return the list of valid signatures (for data encoding).
-  """
-  @spec valid_signatures() :: [integer()]
-  def valid_signatures() do
-    [
-      @local_time_signature,
-      @time_with_tz_signature,
-      @date_signature,
-      @local_datetime_signature,
-      @datetime_with_zone_offset_signature,
-      @datetime_with_zone_id_signature,
-      @duration_signature,
-      @point2d_signature,
-      @point3d_signature
-    ]
   end
 end

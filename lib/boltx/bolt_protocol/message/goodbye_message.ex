@@ -1,11 +1,13 @@
 defmodule Boltx.BoltProtocol.Message.GoodbyeMessage do
   @moduledoc false
 
-  alias Boltx.Internals.PackStream.Message.Encoder
-  alias Boltx.Internals.PackStream.Message.Decoder
+  alias Boltx.BoltProtocol.MessageEncoder
+  alias Boltx.BoltProtocol.MessageDecoder
+
+  @signature 0x02
 
   def encode(bolt_version) when is_float(bolt_version) and bolt_version >= 3.0 do
-    Encoder.do_encode(:goodbye, [], 3)
+    MessageEncoder.encode(@signature, [])
   end
 
   def encode(_) do
@@ -18,7 +20,7 @@ defmodule Boltx.BoltProtocol.Message.GoodbyeMessage do
 
   @spec decode(float(), <<_::16, _::_*8>>) :: {:error, Boltx.Error.t()} | {:ok, any()}
   def decode(_bolt_version, binary_messages) do
-    messages = Enum.map(binary_messages, &Decoder.decode(&1, 1))
+    messages = Enum.map(binary_messages, &MessageDecoder.decode(&1))
 
     case hd(messages) do
       {:success, response} ->
