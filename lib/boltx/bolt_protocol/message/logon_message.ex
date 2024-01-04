@@ -3,12 +3,14 @@ defmodule Boltx.BoltProtocol.Message.LogonMessage do
 
   import Boltx.BoltProtocol.Message.Shared.AuthHelper
 
-  alias Boltx.Internals.PackStream.Message.Encoder
+  alias Boltx.BoltProtocol.MessageEncoder
   alias Boltx.BoltProtocol.MessageDecoder
+
+  @signature 0x6A
 
   def encode(bolt_version, fields) when is_float(bolt_version) and bolt_version >= 3.0 do
     message = [get_auth_params(fields)]
-    Encoder.do_encode(:logon, message, 3)
+    MessageEncoder.encode(@signature, message)
   end
 
   def encode(_, _) do

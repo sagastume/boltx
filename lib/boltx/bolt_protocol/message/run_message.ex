@@ -1,19 +1,21 @@
 defmodule Boltx.BoltProtocol.Message.RunMessage do
   @moduledoc false
 
-  alias Boltx.Internals.PackStream.Message.Encoder
+  alias Boltx.BoltProtocol.MessageEncoder
   alias Boltx.BoltProtocol.MessageDecoder
+
+  @signature 0x10
 
   def encode(bolt_version, query, parameters, extra_parameters)
       when is_float(bolt_version) and bolt_version >= 3.0 do
     message = [query, parameters, get_extra_parameters(extra_parameters)]
-    Encoder.do_encode(:run, message, 3)
+    MessageEncoder.encode(@signature, message)
   end
 
   def encode(bolt_version, query, parameters, _extra_parameters)
       when is_float(bolt_version) and bolt_version <= 2.0 do
     message = [query, parameters]
-    Encoder.do_encode(:run, message, 3)
+    MessageEncoder.encode(@signature, message)
   end
 
   def encode(_, _, _, _) do

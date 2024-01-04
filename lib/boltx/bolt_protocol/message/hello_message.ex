@@ -3,8 +3,10 @@ defmodule Boltx.BoltProtocol.Message.HelloMessage do
 
   import Boltx.BoltProtocol.Message.Shared.AuthHelper
 
-  alias Boltx.Internals.PackStream.Message.Encoder
+  alias Boltx.BoltProtocol.MessageEncoder
   alias Boltx.BoltProtocol.MessageDecoder
+
+  @signature 0x01
 
   def encode(bolt_version, fields) when is_float(bolt_version) and bolt_version >= 5.1 do
     message = [
@@ -13,12 +15,12 @@ defmodule Boltx.BoltProtocol.Message.HelloMessage do
       |> Map.merge(get_extra_parameters(fields))
     ]
 
-    Encoder.do_encode(:hello, message, 3)
+    MessageEncoder.encode(@signature, message)
   end
 
   def encode(bolt_version, fields) when is_float(bolt_version) and bolt_version >= 3.0 do
     message = [Map.merge(get_auth_params(fields), get_user_agent(bolt_version, fields))]
-    Encoder.do_encode(:hello, message, 3)
+    MessageEncoder.encode(@signature, message)
   end
 
   def encode(_, _) do

@@ -1,11 +1,13 @@
 defmodule Boltx.BoltProtocol.Message.ResetMessage do
   @moduledoc false
 
-  alias Boltx.Internals.PackStream.Message.Encoder
+  alias Boltx.BoltProtocol.MessageEncoder
   alias Boltx.BoltProtocol.MessageDecoder
 
+  @signature 0x0F
+
   def encode(bolt_version) when is_float(bolt_version) and bolt_version >= 3.0 do
-    Encoder.do_encode(:reset, [], 3)
+    MessageEncoder.encode(@signature, [])
   end
 
   def encode(_) do

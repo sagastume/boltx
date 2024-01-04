@@ -41,18 +41,6 @@ defmodule Boltx.Internals.PackStream.Message.EncoderV3Test do
                     :erlang.iolist_to_binary(EncoderV3.encode({:goodbye, []}, 3))
   end
 
-  describe "Encode HELLO" do
-    test "without params" do
-      assert <<0x0, _, 0xB1, 0x1, _::binary>> =
-               :erlang.iolist_to_binary(EncoderV3.encode({:hello, []}, 3))
-    end
-
-    test "with params" do
-      assert <<0x0, _, 0xB1, 0x1, _::binary>> =
-               :erlang.iolist_to_binary(EncoderV3.encode({:hello, [{"neo4j", "test"}]}, 3))
-    end
-  end
-
   test "Encode ROLLBACK" do
     assert <<0x0, 0x2, 0xB0, 0x13, 0x0, 0x0>> ==
              :erlang.iolist_to_binary(EncoderV3.encode({:rollback, []}, 3))

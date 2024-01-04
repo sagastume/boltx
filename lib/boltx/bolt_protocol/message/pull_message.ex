@@ -3,18 +3,20 @@ defmodule Boltx.BoltProtocol.Message.PullMessage do
 
   import Boltx.BoltProtocol.ServerResponse
 
-  alias Boltx.Internals.PackStream.Message.Encoder
+  alias Boltx.BoltProtocol.MessageEncoder
   alias Boltx.BoltProtocol.MessageDecoder
+
+  @signature 0x3F
 
   def encode(bolt_version, extra_parameters)
       when is_float(bolt_version) and bolt_version >= 4.0 do
     message = [get_extra_parameters(extra_parameters)]
-    Encoder.do_encode(:pull_all, message, 1)
+    MessageEncoder.encode(@signature, message)
   end
 
   def encode(bolt_version, _extra_parameters)
       when is_float(bolt_version) and bolt_version <= 3.0 do
-    Encoder.do_encode(:pull_all, [], 1)
+    MessageEncoder.encode(@signature, [])
   end
 
   def encode(_, _) do

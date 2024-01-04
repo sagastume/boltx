@@ -1,12 +1,14 @@
 defmodule Boltx.BoltProtocol.Message.RollbackMessage do
   @moduledoc false
 
-  alias Boltx.Internals.PackStream.Message.Encoder
+  alias Boltx.BoltProtocol.MessageEncoder
   alias Boltx.BoltProtocol.MessageDecoder
+
+  @signature 0x13
 
   def encode(bolt_version) when is_float(bolt_version) and bolt_version >= 3.0 do
     message = []
-    Encoder.do_encode(:rollback, message, 3)
+    MessageEncoder.encode(@signature, message)
   end
 
   def encode(_) do

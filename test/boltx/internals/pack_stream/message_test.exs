@@ -49,13 +49,6 @@ defmodule Boltx.Internals.PackStream.MessageTest do
     BoltVersionHelper.available_versions()
     |> Enum.filter(&(&1 <= 2))
     |> Enum.each(fn bolt_version ->
-      test "ACK_FAILURE (bolt_version: #{bolt_version})" do
-        assert <<_, _, _, 0x0E, _::binary>> =
-                 :erlang.iolist_to_binary(
-                   Message.encode({:ack_failure, []}, unquote(bolt_version))
-                 )
-      end
-
       test "INIT without auth (bolt_version: #{bolt_version})" do
         assert <<_, _, _, 0x01, _::binary>> =
                  :erlang.iolist_to_binary(Message.encode({:init, []}, unquote(bolt_version)))
@@ -74,18 +67,6 @@ defmodule Boltx.Internals.PackStream.MessageTest do
     BoltVersionHelper.available_versions()
     |> Enum.filter(&(&1 >= 3))
     |> Enum.each(fn bolt_version ->
-      test "HELLO without auth (bolt_version: #{bolt_version})" do
-        assert <<_, _, _, 0x01, _::binary>> =
-                 :erlang.iolist_to_binary(Message.encode({:hello, []}, unquote(bolt_version)))
-      end
-
-      test "HELLO with auth (bolt_version: #{bolt_version})" do
-        assert <<_, _, _, 0x01, _::binary>> =
-                 :erlang.iolist_to_binary(
-                   Message.encode({:hello, [{"neo4j", "password"}]}, unquote(bolt_version))
-                 )
-      end
-
       test "GOODBYE (bolt_version: #{bolt_version})" do
         assert assert <<_, _, _, 0x02, _::binary>> =
                         :erlang.iolist_to_binary(

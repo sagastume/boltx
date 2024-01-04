@@ -54,13 +54,6 @@ defmodule Boltx.Internals.PackStream.Message.EncoderTest do
                  )
       end
 
-      test "ACK_FAILURE (bolt_version: #{bolt_version})" do
-        assert <<0x0, 0x2, 0xB0, 0xE, 0x0, 0x0>> ==
-                 :erlang.iolist_to_binary(
-                   Encoder.encode({:ack_failure, []}, unquote(bolt_version))
-                 )
-      end
-
       test "RUN without params (bolt_version: #{bolt_version})" do
         assert <<0x0, 0x13, 0xB2, 0x10, 0x8F, 0x52, 0x45, 0x54, 0x55, 0x52, 0x4E, 0x20, 0x31,
                  0x20, 0x41, 0x53, 0x20, 0x6E, 0x75, 0x6D, 0xA0, 0x0,
@@ -104,18 +97,6 @@ defmodule Boltx.Internals.PackStream.Message.EncoderTest do
     |> Enum.filter(&(&1 >= 3))
     |> Enum.each(fn bolt_version ->
       nil
-
-      test "HELLO without params (bolt_version: #{bolt_version})" do
-        assert <<0x0, _, 0xB1, 0x1, _::binary>> =
-                 :erlang.iolist_to_binary(Encoder.encode({:hello, []}, unquote(bolt_version)))
-      end
-
-      test "HELLO with params (bolt_version: #{bolt_version})" do
-        assert <<0x0, _, 0xB1, 0x1, _::binary>> =
-                 :erlang.iolist_to_binary(
-                   Encoder.encode({:hello, [{"neo4j", "test"}]}, unquote(bolt_version))
-                 )
-      end
 
       test "Encode GOODBYE (bolt_version: #{bolt_version})" do
         assert assert <<0x0, 0x2, 0xB0, 0x02, 0x0, 0x0>> ==

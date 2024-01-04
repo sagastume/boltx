@@ -1,11 +1,13 @@
 defmodule Boltx.BoltProtocol.Message.LogoffMessage do
   @moduledoc false
 
-  alias Boltx.Internals.PackStream.Message.Encoder
+  alias Boltx.BoltProtocol.MessageEncoder
   alias Boltx.BoltProtocol.MessageDecoder
 
+  @signature 0x6B
+
   def encode(bolt_version) when is_float(bolt_version) and bolt_version >= 5.1 do
-    Encoder.do_encode(:logoff, [], 3)
+    MessageEncoder.encode(@signature, [])
   end
 
   def encode(_) do
