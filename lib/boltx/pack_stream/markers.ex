@@ -99,26 +99,3 @@ defmodule Boltx.PackStream.Markers do
     end
   end
 end
-
-defmodule Boltx.PackStream.MarkersHelper do
-  @moduledoc false
-  use Boltx.Internals.PackStream.Markers
-
-  @doc """
-  Return the list of valid signatures (for data encoding).
-  """
-  @spec valid_signatures() :: [integer()]
-  def valid_signatures() do
-    [
-      @local_time_signature,
-      @time_with_tz_signature,
-      @date_signature,
-      @local_datetime_signature,
-      @datetime_with_zone_offset_signature,
-      @datetime_with_zone_id_signature,
-      @duration_signature,
-      @point2d_signature,
-      @point3d_signature
-    ]
-  end
-end
