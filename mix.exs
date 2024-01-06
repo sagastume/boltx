@@ -1,7 +1,7 @@
 defmodule Boltx.Mixfile do
   use Mix.Project
 
-  @version "0.0.2"
+  @version "0.0.3"
   @url_docs "https://hexdocs.pm/boltx"
   @url_github "https://github.com/sagastume/boltx"
 
@@ -36,7 +36,7 @@ defmodule Boltx.Mixfile do
 
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger, :ssl, :public_key]
     ]
   end
 
@@ -86,7 +86,6 @@ defmodule Boltx.Mixfile do
 
       # Testing dependencies
       {:excoveralls, "~> 0.15.0", optional: true, only: [:test, :dev]},
-      {:mix_test_watch, "~> 1.1.0", only: [:dev, :test]},
       {:porcelain, "~> 2.0.3", only: [:test, :dev], runtime: false},
       {:uuid, "~> 1.1.8", only: [:test, :dev], runtime: false},
       {:tzdata, "~> 1.1", only: [:test, :dev]},

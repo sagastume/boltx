@@ -65,7 +65,7 @@ defmodule Boltx.ConnectionTest do
     :ok = Connection.disconnect(:stop, conn_data)
   end
 
-  @tag core: true
+  @tag :core
   test "connect/1 fails when connection is not available" do
     opts = [
       hostname: "192.0.0.198",
@@ -73,7 +73,7 @@ defmodule Boltx.ConnectionTest do
       auth: [username: "baduser"]
     ]
 
-    {:error, %Boltx.Error{code: :timeout}} = Connection.connect(opts)
+    assert {:error, %Boltx.Error{code: :timeout}} = Connection.connect(opts)
   end
 
   @tag :bolt_version_1_0

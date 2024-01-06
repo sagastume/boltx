@@ -19,7 +19,7 @@ Documentation: [https://hexdocs.pm/boltx](https://hexdocs.pm/boltx)
 | Stream capabilities   | NO           |
 | Routing               | NO           |
 
-### Usage
+## Usage
 
 Add :boltx to your dependencies:
 
@@ -56,6 +56,19 @@ Boltx.transaction(conn, fn conn ->
 end)
 
 ```
+
+### URI schemes
+
+By default the scheme is `bolt+s`
+
+| URI        | Description                                | TLSOptions
+|------------|--------------------------------------------|-------------------------|
+| neo4j      | Unsecured                                  | []                      |
+| neo4j+s    | Secured with full certificate              | [verify: :verify_none]  |
+| neo4j+ssc  | Secured with self-signed certificate       | [verify: :verify_peer]  |
+| bolt       | Unsecured                                  | []                      |
+| bolt+s     | Secured with full certificate              | [verify: :verify_none]  |
+| bolt+ssc   | Secured with self-signed certificate       | [verify: :verify_peer]  |
 
 ## Bolt Protocol message
 

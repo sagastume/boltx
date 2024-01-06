@@ -26,6 +26,8 @@ defmodule Boltx do
           | {:user_agent, String.t()}
           | {:notifications_minimum_severity, String.t()}
           | {:notifications_disabled_categories, list(String.t())}
+          | {:ssl, boolean()}
+          | {:ssl_opts, [:ssl.tls_client_option()]}
           | {:connect_timeout, timeout()}
           | {:socket_options, [:gen_tcp.connect_option()]}
           | DBConnection.start_option()
@@ -51,7 +53,7 @@ defmodule Boltx do
 
   * `:port` - Server port (default: `BOLT_TCP_PORT` env variable, then `7687`)
 
-  * `:scheme` - Is one among neo4j, neo4j+s, neo4j+ssc, bolt, bolt+s, bolt+ssc.
+  * `:scheme` - Is one among neo4j, neo4j+s, neo4j+ssc, bolt, bolt+s, bolt+ssc (default: bolt+s).
 
   * `:versions` - List of bolt versions you want to be negotiated with the server.
 
@@ -70,6 +72,10 @@ defmodule Boltx do
   * `:connect_timeout` - Socket connect timeout in milliseconds (default:
       `15_000`)
 
+  * `:ssl` - Set to `true` if SSL should be used (default: `true`)
+
+  * `:ssl_opts` - A list of SSL options, see `:ssl.connect/2` (default: `[verify: :verify_none]`)
+
   The given options are passed down to DBConnection, some of the most commonly used ones are
    documented below:
 
@@ -78,7 +84,7 @@ defmodule Boltx do
 
   * `:pool` - The pool module to use, defaults to built-in pool provided by DBconnection
 
-   * `:pool_size` - The size of the pool
+  * `:pool_size` - The size of the pool
   """
   @spec start_link([start_option()]) :: {:ok, pid()} | {:error, Boltx.Error.t()}
   def start_link(options) do

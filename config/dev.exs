@@ -1,8 +1,5 @@
 import Config
 
-config :mix_test_watch,
-  clear: true
-
 level =
   if System.get_env("DEBUG") do
     :debug
