@@ -26,9 +26,6 @@ config :logger, :console,
   level: level,
   format: "$date $time [$level] $metadata$message\n"
 
-config :mix_test_watch,
-  clear: true
-
 config :tzdata, :autoupdate, :disabled
 config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
 config :porcelain, driver: Porcelain.Driver.Basic

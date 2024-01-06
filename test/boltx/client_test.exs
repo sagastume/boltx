@@ -47,14 +47,14 @@ defmodule Boltx.ClientTest do
       config = Client.Config.new(opts)
 
       assert config.hostname == "localhost"
-      assert config.scheme == "bolt"
+      assert config.scheme == "bolt+s"
       assert config.username == "usertest"
     end
 
     test "parsing the host, scheme and the port without uri" do
       opts = [
         hostname: "hobby-happyHoHoHo.dbs.com",
-        scheme: "bolts",
+        scheme: "bolt+s",
         port: 7689,
         auth: [username: "usertests"]
       ]
@@ -62,7 +62,7 @@ defmodule Boltx.ClientTest do
       config = Client.Config.new(opts)
 
       assert config.hostname == "hobby-happyHoHoHo.dbs.com"
-      assert config.scheme == "bolts"
+      assert config.scheme == "bolt+s"
       assert config.port == 7689
       assert config.username == "usertests"
     end
@@ -82,6 +82,38 @@ defmodule Boltx.ClientTest do
       assert config.scheme == "bolt"
       assert config.port == 24786
       assert config.username == "usertests"
+    end
+
+    test "returns correct values for different schemes" do
+      base_opts = [
+        auth: [username: "usertests"]
+      ]
+
+      opts1 = base_opts ++ [scheme: "bolt"]
+      assert %Client.Config{scheme: "bolt", ssl?: false, ssl_opts: []} = Client.Config.new(opts1)
+
+      opts2 = base_opts ++ [scheme: "bolt+s"]
+
+      assert %Client.Config{scheme: "bolt+s", ssl?: true, ssl_opts: [verify: :verify_none]} =
+               Client.Config.new(opts2)
+
+      opts3 = base_opts ++ [scheme: "bolt+ssc"]
+
+      assert %Client.Config{scheme: "bolt+ssc", ssl?: true, ssl_opts: [verify: :verify_peer]} =
+               Client.Config.new(opts3)
+
+      opts4 = base_opts ++ [scheme: "neo4j"]
+      assert %Client.Config{scheme: "neo4j", ssl?: false, ssl_opts: []} = Client.Config.new(opts4)
+
+      opts5 = base_opts ++ [scheme: "neo4j+s"]
+
+      assert %Client.Config{scheme: "neo4j+s", ssl?: true, ssl_opts: [verify: :verify_none]} =
+               Client.Config.new(opts5)
+
+      opts6 = base_opts ++ [scheme: "neo4j+ssc"]
+
+      assert %Client.Config{scheme: "neo4j+ssc", ssl?: true, ssl_opts: [verify: :verify_peer]} =
+               Client.Config.new(opts6)
     end
   end
 

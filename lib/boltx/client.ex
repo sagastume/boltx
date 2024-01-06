@@ -40,25 +40,48 @@ defmodule Boltx.Client do
       :password,
       :connect_timeout,
       :socket_options,
-      :versions
+      :versions,
+      :ssl?,
+      :ssl_opts
     ]
 
     def new(opts) do
       {hostname, port} = get_hostname_and_port(opts)
       {username, password} = get_user_and_pass(opts)
+      {scheme, ssl?, ssl_opts} = get_scheme_and_ssl_opts(opts)
       versions = get_versions(opts)
 
       %__MODULE__{
         hostname: hostname,
         port: port,
-        scheme: get_schema(opts),
+        scheme: scheme,
         username: username,
         password: password,
         connect_timeout: Keyword.get(opts, :connect_timeout, @default_timeout),
         socket_options:
           Keyword.merge([mode: :binary, packet: :raw, active: false], opts[:socket_options] || []),
-        versions: versions
+        versions: versions,
+        ssl?: ssl?,
+        ssl_opts: ssl_opts
       }
+    end
+
+    defp get_scheme_and_ssl_opts(opts) do
+      scheme = get_schema(opts)
+      ssl_opts = Keyword.get(opts, :ssl_opts, [])
+
+      {ssl, ssl_opts} =
+        case scheme do
+          "bolt" -> {false, ssl_opts}
+          "neo4j" -> {false, ssl_opts}
+          "neo4j+s" -> {true, Keyword.merge(ssl_opts, verify: :verify_none)}
+          "bolt+s" -> {true, Keyword.merge(ssl_opts, verify: :verify_none)}
+          "neo4j+ssc" -> {true, Keyword.merge(ssl_opts, verify: :verify_peer)}
+          "bolt+ssc" -> {true, Keyword.merge(ssl_opts, verify: :verify_peer)}
+          _ -> {true, ssl_opts}
+        end
+
+      {scheme, ssl, ssl_opts}
     end
 
     defp get_user_and_pass(opts) do
@@ -87,7 +110,7 @@ defmodule Boltx.Client do
 
     defp get_schema(opts) do
       uri = Keyword.get(opts, :uri, nil) |> to_string() |> URI.parse()
-      uri.scheme || Keyword.get(opts, :scheme, nil) || "bolt"
+      uri.scheme || Keyword.get(opts, :scheme, nil) || "bolt+s"
     end
 
     def get_versions(opts) do
@@ -123,6 +146,14 @@ defmodule Boltx.Client do
   end
 
   def do_connect(config) do
+    client = %__MODULE__{sock: nil, bolt_version: nil}
+
+    case maybe_connect_to_ssl(client, config) do
+      {:ok, client} -> {:ok, client}
+    end
+  end
+
+  defp maybe_connect_to_ssl(client, %{ssl?: false} = config) do
     %{
       hostname: hostname,
       port: port,
@@ -130,19 +161,8 @@ defmodule Boltx.Client do
       connect_timeout: connect_timeout
     } = config
 
-    buffer? = Keyword.has_key?(socket_options, :buffer)
-    client = %__MODULE__{sock: nil, bolt_version: nil}
-
     case :gen_tcp.connect(String.to_charlist(hostname), port, socket_options, connect_timeout) do
-      {:ok, sock} when buffer? ->
-        {:ok, %{client | sock: {:gen_tcp, sock}}}
-
       {:ok, sock} ->
-        {:ok, [sndbuf: sndbuf, recbuf: recbuf, buffer: buffer]} =
-          :inet.getopts(sock, [:sndbuf, :recbuf, :buffer])
-
-        buffer = buffer |> max(sndbuf) |> max(recbuf)
-        :ok = :inet.setopts(sock, buffer: buffer)
         {:ok, %{client | sock: {:gen_tcp, sock}}}
 
       {:error, :timeout} ->
@@ -150,6 +170,23 @@ defmodule Boltx.Client do
 
       other ->
         other
+    end
+  end
+
+  defp maybe_connect_to_ssl(client, %{ssl?: true} = config) do
+    %{
+      hostname: hostname,
+      port: port,
+      socket_options: socket_options,
+      connect_timeout: connect_timeout,
+      ssl_opts: ssl_opts
+    } = config
+
+    opts = Keyword.merge(ssl_opts, socket_options)
+
+    with {:ok, ssl_sock} <-
+           :ssl.connect(String.to_charlist(hostname), port, opts, connect_timeout) do
+      {:ok, %{client | sock: {:ssl, ssl_sock}}}
     end
   end
 
