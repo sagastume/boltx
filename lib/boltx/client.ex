@@ -149,7 +149,11 @@ defmodule Boltx.Client do
     client = %__MODULE__{sock: nil, bolt_version: nil}
 
     case maybe_connect_to_ssl(client, config) do
-      {:ok, client} -> {:ok, client}
+      {:ok, client} ->
+        {:ok, client}
+
+      other ->
+        other
     end
   end
 
@@ -184,9 +188,15 @@ defmodule Boltx.Client do
 
     opts = Keyword.merge(ssl_opts, socket_options)
 
-    with {:ok, ssl_sock} <-
-           :ssl.connect(String.to_charlist(hostname), port, opts, connect_timeout) do
-      {:ok, %{client | sock: {:ssl, ssl_sock}}}
+    case :ssl.connect(String.to_charlist(hostname), port, opts, connect_timeout) do
+      {:ok, ssl_sock} ->
+        {:ok, %{client | sock: {:ssl, ssl_sock}}}
+
+      {:error, :timeout} ->
+        {:error, Boltx.Error.wrap(__MODULE__, :timeout)}
+
+      other ->
+        other
     end
   end
 
