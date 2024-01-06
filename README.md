@@ -26,7 +26,7 @@ Add :boltx to your dependencies:
 ```elixir
 def deps() do
   [
-    {:boltx, "~> 0.0.2"}
+    {:boltx, "~> 0.0.3"}
   ]
 end
 ```
@@ -61,7 +61,7 @@ end)
 
 By default the scheme is `bolt+s`
 
-| URI        | Description                                | TLSOptions
+| URI        | Description                                | TLSOptions              |
 |------------|--------------------------------------------|-------------------------|
 | neo4j      | Unsecured                                  | []                      |
 | neo4j+s    | Secured with full certificate              | [verify: :verify_none]  |
