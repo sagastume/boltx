@@ -8,13 +8,13 @@ defmodule Boltx.BoltProtocol.MessageEncoder do
   @struct16_marker 0xDD
 
   def encode(signature, data) do
-    Boltx.Internals.Logger.log_message(:client, :message_type, data)
+    Boltx.Utils.Logger.log_message(:client, :message_type, data)
 
     encoded =
       do_encode(signature, data)
       |> generate_chunks([])
 
-    Boltx.Internals.Logger.log_message(:client, :message_type, encoded, :hex)
+      Boltx.Utils.Logger.log_message(:client, :message_type, encoded, :hex)
     encoded |> IO.iodata_to_binary()
   end
 
