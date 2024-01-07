@@ -14,7 +14,7 @@ defmodule Boltx.BoltProtocol.MessageEncoder do
       do_encode(signature, data)
       |> generate_chunks([])
 
-      Boltx.Utils.Logger.log_message(:client, :message_type, encoded, :hex)
+    Boltx.Utils.Logger.log_message(:client, :message_type, encoded, :hex)
     encoded |> IO.iodata_to_binary()
   end
 

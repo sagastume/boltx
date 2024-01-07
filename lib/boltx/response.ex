@@ -18,6 +18,12 @@ defmodule Boltx.Response do
   @type acc :: any
   @type element :: any
 
+  @doc """
+  Una estructura que representa una consulta Boltx.
+
+  * `statement` - La declaración de la consulta.
+  * `extra` - Datos adicionales asociados con la consulta.
+  """
   defstruct results: [],
             fields: nil,
             records: [],

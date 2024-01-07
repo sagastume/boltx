@@ -45,7 +45,7 @@ defmodule Boltx.BoltProtocol.MessageDecoder do
           response
       end
 
-      Boltx.Utils.Logger.log_message(:server, message_type, response)
+    Boltx.Utils.Logger.log_message(:server, message_type, response)
     {message_type, response}
   end
 end
