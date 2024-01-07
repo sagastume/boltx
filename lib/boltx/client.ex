@@ -445,7 +445,7 @@ defmodule Boltx.Client do
   defp recv_packets(client, decoder, timeout, chunks) do
     case recv_data(client, timeout) do
       {:ok, response} ->
-        case concatenateChunks(response, chunks) do
+        case concatenate_chunks(response, chunks) do
           {:complete_chunks, binary_messages} ->
             decode_messages(client.bolt_version, binary_messages, decoder)
 
@@ -461,7 +461,7 @@ defmodule Boltx.Client do
     end
   end
 
-  defp concatenateChunks(response, chunks) do
+  defp concatenate_chunks(response, chunks) do
     case response do
       @noop_chunk ->
         {:remaining_chunks, chunks}
