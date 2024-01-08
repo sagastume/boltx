@@ -30,7 +30,8 @@ This will execute tests with the specified command in different Bolt versions an
 ## Requirements
 Make sure you have the following dependencies installed on your system before running the script:
 
-- Docker-compose
+- Docker v24.0.6+
+- Docker-compose v2.23.0+
 - jq 1.6+
 
 To run the script's tests, you'll also need:
