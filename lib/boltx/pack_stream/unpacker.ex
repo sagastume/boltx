@@ -1,4 +1,6 @@
 defmodule Boltx.PackStream.Unpacker do
+  @moduledoc false
+
   use Boltx.PackStream.Markers
 
   alias Boltx.Types.{

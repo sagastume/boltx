@@ -34,7 +34,7 @@ defmodule Boltx.BoltProtocol.MessageDecoder do
   end
 
   defp build_response(message_type, data, nb_entries) do
-    Boltx.Internals.Logger.log_message(:server, message_type, data, :hex)
+    Boltx.Utils.Logger.log_message(:server, message_type, data, :hex)
 
     response =
       case PackStream.unpack(data) do
@@ -45,7 +45,7 @@ defmodule Boltx.BoltProtocol.MessageDecoder do
           response
       end
 
-    Boltx.Internals.Logger.log_message(:server, message_type, response)
+    Boltx.Utils.Logger.log_message(:server, message_type, response)
     {message_type, response}
   end
 end

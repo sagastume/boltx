@@ -1,4 +1,6 @@
 defmodule Boltx.PackStream do
+  @moduledoc false
+
   alias Boltx.PackStream.Packer
   alias Boltx.PackStream.Unpacker
 

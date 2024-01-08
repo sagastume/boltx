@@ -21,7 +21,7 @@ defmodule Boltx.Connection do
 
     with {:ok, %Client{} = client} <- Client.connect(config),
          {:ok, response_server_metadata} <- do_init(client, opts) do
-      state = getServerMetadataState(response_server_metadata)
+      state = get_server_metadata_state(response_server_metadata)
       state = %__MODULE__{state | client: client}
       {:ok, state}
     end
@@ -161,7 +161,7 @@ defmodule Boltx.Connection do
     Client.send_init(client, opts)
   end
 
-  defp getServerMetadataState(response_metadata) do
+  defp get_server_metadata_state(response_metadata) do
     patch_bolt = Map.get(response_metadata, "patch_bolt", "")
     hints = Map.get(response_metadata, "hints", "")
     connection_id = Map.get(response_metadata, "connection_id", "")

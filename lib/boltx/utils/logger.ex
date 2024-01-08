@@ -1,4 +1,4 @@
-defmodule Boltx.Internals.Logger do
+defmodule Boltx.Utils.Logger do
   @moduledoc false
   # Designed to log Bolt protocol message between Client and Server.
   #
