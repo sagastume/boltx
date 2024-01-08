@@ -2,6 +2,17 @@ defprotocol Boltx.PackStream.Packer do
   @moduledoc """
   The `Boltx.PackStream.Packer` protocol is responsible for serializing any Elixir data
   structure according to the PackStream specification.
+
+  ##  Serializing for structs
+  By default, all structures are serialized with all their fields. However, if it is
+  necessary that only certain fields be considered for serialization, it is necessary to
+  perform a derivation. Below is an example:
+
+      defmodule Book do
+        @derive [{Boltx.PackStream.Packer, fields: [:name]}]
+        defstruct [:name, :other_data]
+      end`
+
   """
   @fallback_to_any true
   def pack(term)

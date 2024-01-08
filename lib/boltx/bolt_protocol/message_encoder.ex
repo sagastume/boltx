@@ -1,4 +1,6 @@
 defmodule Boltx.BoltProtocol.MessageEncoder do
+  @moduledoc false
+
   alias Boltx.PackStream
 
   @max_chunk_size 65_535
