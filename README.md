@@ -70,6 +70,40 @@ By default the scheme is `bolt+s`
 | bolt+s     | Secured with full certificate              | [verify: :verify_none]  |
 | bolt+ssc   | Secured with self-signed certificate       | [verify: :verify_peer]  |
 
+## Contributing
+
+### Getting Started
+
+Neo4j uses the Bolt protocol for communication and query execution. You can find the official documentation for Bolt here: [Documentación Bolt](https://neo4j.com/docs/bolt/current).
+
+It is crucial to grasp various concepts before getting started, with the most important ones being:
+
+- [PackStream](https://neo4j.com/docs/bolt/current/packstream/): The syntax layer for the Bolt messaging protocol.
+- [Bolt Protocol](https://neo4j.com/docs/bolt/current/bolt/): The application protocol for database queries via a database query language.
+  - Bolt Protocol handshake specification
+  - Bolt Protocol message specification
+  - Structure Semantics
+
+It is advisable to use the specific terminology from the official documentation and official drivers to ensure consistency with this implementation.
+
+### Test
+
+As certain versions of Bolt may be compatible with specific functionalities while others can undergo significant changes, tags are employed to facilitate version-specific testing. Some of these tags include:
+
+- `:core` (Included in all executions).
+- `:bolt_version_{{specific version}}` (Tag to run the test on a specific version, for example, for 5.2: `:bolt_version_5_2`, for version 1: `:bolt_version_1_0)`.
+- `bolt_{major version}_x`  (Tag to run on all minor versions of a major version, for example, for 5: `:bolt_5_x`, for all minor versions of 4:: `:bolt_4_x`).
+- `:last_version` (Tag to run the test only on the latest version).
+
+By default, all tags are disabled except the `:core` tag. To enable the tags, it is necessary to configure the following environment variables:
+
+- `BOLT_VERSIONS`: This variable is used for Bolt version configuration but is also useful for testing. You can specify a version, for example, BOLT_VERSIONS="1.0".
+- `BOLT_TCP_PORT`:  You can configure the port with the environment variable (BOLT_TCP_PORT=7688).
+
+#### Script Auxiliar
+To simplify test execution, the test-runner.sh script is available. You can find the corresponding documentation here: [Help script](scripts/README.md)
+
+
 ## Bolt Protocol message
 
 | Message       | Bolt Version                            | Implemented |
