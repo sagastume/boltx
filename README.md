@@ -26,7 +26,7 @@ Add :boltx to your dependencies:
 ```elixir
 def deps() do
   [
-    {:boltx, "~> 0.0.3"}
+    {:boltx, "~> 0.0.4"}
   ]
 end
 ```
