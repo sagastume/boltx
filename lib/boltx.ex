@@ -88,7 +88,17 @@ defmodule Boltx do
   """
   @spec start_link([start_option()]) :: {:ok, pid()} | {:error, Boltx.Error.t()}
   def start_link(options) do
-    DBConnection.start_link(Boltx.Connection, options)
+    name = Keyword.get(options, :name, __MODULE__)
+    options_with_name = Keyword.put_new(options, :name, name)
+    DBConnection.start_link(Boltx.Connection, options_with_name)
+  end
+
+  @doc """
+  Returns a supervisor child specification for a DBConnection pool.
+  """
+  @spec child_spec([start_option()]) :: :supervisor.child_spec()
+  def child_spec(options) do
+    DBConnection.child_spec(Boltx.Connection, options)
   end
 
   def query(conn, statement, params \\ %{}, opts \\ []) do
