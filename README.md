@@ -111,7 +111,7 @@ children = [
 Now you can run query with the name you set
 
 ```elixir
-iex> Boltx.query!(Boltx, "return 1 as n") |> Boltx.Response.first()
+iex> Boltx.query!(Bolt, "return 1 as n") |> Boltx.Response.first()
 %{"n" => 1}
 ```
 
