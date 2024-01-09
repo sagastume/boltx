@@ -88,9 +88,7 @@ defmodule Boltx do
   """
   @spec start_link([start_option()]) :: {:ok, pid()} | {:error, Boltx.Error.t()}
   def start_link(options) do
-    name = Keyword.get(options, :name, __MODULE__)
-    options_with_name = Keyword.put_new(options, :name, name)
-    DBConnection.start_link(Boltx.Connection, options_with_name)
+    DBConnection.start_link(Boltx.Connection, options)
   end
 
   @doc """
