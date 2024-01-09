@@ -91,6 +91,14 @@ defmodule Boltx do
     DBConnection.start_link(Boltx.Connection, options)
   end
 
+  @doc """
+  Returns a supervisor child specification for a DBConnection pool.
+  """
+  @spec child_spec([start_option()]) :: :supervisor.child_spec()
+  def child_spec(options) do
+    DBConnection.child_spec(Boltx.Connection, options)
+  end
+
   def query(conn, statement, params \\ %{}, opts \\ []) do
     formatted_params =
       params

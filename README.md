@@ -57,6 +57,65 @@ end)
 
 ```
 
+### Set it up in an app
+
+Add the configuration to the corresponding files for each environment or to your config/config.ex.
+> #### Name of process
+>
+> The process name must be defined in your configuration
+
+
+```elixir
+import Config
+
+config :boltx, Bolt,
+  uri: "bolt://localhost:7687",
+  auth: [username: "neo4j", password: "password"],
+  user_agent: "boltxTest/1",
+  pool_size: 15,
+  max_overflow: 3,
+  prefix: :default,
+  name: Bolt
+```
+
+Add Boltx to the application's main monitoring tree and let OTP manage it.
+
+```elixir
+# lib/n4_d/application.ex
+
+defmodule N4D.Application do
+  @moduledoc false
+
+  use Application
+
+  def start(_type, _args) do
+    children = [
+      %{
+        id: Boltx,
+        start: {Boltx, :start_link, [Application.get_env(:boltx, Bolt)] },
+      }
+    ]
+
+    opts = [strategy: :one_for_one, name: N4D.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
+end
+```
+Or
+
+```elixir
+children = [
+  {Boltx, Application.get_env(:boltx, Bolt)}
+]
+```
+Now you can run query with the name you set
+
+```elixir
+iex> Boltx.query!(Boltx, "return 1 as n") |> Boltx.Response.first()
+%{"n" => 1}
+```
+
+
 ### URI schemes
 
 By default the scheme is `bolt+s`
@@ -74,7 +133,7 @@ By default the scheme is `bolt+s`
 
 ### Getting Started
 
-Neo4j uses the Bolt protocol for communication and query execution. You can find the official documentation for Bolt here: [Documentación Bolt](https://neo4j.com/docs/bolt/current).
+Neo4j uses the Bolt protocol for communication and query execution. You can find the official documentation for Bolt here: [Bolt Documentation](https://neo4j.com/docs/bolt/current).
 
 It is crucial to grasp various concepts before getting started, with the most important ones being:
 
@@ -100,7 +159,7 @@ By default, all tags are disabled except the `:core` tag. To enable the tags, it
 - `BOLT_VERSIONS`: This variable is used for Bolt version configuration but is also useful for testing. You can specify a version, for example, BOLT_VERSIONS="1.0".
 - `BOLT_TCP_PORT`:  You can configure the port with the environment variable (BOLT_TCP_PORT=7688).
 
-#### Script Auxiliar
+#### Help script
 To simplify test execution, the test-runner.sh script is available. You can find the corresponding documentation here: [Help script](scripts/README.md)
 
 
