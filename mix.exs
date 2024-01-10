@@ -85,7 +85,7 @@ defmodule Boltx.Mixfile do
       {:poison, "~> 5.0", optional: true},
 
       # Testing dependencies
-      {:excoveralls, "~> 0.15.0", optional: true, only: [:test, :dev]},
+      {:excoveralls, "~> 0.18.0", optional: true, only: [:test, :dev]},
       {:porcelain, "~> 2.0.3", only: [:test, :dev], runtime: false},
       {:uuid, "~> 1.1.8", only: [:test, :dev], runtime: false},
       {:tzdata, "~> 1.1", only: [:test, :dev]},
