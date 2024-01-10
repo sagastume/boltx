@@ -96,7 +96,7 @@ defmodule Boltx.Mixfile do
 
       # Linting dependencies
       {:credo, "~> 1.7.3", only: [:dev]},
-      {:dialyxir, "~> 1.2.0", only: [:dev], runtime: false},
+      {:dialyxir, "~> 1.4.3", only: [:dev], runtime: false},
 
       # Documentation dependencies
       # Run me like this: `mix docs`
