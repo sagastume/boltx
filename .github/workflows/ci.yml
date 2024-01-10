@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - uses: erlef/setup-beam@v1
         with:
@@ -84,7 +84,7 @@ jobs:
     steps:
       - run: docker run -p 7687:7687 -e NEO4J_AUTH=neo4j/boltxPassword -e NEO4J_dbms_connector_bolt_listen__address=:7687 --detach ${{matrix.db}}
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - uses: erlef/setup-beam@v1
         with:
