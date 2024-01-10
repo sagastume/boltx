@@ -95,7 +95,7 @@ defmodule Boltx.Mixfile do
       {:benchee_html, "~> 1.0.0", optional: true, only: [:dev]},
 
       # Linting dependencies
-      {:credo, "~> 1.6.7", only: [:dev]},
+      {:credo, "~> 1.7.3", only: [:dev]},
       {:dialyxir, "~> 1.2.0", only: [:dev], runtime: false},
 
       # Documentation dependencies
