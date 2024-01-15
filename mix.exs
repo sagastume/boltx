@@ -80,7 +80,7 @@ defmodule Boltx.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:db_connection, "~> 2.4.2"},
+      {:db_connection, "~> 2.6.0"},
       {:jason, "~> 1.4", optional: true},
       {:poison, "~> 5.0", optional: true},
 
