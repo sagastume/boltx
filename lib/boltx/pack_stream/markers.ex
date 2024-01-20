@@ -77,8 +77,12 @@ defmodule Boltx.PackStream.Markers do
       @local_datetime_signature 0x64
       @local_datetime_struct_size 2
 
-      # Datetime with TZ offset
-      @datetime_with_zone_offset_signature 0x46
+      # Legacy Datetime with TZ offset
+      @legacy_datetime_with_zone_offset_signature 0x46
+      @legacy_datetime_with_zone_offset_struct_size 3
+
+      # Legacy Datetime with TZ offset
+      @datetime_with_zone_offset_signature 0x49
       @datetime_with_zone_offset_struct_size 3
 
       # Datetime with TZ id

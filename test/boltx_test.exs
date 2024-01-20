@@ -84,23 +84,34 @@ defmodule BoltxTest do
     @tag :bolt_5_x
     test "a query to get a Node with temporal functions", c do
       uuid = "6152f30e-076a-4479-b575-764bf6ab5e38"
-      Boltx.query!(c.conn, "CREATE (user:User{uuid: $uuid, name: 'John', created_at: DATETIME()})", %{uuid: uuid})
-      response = Boltx.query!(c.conn, "MATCH (user:User {uuid: $uuid })RETURN user", %{uuid: uuid})
+
+      cypher_create = """
+        CREATE (user:User{
+          uuid: $uuid,
+          name: 'John',
+          date_time_with_tz_offset: DATETIME()
+        })
+      """
+
+      Boltx.query!(c.conn, cypher_create, %{uuid: uuid})
+
+      response =
+        Boltx.query!(c.conn, "MATCH (user:User {uuid: $uuid }) RETURN user", %{uuid: uuid})
 
       assert %Boltx.Response{
-        results: [
-          %{
-            "user" => %Boltx.Types.Node{
-              id: _,
-              properties: %{
-                "created_at" => _,
-                "name" => "John",
-                "uuid" => "6152f30e-076a-4479-b575-764bf6ab5e38"
-              }
-            }
-          }
-        ]
-      } = response
+               results: [
+                 %{
+                   "user" => %Boltx.Types.Node{
+                     id: _,
+                     properties: %{
+                       "date_time_with_tz_offset" => %Boltx.Types.DateTimeWithTZOffset{},
+                       "name" => "John",
+                       "uuid" => "6152f30e-076a-4479-b575-764bf6ab5e38"
+                     }
+                   }
+                 }
+               ]
+             } = response
     end
 
     @tag :core

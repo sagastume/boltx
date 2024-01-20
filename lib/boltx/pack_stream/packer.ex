@@ -252,8 +252,8 @@ defimpl Boltx.PackStream.Packer, for: Boltx.Types.DateTimeWithTZOffset do
       )
 
     [
-      <<@tiny_struct_marker::4, @datetime_with_zone_offset_struct_size::4,
-        @datetime_with_zone_offset_signature>>,
+      <<@tiny_struct_marker::4, @legacy_datetime_with_zone_offset_struct_size::4,
+        @legacy_datetime_with_zone_offset_signature>>,
       data
     ]
   end
