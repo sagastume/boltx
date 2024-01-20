@@ -78,6 +78,31 @@ defmodule BoltxTest do
              "missing 'The Name Kote' database, or data incomplete"
     end
 
+    @tag :bolt_2_x
+    @tag :bolt_3_x
+    @tag :bolt_4_x
+    @tag :bolt_5_x
+    test "a query to get a Node with temporal functions", c do
+      uuid = "6152f30e-076a-4479-b575-764bf6ab5e38"
+      Boltx.query!(c.conn, "CREATE (user:User{uuid: $uuid, name: 'John', created_at: DATETIME()})", %{uuid: uuid})
+      response = Boltx.query!(c.conn, "MATCH (user:User {uuid: $uuid })RETURN user", %{uuid: uuid})
+
+      assert %Boltx.Response{
+        results: [
+          %{
+            "user" => %Boltx.Types.Node{
+              id: _,
+              properties: %{
+                "created_at" => _,
+                "name" => "John",
+                "uuid" => "6152f30e-076a-4479-b575-764bf6ab5e38"
+              }
+            }
+          }
+        ]
+      } = response
+    end
+
     @tag :core
     test "A procedure call failure should send reset and not lock the db" do
       opts = [pool_size: 1] ++ @opts
