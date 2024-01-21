@@ -260,7 +260,7 @@ defmodule Boltx.PackStream.Unpacker do
     naive_dt =
       NaiveDateTime.add(
         ~N[1970-01-01 00:00:00.000000],
-        seconds * 1_000_000_000 + nanoseconds,
+        (seconds + zone_offset) * 1_000_000_000 + nanoseconds,
         :nanosecond
       )
 
