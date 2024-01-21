@@ -2,7 +2,7 @@ defmodule BoltxTest do
   use ExUnit.Case, async: true
 
   alias Boltx.Response
-  alias Boltx.Types.{Duration, Point, DateTimeWithTZOffset}
+  alias Boltx.Types.{Duration, Point, DateTimeWithTZOffset, TimeWithTZOffset}
 
   @opts Boltx.TestHelper.opts()
 
@@ -92,7 +92,12 @@ defmodule BoltxTest do
           date_time_offset: DATETIME('2024-01-20T18:47:05.850000-06:00'),
           date_time: DATETIME('2000-01-01'),
           date_time2: DATETIME('2000-01-01T00:00:00Z'),
-          date_time_with_zona_id: DATETIME('2024-01-21T14:03:45.702000-08:00[America/Los_Angeles]')
+          date_time_with_zona_id: DATETIME('2024-01-21T14:03:45.702000-08:00[America/Los_Angeles]'),
+          date: DATE("2024-01-21"),
+          localtime: LOCALTIME("15:41:10.222000000"),
+          localdatetime: LOCALDATETIME("2024-01-21T15:41:40.706000000"),
+          time: TIME("15:41:10.222000000Z"),
+          time_with_offset: TIME("15:41:10.222000000-06:00")
         })
       """
 
@@ -111,6 +116,11 @@ defmodule BoltxTest do
                        "date_time" => date_time,
                        "date_time2" => date_time2,
                        "date_time_with_zona_id" => date_time_with_zona_id,
+                       "date" => date,
+                       "localtime" => localtime,
+                       "time" => time,
+                       "localdatetime" => localdatetime,
+                       "time_with_offset" => time_with_offset,
                        "name" => "John",
                        "uuid" => "6152f30e-076a-4479-b575-764bf6ab5e38"
                      }
@@ -130,6 +140,12 @@ defmodule BoltxTest do
 
       assert "2024-01-21 14:03:45.702000-08:00 PST America/Los_Angeles" ==
                DateTime.to_string(date_time_with_zona_id)
+
+      assert ~D[2024-01-21] == date
+      assert ~T[15:41:10.222000] == localtime
+      assert ~N[2024-01-21 15:41:40.706000] == localdatetime
+      assert {:ok, "15:41:10.222000+00:00"} == TimeWithTZOffset.format_param(time)
+      assert {:ok, "15:41:10.222000-06:00"} == TimeWithTZOffset.format_param(time_with_offset)
     end
 
     @tag :core
