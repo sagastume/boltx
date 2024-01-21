@@ -91,7 +91,8 @@ defmodule BoltxTest do
           name: 'John',
           date_time_offset: DATETIME('2024-01-20T18:47:05.850000-06:00'),
           date_time: DATETIME('2000-01-01'),
-          date_time2: DATETIME('2000-01-01T00:00:00Z')
+          date_time2: DATETIME('2000-01-01T00:00:00Z'),
+          date_time_with_zona_id: DATETIME('2024-01-21T14:03:45.702000-08:00[America/Los_Angeles]')
         })
       """
 
@@ -109,6 +110,7 @@ defmodule BoltxTest do
                        "date_time_offset" => date_time_offset,
                        "date_time" => date_time,
                        "date_time2" => date_time2,
+                       "date_time_with_zona_id" => date_time_with_zona_id,
                        "name" => "John",
                        "uuid" => "6152f30e-076a-4479-b575-764bf6ab5e38"
                      }
@@ -116,9 +118,18 @@ defmodule BoltxTest do
                  }
                ]
              } = response
-      assert {:ok, "2024-01-20T18:47:05.850000-06:00"} == DateTimeWithTZOffset.format_param(date_time_offset)
-      assert {:ok, "2000-01-01T00:00:00.000000+00:00"} == DateTimeWithTZOffset.format_param(date_time)
-      assert {:ok, "2000-01-01T00:00:00.000000+00:00"} == DateTimeWithTZOffset.format_param(date_time2)
+
+      assert {:ok, "2024-01-20T18:47:05.850000-06:00"} ==
+               DateTimeWithTZOffset.format_param(date_time_offset)
+
+      assert {:ok, "2000-01-01T00:00:00.000000+00:00"} ==
+               DateTimeWithTZOffset.format_param(date_time)
+
+      assert {:ok, "2000-01-01T00:00:00.000000+00:00"} ==
+               DateTimeWithTZOffset.format_param(date_time2)
+
+      assert "2024-01-21 14:03:45.702000-08:00 PST America/Los_Angeles" ==
+               DateTime.to_string(date_time_with_zona_id)
     end
 
     @tag :core
