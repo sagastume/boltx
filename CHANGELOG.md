@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.0.5 (2024-01-21)
+  * Support for DateTime, Legacy DateTime, DateTimeZoneId and Legacy DateTimeZoneId structures added in bolt version 5.
+  * Update of db_connection from 2.4.3 to 2.6.0
+
 ## v0.0.4 (2024-01-09)
   * Documentation update
   * Add child_spec to return a specification for a DBConnection pool
