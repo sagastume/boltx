@@ -215,10 +215,13 @@ defmodule Boltx.PackStream.Unpacker do
     [t | rest]
   end
 
-  # Datetime with zone Id
-  def unpack({@datetime_with_zone_id_signature, struct, @datetime_with_zone_id_struct_size}) do
+  # Legacy Datetime with zone Id
+  def unpack(
+        {@legacy_datetime_with_zone_id_signature, struct,
+         @legacy_datetime_with_zone_id_struct_size}
+      ) do
     {[seconds, nanoseconds, zone_id], rest} =
-      decode_struct(struct, @datetime_with_zone_id_struct_size)
+      decode_struct(struct, @legacy_datetime_with_zone_id_struct_size)
 
     naive_dt =
       NaiveDateTime.add(
@@ -231,17 +234,46 @@ defmodule Boltx.PackStream.Unpacker do
     [dt | rest]
   end
 
-  # Datetime with zone offset
+  # Datetime with zone Id
+  def unpack({@datetime_with_zone_id_signature, struct, @datetime_with_zone_id_struct_size}) do
+    {[seconds, nanoseconds, zone_id], rest} =
+      decode_struct(struct, @datetime_with_zone_id_struct_size)
+
+    {:ok, date_from_unix} = DateTime.from_unix(seconds * 1_000_000_000 + nanoseconds, :nanosecond)
+    {:ok, datetime} = DateTime.shift_zone(date_from_unix, zone_id)
+    [datetime | rest]
+  end
+
+  # Legacy Datetime with zone offset
   def unpack(
-        {@datetime_with_zone_offset_signature, struct, @datetime_with_zone_offset_struct_size}
+        {@legacy_datetime_with_zone_offset_signature, struct,
+         @legacy_datetime_with_zone_offset_struct_size}
       ) do
     {[seconds, nanoseconds, zone_offset], rest} =
-      decode_struct(struct, @datetime_with_zone_id_struct_size)
+      decode_struct(struct, @legacy_datetime_with_zone_id_struct_size)
 
     naive_dt =
       NaiveDateTime.add(
         ~N[1970-01-01 00:00:00.000000],
         seconds * 1_000_000_000 + nanoseconds,
+        :nanosecond
+      )
+
+    dt = DateTimeWithTZOffset.create(naive_dt, zone_offset)
+    [dt | rest]
+  end
+
+  # Datetime with zone offset
+  def unpack(
+        {@datetime_with_zone_offset_signature, struct, @datetime_with_zone_offset_struct_size}
+      ) do
+    {[seconds, nanoseconds, zone_offset], rest} =
+      decode_struct(struct, @legacy_datetime_with_zone_id_struct_size)
+
+    naive_dt =
+      NaiveDateTime.add(
+        ~N[1970-01-01 00:00:00.000000],
+        (seconds + zone_offset) * 1_000_000_000 + nanoseconds,
         :nanosecond
       )
 
