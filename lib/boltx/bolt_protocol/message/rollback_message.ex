@@ -2,7 +2,6 @@ defmodule Boltx.BoltProtocol.Message.RollbackMessage do
   @moduledoc false
 
   alias Boltx.BoltProtocol.MessageEncoder
-  alias Boltx.BoltProtocol.MessageDecoder
 
   @signature 0x13
 
