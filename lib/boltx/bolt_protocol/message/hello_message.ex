@@ -4,7 +4,6 @@ defmodule Boltx.BoltProtocol.Message.HelloMessage do
   import Boltx.BoltProtocol.Message.Shared.AuthHelper
 
   alias Boltx.BoltProtocol.MessageEncoder
-  alias Boltx.BoltProtocol.MessageDecoder
 
   @signature 0x01
 
@@ -29,20 +28,6 @@ defmodule Boltx.BoltProtocol.Message.HelloMessage do
        code: :unsupported_message_version,
        message: "HELLO message version not supported"
      })}
-  end
-
-  def decode(_bolt_version, binary_messages) do
-    messages = Enum.map(binary_messages, &MessageDecoder.decode(&1))
-    response = hd(messages)
-
-    case response do
-      {:success, response} ->
-        {:ok, response}
-
-      {:failure, response} ->
-        {:error,
-         Boltx.Error.wrap(__MODULE__, %{code: response["code"], message: response["message"]})}
-    end
   end
 
   defp get_extra_parameters(fields) do

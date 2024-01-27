@@ -8,6 +8,7 @@ defmodule Boltx.Client do
 
   alias Boltx.BoltProtocol.Versions
   alias Boltx.Utils.Converters
+  alias Boltx.BoltProtocol.MessageDecoder
 
   alias Boltx.BoltProtocol.Message.{
     HelloMessage,
@@ -230,11 +231,25 @@ defmodule Boltx.Client do
     end
   end
 
+  def generic_decoder(_bolt_version, binary_messages) do
+    messages = Enum.map(binary_messages, &MessageDecoder.decode(&1))
+    response = hd(messages)
+
+    case response do
+      {:success, response} ->
+        {:ok, response}
+
+      {:failure, response} ->
+        {:error,
+         Boltx.Error.wrap(__MODULE__, %{code: response["code"], message: response["message"]})}
+    end
+  end
+
   def send_hello(client, fields) do
     payload = HelloMessage.encode(client.bolt_version, fields)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &HelloMessage.decode/2, :infinity)
+      recv_packets(client, &__MODULE__.generic_decoder/2, :infinity)
     end
   end
 
@@ -242,7 +257,7 @@ defmodule Boltx.Client do
     payload = LogonMessage.encode(client.bolt_version, fields)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &LogonMessage.decode/2, :infinity)
+      recv_packets(client, &__MODULE__.generic_decoder/2, :infinity)
     end
   end
 
@@ -250,7 +265,7 @@ defmodule Boltx.Client do
     payload = InitMessage.encode(client.bolt_version, fields)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &InitMessage.decode/2, :infinity)
+      recv_packets(client, &__MODULE__.generic_decoder/2, :infinity)
     end
   end
 
@@ -321,7 +336,7 @@ defmodule Boltx.Client do
     payload = BeginMessage.encode(client.bolt_version, extra_parameters)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &BeginMessage.decode/2, :infinity)
+      recv_packets(client, &__MODULE__.generic_decoder/2, :infinity)
     end
   end
 
@@ -339,7 +354,7 @@ defmodule Boltx.Client do
     payload = CommitMessage.encode(client.bolt_version)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &CommitMessage.decode/2, :infinity)
+      recv_packets(client, &__MODULE__.generic_decoder/2, :infinity)
     end
   end
 
@@ -358,7 +373,7 @@ defmodule Boltx.Client do
     payload = RollbackMessage.encode(client.bolt_version)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &RollbackMessage.decode/2, :infinity)
+      recv_packets(client, &__MODULE__.generic_decoder/2, :infinity)
     end
   end
 
@@ -366,7 +381,7 @@ defmodule Boltx.Client do
     payload = AckFailureMessage.encode(client.bolt_version)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &AckFailureMessage.decode/2, :infinity)
+      recv_packets(client, &__MODULE__.generic_decoder/2, :infinity)
     end
   end
 
@@ -374,7 +389,7 @@ defmodule Boltx.Client do
     payload = ResetMessage.encode(client.bolt_version)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &ResetMessage.decode/2, :infinity)
+      recv_packets(client, &__MODULE__.generic_decoder/2, :infinity)
     end
   end
 
@@ -408,7 +423,7 @@ defmodule Boltx.Client do
     payload = LogoffMessage.encode(client.bolt_version)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &LogoffMessage.decode/2, :infinity)
+      recv_packets(client, &__MODULE__.generic_decoder/2, :infinity)
     end
   end
 
