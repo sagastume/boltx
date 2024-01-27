@@ -73,7 +73,13 @@ defmodule Boltx.Connection do
 
   @impl true
   def ping(state) do
-    {:ok, state}
+    case Client.send_ping(state.client) do
+      {:ok, true} ->
+        {:ok, state}
+
+      _ ->
+        {:disconnect, Boltx.Error.wrap(__MODULE__, :db_ping_failed), state}
+    end
   end
 
   def checkin(state) do

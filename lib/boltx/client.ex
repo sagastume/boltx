@@ -412,6 +412,16 @@ defmodule Boltx.Client do
     end
   end
 
+  def send_ping(client) do
+    case run_statement(client, "RETURN true as success", %{}, %{}) do
+      {:ok, statement_result(result_pull: pull_result(records: [[true]]))} ->
+        {:ok, true}
+
+      _ ->
+        {:error, :db_ping_failed}
+    end
+  end
+
   defp decode_version(<<0, 0, minor::unsigned-integer, major::unsigned-integer>>)
        when is_integer(major) and is_integer(minor) do
     Float.round(major + minor / 10.0, 1)

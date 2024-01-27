@@ -11,8 +11,9 @@ defmodule Boltx.ClientTest do
   defp handle_handshake(client, opts) do
     case client.bolt_version do
       version when version >= 5.1 ->
-        Client.send_hello(client, opts)
+        metadata = Client.send_hello(client, opts)
         Client.send_logon(client, opts)
+        metadata
 
       version when version >= 3.0 ->
         Client.send_hello(client, opts)
@@ -427,6 +428,34 @@ defmodule Boltx.ClientTest do
 
       assert {:ok, _} = Client.send_logoff(client)
       assert {:ok, _} = Client.send_logon(client, @opts)
+    end
+  end
+
+  describe "Ping message:" do
+    @tag :core
+    test "send_ping/1 (successful)" do
+      assert {:ok, client} = Client.connect(@opts)
+      handle_handshake(client, @opts)
+
+      assert {:ok, true} = Client.send_ping(client)
+    end
+
+    @tag :bolt_3_x
+    @tag :bolt_4_x
+    @tag :bolt_5_x
+    test "send_ping/1 (failure)" do
+      opts = @opts ++ [pool_size: 1]
+      assert {:ok, client} = Client.connect(opts)
+      {:ok, server_metadata} = handle_handshake(client, @opts)
+
+      Client.run_statement(
+        client,
+        "CALL dbms.killConnection($connection_id)",
+        %{connection_id: server_metadata["connection_id"]},
+        %{}
+      )
+
+      assert {:error, :db_ping_failed} = Client.send_ping(client)
     end
   end
 end
