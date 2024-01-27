@@ -109,12 +109,12 @@ defmodule Boltx.Connection do
         {:ok, statement_result}
 
       {:error, %Boltx.Error{code: error_code} = error} ->
-        if error_code in [:syntax_error, :semantic_error] do
-          action =
-            if client.bolt_version >= 3.0,
-              do: &Client.send_reset/1,
-              else: &Client.send_ack_failure/1
+        action =
+          if client.bolt_version >= 3.0,
+            do: &Client.send_reset/1,
+            else: &Client.send_ack_failure/1
 
+        if error_code in [:syntax_error, :semantic_error] do
           action.(client)
         end
 
