@@ -22,8 +22,7 @@ defmodule Boltx.Connection do
     with {:ok, %Client{} = client} <- Client.connect(config),
          {:ok, response_server_metadata} <- do_init(client, opts) do
       state = get_server_metadata_state(response_server_metadata)
-      state = %__MODULE__{state | client: client}
-      {:ok, state}
+      {:ok, %__MODULE__{state | client: client}}
     end
   end
 
