@@ -71,7 +71,7 @@ defmodule Boltx.Client do
       scheme = get_schema(opts)
       ssl_opts = Keyword.get(opts, :ssl_opts, [])
 
-      {ssl, ssl_opts} =
+      {ssl, ssl_config} =
         case scheme do
           "bolt" -> {false, ssl_opts}
           "neo4j" -> {false, ssl_opts}
@@ -82,7 +82,7 @@ defmodule Boltx.Client do
           _ -> {true, ssl_opts}
         end
 
-      {scheme, ssl, ssl_opts}
+      {scheme, ssl, ssl_config}
     end
 
     defp get_user_and_pass(opts) do
