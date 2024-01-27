@@ -98,20 +98,32 @@ defmodule Boltx.Client do
     end
 
     defp get_hostname_and_port(opts) do
-      uri = Keyword.get(opts, :uri, nil) |> to_string() |> URI.parse()
+      uri = Keyword.get(opts, :uri, nil)
+
+      parsed_uri =
+        uri
+        |> to_string
+        |> URI.parse()
+
       port_default = String.to_integer(System.get_env("BOLT_TCP_PORT") || "7687")
 
       hostname =
-        uri.host || Keyword.get(opts, :hostname, nil) || System.get_env("BOLT_HOST") ||
+        parsed_uri.host || Keyword.get(opts, :hostname, nil) || System.get_env("BOLT_HOST") ||
           "localhost"
 
-      port = uri.port || Keyword.get(opts, :port, port_default)
+      port = parsed_uri.port || Keyword.get(opts, :port, port_default)
       {hostname, port}
     end
 
     defp get_schema(opts) do
-      uri = Keyword.get(opts, :uri, nil) |> to_string() |> URI.parse()
-      uri.scheme || Keyword.get(opts, :scheme, nil) || "bolt+s"
+      uri = Keyword.get(opts, :uri, nil)
+
+      parsed_uri =
+        uri
+        |> to_string
+        |> URI.parse()
+
+      parsed_uri.scheme || Keyword.get(opts, :scheme, nil) || "bolt+s"
     end
 
     def get_versions(opts) do
