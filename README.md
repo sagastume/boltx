@@ -161,25 +161,3 @@ By default, all tags are disabled except the `:core` tag. To enable the tags, it
 
 #### Help script
 To simplify test execution, the test-runner.sh script is available. You can find the corresponding documentation here: [Help script](scripts/README.md)
-
-
-## Bolt Protocol message
-
-| Message       | Bolt Version                            | Implemented |
-| ------------- | --------------------------------------- | ----------- |
-| INIT          | V1, V2                                  | YES         |
-| HELLO         | V3, V4.x, v5.1, v5.2, v5.3, v5.4        | YES         |
-| LOGON         | V3, V4.x, v5.1, v5.2, v5.3, v5.4        | YES         |
-| RUN           | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4| YES         |
-| PULL          | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4| YES         |
-| BEGIN         | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4| YES         |
-| COMMIT        | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4| YES         |
-| ROLLBACK      | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4| YES         |
-| LOGOFF        | V3, V4.x, v5.1, v5.2, v5.3, v5.4        | YES         |
-| TELEMETRY     | V5.4                                    | NO          |
-| GOODBYE       | V3, V4.x, v5.1, v5.2, v5.3, v5.4        | YES         |
-| RESET         | V3, V4.x, v5.1, v5.2, v5.3, v5.4        | YES         |
-| DISCARD       | V1, V2, V3, V4.x, v5.1, v5.2, v5.3, v5.4| YES         |
-| ROUTE         | V4.x, v5.1, v5.2, v5.3, v5.4            | NO          |
-| ACK_FAILURE   | V1, V2                                  | YES         |
-
