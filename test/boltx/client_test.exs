@@ -440,9 +440,9 @@ defmodule Boltx.ClientTest do
       assert {:ok, true} = Client.send_ping(client)
     end
 
-    @tag :bolt_version_3_x
-    @tag :bolt_version_4_x
-    @tag :bolt_version_5_x
+    @tag :bolt_3_x
+    @tag :bolt_4_x
+    @tag :bolt_5_x
     test "send_ping/1 (failure)" do
       opts = @opts ++ [pool_size: 1]
       assert {:ok, client} = Client.connect(opts)
