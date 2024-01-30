@@ -2,7 +2,8 @@ defmodule Boltx.Utils.ModuleInspector do
   @moduledoc false
 
   def match_modules(hint) do
-    Enum.map(get_modules(), &Atom.to_string/1)
+    get_modules()
+    |> Enum.map(&Atom.to_string/1)
     |> :lists.usort()
     |> Enum.drop_while(&(not String.starts_with?(&1, hint)))
     |> Enum.take_while(&String.starts_with?(&1, hint))
