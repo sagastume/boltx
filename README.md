@@ -15,7 +15,6 @@ Documentation: [https://hexdocs.pm/boltx](https://hexdocs.pm/boltx)
 | --------------------- | ------------ |
 | Querys                | YES          |
 | Transactions          | YES          |
-| Multi tenancy         | NO           |
 | Stream capabilities   | NO           |
 | Routing               | NO           |
 
