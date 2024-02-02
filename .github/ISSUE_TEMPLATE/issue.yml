@@ -25,7 +25,7 @@ body:
       required: true
   
   - type: input
-    id: os
+    id: neo4j
     attributes:
       label: Neo4j version
       description: The version of Neo4j in which this problem occurs. (Neo4j 5.13.0, etc.)
@@ -33,7 +33,7 @@ body:
       required: true
 
   - type: input
-    id: os
+    id: boltx
     attributes:
       label: Boltx version
       description: The version of Boltx in which this problem occurs. (Boltx 0.0.5, etc.)
