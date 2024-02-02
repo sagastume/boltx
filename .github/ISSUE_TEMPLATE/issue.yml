@@ -1,0 +1,61 @@
+---
+name: Report an issue
+description:
+  Tell us about something that is not working the way we (probably) intend
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Thank you for contributing to Boltx! :heart:
+
+  - type: textarea
+    id: elixir-and-otp-version
+    attributes:
+      label: Elixir and Erlang/OTP versions
+      description: Paste the output of `elixir --version` here.
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      description: The operating system that this issue is happening on.
+    validations:
+      required: true
+  
+  - type: input
+    id: os
+    attributes:
+      label: Neo4j version
+      description: The version of Neo4j in which this problem occurs. (Neo4j 5.13.0, etc.)
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Boltx version
+      description: The version of Boltx in which this problem occurs. (Boltx 0.0.5, etc.)
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-behavior
+    attributes:
+      label: Current behavior
+      description: >
+        Include code samples, errors, and stacktraces if appropriate.
+
+
+        If reporting a bug, please include the reproducing steps.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: A short description on how you expect the code to behave.
+    validations:
+      required: true
