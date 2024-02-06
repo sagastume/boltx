@@ -325,21 +325,26 @@ defimpl Boltx.PackStream.Packer, for: Any do
     keys = struct |> Map.from_struct() |> Map.keys()
     fields = Keyword.get(options, :fields, keys)
     include_struct_field? = Keyword.get(options, :include_struct_field, :__struct__ in fields)
-    fields = List.delete(fields, :__struct__)
+    fields_to_serialize = List.delete(fields, :__struct__)
 
     extractor =
       cond do
-        fields == keys and include_struct_field? ->
-          quote(do: Map.from_struct(struct) |> Map.put("__struct__", unquote(module)))
+        fields_to_serialize == keys and include_struct_field? ->
+          quote(do: struct |> Map.from_struct() |> Map.put("__struct__", unquote(module)))
 
-        fields == keys ->
+        fields_to_serialize == keys ->
           quote(do: Map.from_struct(struct))
 
         include_struct_field? ->
-          quote(do: Map.take(struct, unquote(fields)) |> Map.put("__struct__", unquote(module)))
+          quote(
+            do:
+              struct
+              |> Map.take(unquote(fields_to_serialize))
+              |> Map.put("__struct__", unquote(module))
+          )
 
         true ->
-          quote(do: Map.take(struct, unquote(fields)))
+          quote(do: Map.take(struct, unquote(fields_to_serialize)))
       end
 
     quote do

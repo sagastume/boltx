@@ -4,6 +4,7 @@ defmodule Boltx.PackStreamTest do
   alias Boltx.PackStream
   alias Boltx.Types.{TimeWithTZOffset, DateTimeWithTZOffset, Duration, Point}
   alias Boltx.TypesHelper
+  alias Boltx.TestDerivationStruct
 
   defmodule TestStruct do
     defstruct foo: "bar"
@@ -113,6 +114,9 @@ defmodule Boltx.PackStreamTest do
 
     test "encodes a struct" do
       assert <<161, 131, 102, 111, 111, 131, 98, 97, 114>> == PackStream.pack!(%TestStruct{})
+
+      assert <<161, 131, 102, 111, 111, 131, 98, 97, 114>> ==
+               PackStream.pack!(%TestDerivationStruct{})
     end
   end
 
