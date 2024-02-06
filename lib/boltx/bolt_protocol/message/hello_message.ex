@@ -9,7 +9,8 @@ defmodule Boltx.BoltProtocol.Message.HelloMessage do
 
   def encode(bolt_version, fields) when is_float(bolt_version) and bolt_version >= 5.1 do
     message = [
-      get_user_agent(bolt_version, fields)
+      bolt_version
+      |> get_user_agent(fields)
       |> Map.merge(get_bolt_agent(fields))
       |> Map.merge(get_extra_parameters(fields))
     ]
