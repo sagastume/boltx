@@ -26,9 +26,7 @@ defmodule Boltx.BoltProtocol.Message.DiscardMessage do
   end
 
   @spec decode(float(), <<_::16, _::_*8>>) :: {:error, Boltx.Error.t()} | {:ok, any()}
-  def decode(bolt_version, binary_messages) do
-    messages = Enum.map(binary_messages, &MessageDecoder.decode(&1))
-
+  def decode(bolt_version, messages) do
     case hd(messages) do
       {:success, response} ->
         success_data =

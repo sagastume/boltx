@@ -27,9 +27,7 @@ defmodule Boltx.BoltProtocol.Message.RunMessage do
   end
 
   @spec decode(float(), <<_::16, _::_*8>>) :: {:error, Boltx.Error.t()} | {:ok, any()}
-  def decode(bolt_version, binary_messages) do
-    messages = Enum.map(binary_messages, &MessageDecoder.decode(&1))
-
+  def decode(bolt_version, messages) do
     case hd(messages) do
       {:success, response} ->
         case bolt_version <= 2.0 do

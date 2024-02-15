@@ -28,8 +28,7 @@ defmodule Boltx.BoltProtocol.Message.PullMessage do
   end
 
   @spec decode(float(), <<_::16, _::_*8>>) :: {:error, Boltx.Error.t()} | {:ok, any()}
-  def decode(bolt_version, binary_messages) do
-    messages = Enum.map(binary_messages, &MessageDecoder.decode(&1))
+  def decode(bolt_version, messages) do
     records = Enum.reduce(messages, [], &group_record/2)
 
     case List.keymember?(messages, :failure, 0) do
