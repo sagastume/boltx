@@ -479,58 +479,65 @@ defmodule Boltx.Client do
     recv_packets(client, decoder, timeout, [])
   end
 
-  defp recv_packets(client, decoder, timeout, chunks) do
-    with {:ok, <<chunk_size::16>>} when chunk_size != 0 <- recv_data(client, timeout, 2),
-         {:ok, <<message_binary::binary>>} <-
-           recv_data(client, timeout, chunk_size + byte_size(@noop_chunk)),
-         message <- MessageDecoder.decode(message_binary) do
+  defp recv_packets(client, decoder, timeout, messages) do
+    with {:ok, chunk_size} <- get_chunk_size(client, timeout),
+         {:ok, <<message_binary::binary>>} <- get_chunk(client, timeout, chunk_size),
+         {:ok, message} <- decode_message(message_binary) do
       case message do
         {status, _} = message_summary when status in @summary ->
-          decoder.(client.bolt_version, [message_summary | chunks])
+          all_messages = decoder.(client.bolt_version, [message_summary | messages])
+          all_messages
 
         {:record, _} = message_record ->
-          IO.inspect(
-            %{
-              message_binary: message_binary,
-              message_record: message_record
-            },
-            limit: :infinity,
-            label: "record/1"
-          )
-
-          recv_packets(client, decoder, timeout, [message_record | chunks])
+          recv_packets(client, decoder, timeout, [message_record | messages])
 
         _ ->
           {:error, ""}
       end
     end
   else
-    {:ok, @noop_chunk} ->
-      recv_packets(client, decoder, timeout, chunks)
+    {:remaining_chunks, _} ->
+      recv_packets(client, decoder, timeout, messages)
 
     {:ok, messages} ->
       {:ok, messages}
 
-    other ->
-      IO.inspect(
-        %{
-          other: other
-        },
-        limit: :infinity,
-        label: "other/1"
-      )
-
-      other
+    {:error, error} ->
+      {:error, error}
   end
 
-  defp do_recv_packets(client, timeout, chunk_size) do
-    case recv_data(client, timeout, chunk_size) do
-      {:ok, data} ->
-        {:ok, data}
-
-      @noop_chunk ->
+  defp get_chunk_size(client, timeout) do
+    case recv_data(client, timeout, 2) do
+      {:ok, @noop_chunk} ->
         {:remaining_chunks, @noop_chunk}
+
+      {:ok, <<chunk_size::16>>} ->
+        {:ok, chunk_size + byte_size(@noop_chunk)}
+
+      {:error, :timeout} ->
+        {:error, Boltx.Error.wrap(__MODULE__, :timeout)}
+
+      {:error, _} = error ->
+        error
     end
+  end
+
+  defp get_chunk(client, timeout, chunk_size) do
+    case recv_data(client, timeout, chunk_size) do
+      {:ok, <<chunk::binary>>} ->
+        {:ok, chunk}
+
+      {:error, :timeout} ->
+        {:error, Boltx.Error.wrap(__MODULE__, :timeout)}
+
+      {:error, _} = error ->
+        error
+    end
+  end
+
+  defp decode_message(message_binary) do
+    message = MessageDecoder.decode(message_binary)
+    {:ok, message}
   end
 
   defp concatenate_chunks(response, chunks) do

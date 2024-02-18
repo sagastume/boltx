@@ -191,8 +191,8 @@ defmodule Boltx.ClientTest do
              ]
     end
 
-    @tag :debug
-    test "recv_packets/3 decoded message with an intermediate noob" do
+    @tag :core
+    test "recv_packets/3 decoded messages with an intermediate noob" do
       chunk1 = <<177, 113, 146, 201, 4, 0, 201, 8, 0, 0, 0>>
 
       chunk2 =
@@ -229,24 +229,43 @@ defmodule Boltx.ClientTest do
              ]
     end
 
-    @tag core: true
+    @tag :core
     test "ignores noop chunks between two chunks" do
-      sizeMock = <<0, 10>>
-      chunk1 = <<177, 14, 103, 106>>
-      chunk2 = <<120, 5, 107, 108, 109, 15, 0, 0>>
+      chunk1 = <<177, 113, 146, 201, 4, 0, 201, 8, 0, 0, 0>>
+
+      chunk2 =
+        <<177, 112, 163, 134, 115, 101, 114, 118, 101, 114, 140, 78, 101, 111, 52, 106, 47, 53,
+          46, 49, 51, 46, 48, 141, 99, 111, 110, 110, 101, 99, 116, 105, 111, 110, 95, 105, 100,
+          136, 98, 111, 108, 116, 45, 53, 49, 49, 133, 104, 105, 110, 116, 115, 162, 208, 31, 99,
+          111, 110, 110, 101, 99, 116, 105, 111, 110, 46, 114, 101, 99, 118, 95, 116, 105, 109,
+          101, 111, 117, 116, 95, 115, 101, 99, 111, 110, 100, 115, 120, 208, 17, 116, 101, 108,
+          101, 109, 101, 116, 114, 121, 46, 101, 110, 97, 98, 108, 101, 100, 194, 0, 0>>
 
       pid =
         Boltx.Mocks.SockMock.start_link([
           @noop_chunk,
-          sizeMock <> chunk1,
+          <<0, byte_size(chunk1)>>,
+          chunk1,
           @noop_chunk,
-          chunk2,
-          @noop_chunk
+          <<0, byte_size(chunk2)>>,
+          chunk2
         ])
 
       client = %{sock: {Boltx.Mocks.SockMock, pid}, bolt_version: 5.0}
       {:ok, message} = Client.recv_packets(client, fn _bolt_version, data -> {:ok, data} end, 0)
-      assert message == [chunk1 <> chunk2]
+
+      assert message == [
+               {:success,
+                %{
+                  "connection_id" => "bolt-511",
+                  "hints" => %{
+                    "connection.recv_timeout_seconds" => 120,
+                    "telemetry.enabled" => false
+                  },
+                  "server" => "Neo4j/5.13.0"
+                }},
+               {:record, [1024, 2048]}
+             ]
     end
   end
 
