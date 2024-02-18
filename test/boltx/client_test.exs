@@ -435,7 +435,7 @@ defmodule Boltx.ClientTest do
       {:ok, %{"fields" => ["num"], "t_first" => _}} =
         Client.send_run(client, "RETURN 1 as num", %{}, %{})
 
-      {:ok, {:pull_result, [[1]], %{"db" => "neo4j", "t_last" => _, "type" => "r"}}} =
+      {:ok, {:pull_result, [[1]], %{"t_last" => _, "type" => "r"}}} =
         Client.send_pull(client, %{})
     end
   end
@@ -515,10 +515,9 @@ defmodule Boltx.ClientTest do
   end
 
   describe "Hello Message:" do
-    @tag :bolt_version_3_x
-    @tag :bolt_version_4_x
-    @tag :bolt_version_5_x
-    @tag :core
+    @tag :bolt_5_x
+    @tag :bolt_4_x
+    @tag :bolt_3_x
     test "send_hello/1 (successful)" do
       assert {:ok, client} = Client.connect(@opts)
       assert {:ok, %{"connection_id" => _, "hints" => _}} = Client.send_hello(client, @opts)

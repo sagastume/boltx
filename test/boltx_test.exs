@@ -35,14 +35,14 @@ defmodule BoltxTest do
 
     @tag :core
     test "get all cities", c do
-      query = "CREATE (country:Country {name:'C1', created_at: datetime(), id: randomUUID()})"
+      query = "CREATE (country:Country {name:'C1', id: randomUUID()})"
       Boltx.query(c.conn, query)
 
       Enum.each(0..333, fn x ->
         query = """
           MATCH(country:Country{name: 'C1'})
-          CREATE (city:City {name:'City_#{x}', created_at: datetime(), id: randomUUID()})
-          CREATE (country)-[:has_city{created_at: datetime(), id: randomUUID()}]->(city)
+          CREATE (city:City {name:'City_#{x}', id: randomUUID()})
+          CREATE (country)-[:has_city{id: randomUUID()}]->(city)
         """
 
         Boltx.query(c.conn, query)

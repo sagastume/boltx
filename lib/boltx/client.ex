@@ -475,8 +475,8 @@ defmodule Boltx.Client do
     end
   end
 
-  def recv_packets(client, decoder, timeout) do
-    recv_packets(client, decoder, timeout, [])
+  def recv_packets(client, prepare_messages, timeout) do
+    recv_packets(client, prepare_messages, timeout, [])
   end
 
   defp recv_packets(client, prepare_messages, timeout, messages) do
