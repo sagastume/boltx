@@ -49,7 +49,7 @@ defmodule BoltxTest do
       end)
 
       all_cities_query = "MATCH (n:City) RETURN n"
-      {:ok, %Response{} = response} = Boltx.query(c.conn, all_cities_query, %{})
+      {:ok, %Response{}} = Boltx.query(c.conn, all_cities_query, %{})
     end
 
     @tag :core

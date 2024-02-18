@@ -2,7 +2,6 @@ defmodule Boltx.BoltProtocol.Message.DiscardMessage do
   @moduledoc false
 
   alias Boltx.BoltProtocol.MessageEncoder
-  alias Boltx.BoltProtocol.MessageDecoder
 
   @signature 0x2F
 
@@ -25,8 +24,7 @@ defmodule Boltx.BoltProtocol.Message.DiscardMessage do
      })}
   end
 
-  @spec decode(float(), <<_::16, _::_*8>>) :: {:error, Boltx.Error.t()} | {:ok, any()}
-  def decode(bolt_version, messages) do
+  def prepare_messages(bolt_version, messages) do
     case hd(messages) do
       {:success, response} ->
         success_data =

@@ -360,12 +360,12 @@ defmodule Boltx.ClientTest do
        statement_result(
          result_run: result_run,
          result_pull: result_pull,
-         query: query_result
+         query: _
        )} = result
 
       assert %{"fields" => ["n"], "t_first" => _} = result_run
 
-      assert pull_result(records: records, success_data: success_data) = result_pull
+      assert pull_result(records: _, success_data: success_data) = result_pull
       assert %{"t_last" => _, "type" => "r"} = success_data
     end
   end
