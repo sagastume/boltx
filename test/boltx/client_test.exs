@@ -164,50 +164,113 @@ defmodule Boltx.ClientTest do
   end
 
   describe "recv_packets" do
-    @tag core: true
-    test "recv_packets concatenates and decodes one message in two chunks" do
-      sizeMock = <<0, 10>>
-      chunk1 = <<177, 14, 103, 106>>
-      chunk2 = <<120, 5, 107, 108, 109, 15, 0, 0>>
-      pid = Boltx.Mocks.SockMock.start_link([@noop_chunk, sizeMock <> chunk1, chunk2])
+    @tag :core
+    test "recv_packets/3 decodes one message in one noop chunk" do
+      chunk =
+        <<177, 112, 163, 134, 115, 101, 114, 118, 101, 114, 140, 78, 101, 111, 52, 106, 47, 53,
+          46, 49, 51, 46, 48, 141, 99, 111, 110, 110, 101, 99, 116, 105, 111, 110, 95, 105, 100,
+          136, 98, 111, 108, 116, 45, 53, 49, 49, 133, 104, 105, 110, 116, 115, 162, 208, 31, 99,
+          111, 110, 110, 101, 99, 116, 105, 111, 110, 46, 114, 101, 99, 118, 95, 116, 105, 109,
+          101, 111, 117, 116, 95, 115, 101, 99, 111, 110, 100, 115, 120, 208, 17, 116, 101, 108,
+          101, 109, 101, 116, 114, 121, 46, 101, 110, 97, 98, 108, 101, 100, 194, 0, 0>>
+
+      pid = Boltx.Mocks.SockMock.start_link([<<0, byte_size(chunk)>>, chunk])
       client = %{sock: {Boltx.Mocks.SockMock, pid}, bolt_version: 1.0}
       {:ok, message} = Client.recv_packets(client, fn _bolt_version, data -> {:ok, data} end, 0)
-      assert message == [chunk1 <> chunk2]
+
+      assert message == [
+               {:success,
+                %{
+                  "connection_id" => "bolt-511",
+                  "hints" => %{
+                    "connection.recv_timeout_seconds" => 120,
+                    "telemetry.enabled" => false
+                  },
+                  "server" => "Neo4j/5.13.0"
+                }}
+             ]
     end
 
-    @tag core: true
-    test "recv_packets decodes a message into a single chunk" do
-      sizeMock = <<0, 4>>
-      chunk1 = <<122, 14, 103, 106, 0, 0>>
-      pid = Boltx.Mocks.SockMock.start_link([@noop_chunk, sizeMock <> chunk1])
+    @tag :core
+    test "recv_packets/3 decoded messages with an intermediate noob" do
+      chunk1 = <<177, 113, 146, 201, 4, 0, 201, 8, 0, 0, 0>>
+
+      chunk2 =
+        <<177, 112, 163, 134, 115, 101, 114, 118, 101, 114, 140, 78, 101, 111, 52, 106, 47, 53,
+          46, 49, 51, 46, 48, 141, 99, 111, 110, 110, 101, 99, 116, 105, 111, 110, 95, 105, 100,
+          136, 98, 111, 108, 116, 45, 53, 49, 49, 133, 104, 105, 110, 116, 115, 162, 208, 31, 99,
+          111, 110, 110, 101, 99, 116, 105, 111, 110, 46, 114, 101, 99, 118, 95, 116, 105, 109,
+          101, 111, 117, 116, 95, 115, 101, 99, 111, 110, 100, 115, 120, 208, 17, 116, 101, 108,
+          101, 109, 101, 116, 114, 121, 46, 101, 110, 97, 98, 108, 101, 100, 194, 0, 0>>
+
+      pid =
+        Boltx.Mocks.SockMock.start_link([
+          <<0, byte_size(chunk1)>>,
+          chunk1,
+          @noop_chunk,
+          <<0, byte_size(chunk2)>>,
+          chunk2
+        ])
+
       client = %{sock: {Boltx.Mocks.SockMock, pid}, bolt_version: 3.0}
       {:ok, message} = Client.recv_packets(client, fn _bolt_version, data -> {:ok, data} end, 0)
-      assert message == [chunk1]
+
+      assert message == [
+               {:success,
+                %{
+                  "connection_id" => "bolt-511",
+                  "hints" => %{
+                    "connection.recv_timeout_seconds" => 120,
+                    "telemetry.enabled" => false
+                  },
+                  "server" => "Neo4j/5.13.0"
+                }},
+               {:record, [1024, 2048]}
+             ]
     end
 
-    @tag core: true
+    @tag :core
     test "ignores noop chunks between two chunks" do
-      sizeMock = <<0, 10>>
-      chunk1 = <<177, 14, 103, 106>>
-      chunk2 = <<120, 5, 107, 108, 109, 15, 0, 0>>
+      chunk1 = <<177, 113, 146, 201, 4, 0, 201, 8, 0, 0, 0>>
+
+      chunk2 =
+        <<177, 112, 163, 134, 115, 101, 114, 118, 101, 114, 140, 78, 101, 111, 52, 106, 47, 53,
+          46, 49, 51, 46, 48, 141, 99, 111, 110, 110, 101, 99, 116, 105, 111, 110, 95, 105, 100,
+          136, 98, 111, 108, 116, 45, 53, 49, 49, 133, 104, 105, 110, 116, 115, 162, 208, 31, 99,
+          111, 110, 110, 101, 99, 116, 105, 111, 110, 46, 114, 101, 99, 118, 95, 116, 105, 109,
+          101, 111, 117, 116, 95, 115, 101, 99, 111, 110, 100, 115, 120, 208, 17, 116, 101, 108,
+          101, 109, 101, 116, 114, 121, 46, 101, 110, 97, 98, 108, 101, 100, 194, 0, 0>>
 
       pid =
         Boltx.Mocks.SockMock.start_link([
           @noop_chunk,
-          sizeMock <> chunk1,
+          <<0, byte_size(chunk1)>>,
+          chunk1,
           @noop_chunk,
-          chunk2,
-          @noop_chunk
+          <<0, byte_size(chunk2)>>,
+          chunk2
         ])
 
       client = %{sock: {Boltx.Mocks.SockMock, pid}, bolt_version: 5.0}
       {:ok, message} = Client.recv_packets(client, fn _bolt_version, data -> {:ok, data} end, 0)
-      assert message == [chunk1 <> chunk2]
+
+      assert message == [
+               {:success,
+                %{
+                  "connection_id" => "bolt-511",
+                  "hints" => %{
+                    "connection.recv_timeout_seconds" => 120,
+                    "telemetry.enabled" => false
+                  },
+                  "server" => "Neo4j/5.13.0"
+                }},
+               {:record, [1024, 2048]}
+             ]
     end
   end
 
   describe "run_statement" do
-    @tag core: true
+    @tag :core
     test "simple query" do
       assert {:ok, client} = Client.connect(@opts)
       handle_handshake(client, @opts)
@@ -284,6 +347,27 @@ defmodule Boltx.ClientTest do
       {:error, %Boltx.Error{code: :request_invalid}} =
         Client.run_statement(client, query, %{}, %{n: %{d: 4}})
     end
+
+    @tag :core
+    test "get all nodes" do
+      assert {:ok, client} = Client.connect(@opts)
+      handle_handshake(client, @opts)
+
+      query = "MATCH(n) RETURN n"
+      result = Client.run_statement(client, query, %{}, %{})
+
+      {:ok,
+       statement_result(
+         result_run: result_run,
+         result_pull: result_pull,
+         query: _
+       )} = result
+
+      assert %{"fields" => ["n"], "t_first" => _} = result_run
+
+      assert pull_result(records: _, success_data: success_data) = result_pull
+      assert %{"t_last" => _, "type" => "r"} = success_data
+    end
   end
 
   describe "Explicit Transaction" do
@@ -339,6 +423,20 @@ defmodule Boltx.ClientTest do
       handle_handshake(client, @opts)
 
       assert {:error, %Boltx.Error{code: :request_invalid}} = Client.send_rollback(client)
+    end
+  end
+
+  describe "pull message" do
+    @tag :core
+    test "ok send_pull" do
+      assert {:ok, client} = Client.connect(@opts)
+      handle_handshake(client, @opts)
+
+      {:ok, %{"fields" => ["num"], "t_first" => _}} =
+        Client.send_run(client, "RETURN 1 as num", %{}, %{})
+
+      {:ok, {:pull_result, [[1]], %{"t_last" => _, "type" => "r"}}} =
+        Client.send_pull(client, %{})
     end
   end
 
@@ -413,6 +511,16 @@ defmodule Boltx.ClientTest do
       {:ok, _} = Client.send_run(client, "RETURN 1 as num", %{}, %{})
 
       assert {:ok, %{"t_last" => _, "type" => "r"}} = Client.send_discard(client, %{})
+    end
+  end
+
+  describe "Hello Message:" do
+    @tag :bolt_5_x
+    @tag :bolt_4_x
+    @tag :bolt_3_x
+    test "send_hello/1 (successful)" do
+      assert {:ok, client} = Client.connect(@opts)
+      assert {:ok, %{"connection_id" => _, "hints" => _}} = Client.send_hello(client, @opts)
     end
   end
 

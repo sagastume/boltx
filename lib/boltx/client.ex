@@ -3,6 +3,7 @@ defmodule Boltx.Client do
 
   @handshake_bytes_identifier <<0x60, 0x60, 0xB0, 0x17>>
   @noop_chunk <<0x00, 0x00>>
+  @summary ~w(success ignored failure)a
 
   import Boltx.BoltProtocol.ServerResponse
 
@@ -243,8 +244,7 @@ defmodule Boltx.Client do
     end
   end
 
-  def generic_decoder(_bolt_version, binary_messages) do
-    messages = Enum.map(binary_messages, &MessageDecoder.decode(&1))
+  def prepare_generic_messages(_bolt_version, messages) do
     response = hd(messages)
 
     case response do
@@ -261,7 +261,7 @@ defmodule Boltx.Client do
     payload = HelloMessage.encode(client.bolt_version, fields)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &__MODULE__.generic_decoder/2, :infinity)
+      recv_packets(client, &__MODULE__.prepare_generic_messages/2, :infinity)
     end
   end
 
@@ -269,7 +269,7 @@ defmodule Boltx.Client do
     payload = LogonMessage.encode(client.bolt_version, fields)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &__MODULE__.generic_decoder/2, :infinity)
+      recv_packets(client, &__MODULE__.prepare_generic_messages/2, :infinity)
     end
   end
 
@@ -277,7 +277,7 @@ defmodule Boltx.Client do
     payload = InitMessage.encode(client.bolt_version, fields)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &__MODULE__.generic_decoder/2, :infinity)
+      recv_packets(client, &__MODULE__.prepare_generic_messages/2, :infinity)
     end
   end
 
@@ -285,7 +285,7 @@ defmodule Boltx.Client do
     payload = RunMessage.encode(client.bolt_version, query, parameters, extra_parameters)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &RunMessage.decode/2, :infinity)
+      recv_packets(client, &RunMessage.prepare_messages/2, :infinity)
     end
   end
 
@@ -293,7 +293,7 @@ defmodule Boltx.Client do
     payload = PullMessage.encode(client.bolt_version, extra_parameters)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &PullMessage.decode/2, :infinity)
+      recv_packets(client, &PullMessage.prepare_messages/2, :infinity)
     end
   end
 
@@ -348,7 +348,7 @@ defmodule Boltx.Client do
     payload = BeginMessage.encode(client.bolt_version, extra_parameters)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &__MODULE__.generic_decoder/2, :infinity)
+      recv_packets(client, &__MODULE__.prepare_generic_messages/2, :infinity)
     end
   end
 
@@ -366,7 +366,7 @@ defmodule Boltx.Client do
     payload = CommitMessage.encode(client.bolt_version)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &__MODULE__.generic_decoder/2, :infinity)
+      recv_packets(client, &__MODULE__.prepare_generic_messages/2, :infinity)
     end
   end
 
@@ -385,7 +385,7 @@ defmodule Boltx.Client do
     payload = RollbackMessage.encode(client.bolt_version)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &__MODULE__.generic_decoder/2, :infinity)
+      recv_packets(client, &__MODULE__.prepare_generic_messages/2, :infinity)
     end
   end
 
@@ -393,7 +393,7 @@ defmodule Boltx.Client do
     payload = AckFailureMessage.encode(client.bolt_version)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &__MODULE__.generic_decoder/2, :infinity)
+      recv_packets(client, &__MODULE__.prepare_generic_messages/2, :infinity)
     end
   end
 
@@ -401,7 +401,7 @@ defmodule Boltx.Client do
     payload = ResetMessage.encode(client.bolt_version)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &__MODULE__.generic_decoder/2, :infinity)
+      recv_packets(client, &__MODULE__.prepare_generic_messages/2, :infinity)
     end
   end
 
@@ -409,7 +409,7 @@ defmodule Boltx.Client do
     payload = DiscardMessage.encode(client.bolt_version, extra_parameters)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &DiscardMessage.decode/2, :infinity)
+      recv_packets(client, &DiscardMessage.prepare_messages/2, :infinity)
     end
   end
 
@@ -435,7 +435,7 @@ defmodule Boltx.Client do
     payload = LogoffMessage.encode(client.bolt_version)
 
     with :ok <- send_packet(client, payload) do
-      recv_packets(client, &__MODULE__.generic_decoder/2, :infinity)
+      recv_packets(client, &__MODULE__.prepare_generic_messages/2, :infinity)
     end
   end
 
@@ -475,20 +475,47 @@ defmodule Boltx.Client do
     end
   end
 
-  def recv_packets(client, decoder, timeout) do
-    recv_packets(client, decoder, timeout, <<>>)
+  def recv_packets(client, prepare_messages, timeout) do
+    recv_packets(client, prepare_messages, timeout, [])
   end
 
-  defp recv_packets(client, decoder, timeout, chunks) do
-    case recv_data(client, timeout) do
-      {:ok, response} ->
-        case concatenate_chunks(response, chunks) do
-          {:complete_chunks, binary_messages} ->
-            decode_messages(client.bolt_version, binary_messages, decoder)
+  defp recv_packets(client, prepare_messages, timeout, messages) do
+    case get_next_message(client, timeout) do
+      {:ok, {status, _} = message_summary} when status in @summary ->
+        prepare_messages.(client.bolt_version, [message_summary | messages])
 
-          {:remaining_chunks, binary_message} ->
-            recv_packets(client, decoder, timeout, binary_message)
-        end
+      {:ok, message_record} ->
+        recv_packets(client, prepare_messages, timeout, [message_record | messages])
+
+      :remaining_chunks ->
+        recv_packets(client, prepare_messages, timeout, messages)
+
+      {:error, _} = error ->
+        error
+    end
+  end
+
+  defp get_next_message(client, timeout) do
+    with {:ok, chunk_size} <- get_chunk_size(client, timeout),
+         {:ok, <<message_binary::binary>>} <- get_chunk(client, timeout, chunk_size),
+         {:ok, message} <- decode_message(message_binary) do
+      {:ok, message}
+    else
+      :remaining_chunks ->
+        :remaining_chunks
+
+      {:error, _} = error ->
+        error
+    end
+  end
+
+  defp get_chunk_size(client, timeout) do
+    case recv_data(client, timeout, 2) do
+      {:ok, @noop_chunk} ->
+        :remaining_chunks
+
+      {:ok, <<chunk_size::16>>} ->
+        {:ok, chunk_size + byte_size(@noop_chunk)}
 
       {:error, :timeout} ->
         {:error, Boltx.Error.wrap(__MODULE__, :timeout)}
@@ -498,35 +525,26 @@ defmodule Boltx.Client do
     end
   end
 
-  defp concatenate_chunks(response, chunks) do
-    case response do
-      @noop_chunk ->
-        {:remaining_chunks, chunks}
+  defp get_chunk(client, timeout, chunk_size) do
+    case recv_data(client, timeout, chunk_size) do
+      {:ok, <<chunk::binary>>} ->
+        {:ok, chunk}
 
-      <<_::binary-size(byte_size(response) - 2), 0, 0>> ->
-        {:complete_chunks, chunks <> response}
+      {:error, :timeout} ->
+        {:error, Boltx.Error.wrap(__MODULE__, :timeout)}
 
-      <<_::binary>> ->
-        {:remaining_chunks, chunks <> response}
+      {:error, _} = error ->
+        error
     end
   end
 
-  def decode_messages(bolt_version, binary_messages, decoder) do
-    messages = split_message(binary_messages, [])
-    decoder.(bolt_version, messages)
+  defp decode_message(message_binary) do
+    message = MessageDecoder.decode(message_binary)
+    {:ok, message}
   end
 
-  defp split_message(<<size::16, data::binary>>, acc) do
-    <<message::binary-size(size + byte_size(@noop_chunk)), remaining::binary>> = data
-    split_message(remaining, [message | acc])
-  end
-
-  defp split_message(<<>>, acc) do
-    acc
-  end
-
-  def recv_data(%{sock: {sock_mod, sock}}, timeout) do
-    sock_mod.recv(sock, 0, timeout)
+  def recv_data(%{sock: {sock_mod, sock}}, timeout, length \\ 0) do
+    sock_mod.recv(sock, length, timeout)
   end
 
   def disconnect(client) do

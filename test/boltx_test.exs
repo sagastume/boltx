@@ -34,6 +34,25 @@ defmodule BoltxTest do
     end
 
     @tag :core
+    test "get all cities", c do
+      query = "CREATE (country:Country {name:'C1', id: randomUUID()})"
+      Boltx.query(c.conn, query)
+
+      Enum.each(0..333, fn x ->
+        query = """
+          MATCH(country:Country{name: 'C1'})
+          CREATE (city:City {name:'City_#{x}', id: randomUUID()})
+          CREATE (country)-[:has_city{id: randomUUID()}]->(city)
+        """
+
+        Boltx.query(c.conn, query)
+      end)
+
+      all_cities_query = "MATCH (n:City) RETURN n"
+      {:ok, %Response{}} = Boltx.query(c.conn, all_cities_query, %{})
+    end
+
+    @tag :core
     test "a simple query to get persons", c do
       self = self()
 
