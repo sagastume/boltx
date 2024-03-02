@@ -122,7 +122,7 @@ jobs:
       - run: mix deps.compile
       - name: Run Test Script
         run: |
-          mix test --cover --partitions 13 --export-coverage boltx
+          mix test --cover --partitions 13 --export-coverage boltx_${MIX_TEST_PARTITION}
         working-directory: .
   coverage:
     name: Coverage
