@@ -116,7 +116,7 @@ jobs:
         with:
           path: |
             cover
-          key: ${{ runner.os }}-coverdata
+          key: ${{ runner.os }}-${{ github.run_id }}-coverdata
       
       - run: mix deps.get
       - run: mix deps.compile
@@ -148,6 +148,6 @@ jobs:
         with:
           path: |
             cover
-          key: ${{ runner.os }}-coverdata
+          key: ${{ runner.os }}-${{ github.run_id }}-coverdata
         
       - run: mix test.coverage
