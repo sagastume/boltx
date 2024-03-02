@@ -115,7 +115,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: |
-            cover/boltx
+            cover
           key: ${{ runner.os }}-coverdata
       
       - run: mix deps.get
@@ -147,7 +147,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: |
-            cover/boltx
+            cover
           key: ${{ runner.os }}-coverdata
         
       - run: mix test.coverage
