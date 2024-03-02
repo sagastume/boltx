@@ -123,6 +123,7 @@ jobs:
         with:
           name: coverdata-${{ github.run_id }}-${{matrix.mixTestPartition}}
           path: cover
+          retention-days: 1
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
@@ -146,5 +147,6 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: cover
-          pattern: coverdata-${{ github.run_id }}-*        
+          pattern: coverdata-${{ github.run_id }}-*
+          merge-multiple: true 
       - run: mix test.coverage
