@@ -53,34 +53,49 @@ jobs:
         include:
           - boltVersion: '1.0'
             db: neo4j:3.4.0
+            mixTestPartition: 1
           - boltVersion: '2.0'
             db: neo4j:3.4.0
+            mixTestPartition: 2
           - boltVersion: '3.0'
             db: neo4j:4.4.27-community
+            mixTestPartition: 3
           - boltVersion: '4.0'
             db: neo4j:4.4.27-community
+            mixTestPartition: 4
           - boltVersion: '4.1'
             db: neo4j:4.4.27-community
+            mixTestPartition: 5
           - boltVersion: '4.2'
             db: neo4j:4.4.27-community
+            mixTestPartition: 6
           - boltVersion: '4.3'
             db: neo4j:4.4.27-community
+            mixTestPartition: 7
           - boltVersion: '4.4'
             db: neo4j:4.4.27-community
+            mixTestPartition: 8
           - boltVersion: '5.0'
             db: neo4j:5.13.0-community
+            mixTestPartition: 9
           - boltVersion: '5.1'
             db: neo4j:5.13.0-community
+            mixTestPartition: 10
           - boltVersion: '5.2'
             db: neo4j:5.13.0-community
+            mixTestPartition: 11
           - boltVersion: '5.3'
             db: neo4j:5.13.0-community
+            mixTestPartition: 12
           - boltVersion: '5.4'
             db: neo4j:5.13.0-community
+            mixTestPartition: 13
     env:
       MIX_ENV: test
       BOLT_VERSIONS: ${{matrix.boltVersion}}
       BOLT_TCP_PORT: 7687
+      MIX_TEST_PARTITION: ${{matrix.mixTestPartition}}
+      RUN_ID: ${{github.run_id}}
     steps:
       - run: docker run -p 7687:7687 -e NEO4J_AUTH=neo4j/boltxPassword -e NEO4J_dbms_connector_bolt_listen__address=:7687 --detach ${{matrix.db}}
       - name: Checkout code
@@ -102,5 +117,36 @@ jobs:
       - run: mix deps.compile
       - name: Run Test Script
         run: |
-          mix test
+          mix test --cover --partitions 13 --export-coverage coverdata-${RUN_ID}-${MIX_TEST_PARTITION}
         working-directory: .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverdata-${{ github.run_id }}-${{matrix.mixTestPartition}}
+          path: cover
+          retention-days: 1
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - uses: erlef/setup-beam@v1
+        with:
+            otp-version: '26.1'
+            elixir-version: '1.15.6'
+        
+      - uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-1.15.6'-'26.1'-${{ hashFiles('**/mix.lock') }}
+        
+      - uses: actions/download-artifact@v4
+        with:
+          path: cover
+          pattern: coverdata-${{ github.run_id }}-*
+          merge-multiple: true 
+      - run: mix test.coverage
