@@ -20,7 +20,10 @@ defmodule Boltx.Mixfile do
       docs: docs(),
       dialyzer: [plt_add_apps: [:jason, :poison, :mix], ignore_warnings: ".dialyzer_ignore.exs"],
       test_coverage: [
-        tool: ExCoveralls
+        tool: ExCoveralls,
+        summary: [
+          threshold: 70
+        ]
       ],
       preferred_cli_env: [
         bench: :bench,
