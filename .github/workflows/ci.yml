@@ -113,10 +113,10 @@ jobs:
           key: ${{ runner.os }}-mix-1.15.6'-'26.1'-${{ hashFiles('**/mix.lock') }}
       
       - uses: actions/cache@v4
-          with:
-            path: |
-              cover/boltx
-            key: ${{ runner.os }}-coverdata
+        with:
+          path: |
+            cover/boltx
+          key: ${{ runner.os }}-coverdata
       
       - run: mix deps.get
       - run: mix deps.compile
@@ -124,30 +124,30 @@ jobs:
         run: |
           mix test --cover --partitions 13 --export-coverage boltx
         working-directory: .
-    coverage:
-      name: Coverage
-      runs-on: ubuntu-latest
-      needs: [test]
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
         
-        - uses: erlef/setup-beam@v1
-          with:
+      - uses: erlef/setup-beam@v1
+        with:
             otp-version: '26.1'
             elixir-version: '1.15.6'
         
-        - uses: actions/cache@v4
-          with:
-            path: |
-              deps
-              _build
-            key: ${{ runner.os }}-mix-1.15.6'-'26.1'-${{ hashFiles('**/mix.lock') }}
+      - uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-1.15.6'-'26.1'-${{ hashFiles('**/mix.lock') }}
         
-        - uses: actions/cache@v4
-          with:
-            path: |
-              cover/boltx
-            key: ${{ runner.os }}-coverdata
+      - uses: actions/cache@v4
+        with:
+          path: |
+            cover/boltx
+          key: ${{ runner.os }}-coverdata
         
-        - run: mix test.coverage
+      - run: mix test.coverage
