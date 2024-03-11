@@ -356,7 +356,7 @@ defmodule Boltx.ConnectionTest do
   end
 
   describe "Connection.handle_prepare/3" do
-    @tag :debug
+    @tag :core
     test "successful" do
       opts = [pool_size: 1] ++ @opts
       {:ok, conn_data} = Connection.connect(opts)
@@ -365,7 +365,7 @@ defmodule Boltx.ConnectionTest do
   end
 
   describe "Connection.handle_close/3" do
-    @tag :debug
+    @tag :core
     test "successful" do
       opts = [pool_size: 1] ++ @opts
       {:ok, conn_data} = Connection.connect(opts)
@@ -374,7 +374,7 @@ defmodule Boltx.ConnectionTest do
   end
 
   describe "Connection.handle_deallocate/4" do
-    @tag :debug
+    @tag :core
     test "successful" do
       opts = [pool_size: 1] ++ @opts
       {:ok, conn_data} = Connection.connect(opts)
@@ -383,7 +383,7 @@ defmodule Boltx.ConnectionTest do
   end
 
   describe "Connection.handle_declare/3" do
-    @tag :debug
+    @tag :core
     test "successful" do
       opts = [pool_size: 1] ++ @opts
       {:ok, conn_data} = Connection.connect(opts)
@@ -392,7 +392,7 @@ defmodule Boltx.ConnectionTest do
   end
 
   describe "Connection.handle_fetch/3" do
-    @tag :debug
+    @tag :core
     test "successful" do
       opts = [pool_size: 1] ++ @opts
       {:ok, conn_data} = Connection.connect(opts)
@@ -401,7 +401,7 @@ defmodule Boltx.ConnectionTest do
   end
 
   describe "Connection.handle_status/2" do
-    @tag :debug
+    @tag :core
     test "successful" do
       opts = [pool_size: 1] ++ @opts
       {:ok, conn_data} = Connection.connect(opts)
