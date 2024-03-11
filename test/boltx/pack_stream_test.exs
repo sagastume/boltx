@@ -248,10 +248,13 @@ defmodule Boltx.PackStreamTest do
         <<0xD0, 0x18, 0x45, 0x6E, 0x20, 0xC3, 0xA5, 0x20, 0x66, 0x6C, 0xC3, 0xB6, 0x74, 0x20,
           0xC3, 0xB6, 0x76, 0x65, 0x72, 0x20, 0xC3, 0xA4, 0x6E, 0x67, 0x65, 0x6E>>
 
+      long_32 = <<210, 0, 1, 1, 208>> <> String.duplicate("a", 66_000)
+
       assert PackStream.unpack!(<<0x80>>) == [""]
       assert PackStream.unpack!(<<0x81, 0x61>>) == ["a"]
       assert PackStream.unpack!(longstr) == ["abcdefghijklmnopqrstuvwxyz"]
       assert PackStream.unpack!(specialcharstr) == ["En å flöt över ängen"]
+      assert PackStream.unpack!(long_32) == [String.duplicate("a", 66_000)]
 
       assert ["hello"] == PackStream.unpack!(<<0x85, 0x68, 0x65, 0x6C, 0x6C, 0x6F>>)
     end
