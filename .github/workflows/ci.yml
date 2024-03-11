@@ -95,6 +95,7 @@ jobs:
       BOLT_VERSIONS: ${{matrix.boltVersion}}
       BOLT_TCP_PORT: 7687
       MIX_TEST_PARTITION: 1
+      TEST_PARTITION_NUMBER: ${{ matrix.mixTestPartition }}
       RUN_ID: ${{github.run_id}}
     steps:
       - run: docker run -p 7687:7687 -e NEO4J_AUTH=neo4j/boltxPassword -e NEO4J_dbms_connector_bolt_listen__address=:7687 --detach ${{matrix.db}}
@@ -117,7 +118,7 @@ jobs:
       - run: mix deps.compile
       - name: Run Test Script
         run: |
-          mix test --cover --partitions 1 --export-coverage coverdata-${RUN_ID}-${MIX_TEST_PARTITION}
+          mix test --cover --partitions 1 --export-coverage coverdata-${RUN_ID}-${TEST_PARTITION_NUMBER}
         working-directory: .
       - uses: actions/upload-artifact@v4
         with:
