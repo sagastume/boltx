@@ -328,4 +328,30 @@ defmodule Boltx.ConnectionTest do
 
     :ok = Connection.disconnect(:stop, conn_data)
   end
+
+  describe "Connection.ping/1" do
+    @tag :core
+    test "with an active connection" do
+      opts = [pool_size: 1] ++ @opts
+      {:ok, conn_data} = Connection.connect(opts)
+
+      assert {:ok, conn_data} == Connection.ping(conn_data)
+    end
+
+    @tag :core
+    test "with an inactive connection" do
+      opts = [pool_size: 1] ++ @opts
+      {:ok, conn_data} = Connection.connect(opts)
+      Connection.disconnect("ping test", conn_data)
+
+      assert {:disconnect,
+              %Boltx.Error{
+                __exception__: true,
+                bolt: nil,
+                code: :db_ping_failed,
+                module: Boltx.Connection,
+                packstream: nil
+              }, conn_data} == Connection.ping(conn_data)
+    end
+  end
 end
