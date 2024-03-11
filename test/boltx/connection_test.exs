@@ -328,4 +328,84 @@ defmodule Boltx.ConnectionTest do
 
     :ok = Connection.disconnect(:stop, conn_data)
   end
+
+  describe "Connection.ping/1" do
+    @tag :core
+    test "with an active connection" do
+      opts = [pool_size: 1] ++ @opts
+      {:ok, conn_data} = Connection.connect(opts)
+
+      assert {:ok, conn_data} == Connection.ping(conn_data)
+    end
+
+    @tag :core
+    test "with an inactive connection" do
+      opts = [pool_size: 1] ++ @opts
+      {:ok, conn_data} = Connection.connect(opts)
+      Connection.disconnect("ping test", conn_data)
+
+      assert {:disconnect,
+              %Boltx.Error{
+                __exception__: true,
+                bolt: nil,
+                code: :db_ping_failed,
+                module: Boltx.Connection,
+                packstream: nil
+              }, conn_data} == Connection.ping(conn_data)
+    end
+  end
+
+  describe "Connection.handle_prepare/3" do
+    @tag :core
+    test "successful" do
+      opts = [pool_size: 1] ++ @opts
+      {:ok, conn_data} = Connection.connect(opts)
+      assert {:ok, "", conn_data} == Connection.handle_prepare("", %{}, conn_data)
+    end
+  end
+
+  describe "Connection.handle_close/3" do
+    @tag :core
+    test "successful" do
+      opts = [pool_size: 1] ++ @opts
+      {:ok, conn_data} = Connection.connect(opts)
+      assert {:ok, "", conn_data} == Connection.handle_close("", %{}, conn_data)
+    end
+  end
+
+  describe "Connection.handle_deallocate/4" do
+    @tag :core
+    test "successful" do
+      opts = [pool_size: 1] ++ @opts
+      {:ok, conn_data} = Connection.connect(opts)
+      assert {:ok, "", conn_data} == Connection.handle_deallocate("", "", %{}, conn_data)
+    end
+  end
+
+  describe "Connection.handle_declare/3" do
+    @tag :core
+    test "successful" do
+      opts = [pool_size: 1] ++ @opts
+      {:ok, conn_data} = Connection.connect(opts)
+      assert {:ok, "", conn_data, nil} == Connection.handle_declare("", "", %{}, conn_data)
+    end
+  end
+
+  describe "Connection.handle_fetch/3" do
+    @tag :core
+    test "successful" do
+      opts = [pool_size: 1] ++ @opts
+      {:ok, conn_data} = Connection.connect(opts)
+      assert {:cont, "", conn_data} == Connection.handle_fetch("", "", %{}, conn_data)
+    end
+  end
+
+  describe "Connection.handle_status/2" do
+    @tag :core
+    test "successful" do
+      opts = [pool_size: 1] ++ @opts
+      {:ok, conn_data} = Connection.connect(opts)
+      assert {:idle, conn_data} == Connection.handle_status(%{}, conn_data)
+    end
+  end
 end
