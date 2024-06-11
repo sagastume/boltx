@@ -85,7 +85,7 @@ defmodule Boltx.Mixfile do
     [
       {:db_connection, "~> 2.6.0"},
       {:jason, "~> 1.4", optional: true},
-      {:poison, "~> 5.0", optional: true},
+      {:poison, "~> 6.0", optional: true},
 
       # Testing dependencies
       {:excoveralls, "~> 0.18.0", optional: true, only: [:test, :dev]},
