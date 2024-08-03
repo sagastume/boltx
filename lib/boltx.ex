@@ -106,7 +106,9 @@ defmodule Boltx do
       |> Enum.map(fn {k, {:ok, value}} -> {k, value} end)
       |> Map.new()
 
-    query = %Boltx.Query{statement: statement}
+    extra = Map.take(opts, [:bookmarks, :mode, :db, :tx_metadata])
+
+    query = %Boltx.Query{statement: statement, extra: extra}
     do_query(conn, query, formatted_params, opts)
   end
 
