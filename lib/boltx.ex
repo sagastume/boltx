@@ -99,6 +99,17 @@ defmodule Boltx do
     DBConnection.child_spec(Boltx.Connection, options)
   end
 
+  @doc """
+  Executes a single query and returns the result.
+
+  ## Examples
+
+  ```elixir
+  {:ok, result} = Boltx.query(conn, "MATCH (n) RETURN n LIMIT 1")
+
+  {:ok, people} = Boltx.query(conn, "MATCH (n:PERSON) RETURN n", %{}, [db: "mydb"])
+  ```
+  """
   def query(conn, statement, params \\ %{}, opts \\ []) do
     formatted_params =
       params
@@ -106,12 +117,26 @@ defmodule Boltx do
       |> Enum.map(fn {k, {:ok, value}} -> {k, value} end)
       |> Map.new()
 
-    extra = Map.take(opts, [:bookmarks, :mode, :db, :tx_metadata])
+    extra = opts
+      |> Keyword.take([:bookmarks, :mode, :db, :tx_metadata])
+      |> Enum.into(%{}) # Convert to map
 
     query = %Boltx.Query{statement: statement, extra: extra}
+
     do_query(conn, query, formatted_params, opts)
   end
 
+  @doc """
+  Executes a single query and returns the result.
+
+  ## Examples
+
+  ```elixir
+  result = Boltx.query!(conn, "MATCH (n) RETURN n LIMIT 1")
+
+  people = Boltx.query!(conn, "MATCH (n:PERSON) RETURN n", %{}, [db: "mydb"])
+  ```
+  """
   def query!(conn, statement, params \\ %{}, opts \\ []) do
     case query(conn, statement, params, opts) do
       {:ok, result} -> result
