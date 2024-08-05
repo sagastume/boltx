@@ -117,9 +117,11 @@ defmodule Boltx do
       |> Enum.map(fn {k, {:ok, value}} -> {k, value} end)
       |> Map.new()
 
-    extra = opts
+    extra =
+      opts
       |> Keyword.take([:bookmarks, :mode, :db, :tx_metadata])
-      |> Enum.into(%{}) # Convert to map
+      # Convert to map
+      |> Enum.into(%{})
 
     query = %Boltx.Query{statement: statement, extra: extra}
 
