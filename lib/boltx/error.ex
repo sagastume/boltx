@@ -42,8 +42,16 @@ defmodule Boltx.Error do
 
   """
   @spec message(t()) :: String.t()
-  def message(%__MODULE__{code: code, module: module}) do
-    module.format_error(code)
+  def message(%__MODULE__{code: code, module: module} = error) do
+    if code == :syntax_error do
+      """
+      Syntax error
+      #{error.bolt.message}
+      """
+    else
+      inspect(error, pretty: true)
+    end
+    # TODO: move to module.format_error(code) later
   end
 
   @doc """
