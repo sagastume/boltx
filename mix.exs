@@ -94,7 +94,7 @@ defmodule Boltx.Mixfile do
       {:tzdata, "~> 1.1", only: [:test, :dev]},
 
       # Benchmarking dependencies
-      {:benchee, "~> 1.3.0", optional: true, only: [:dev, :test]},
+      {:benchee, "~> 1.4.0", optional: true, only: [:dev, :test]},
       {:benchee_html, "~> 1.0.0", optional: true, only: [:dev]},
 
       # Linting dependencies
