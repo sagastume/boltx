@@ -15,7 +15,7 @@ Documentation: [https://hexdocs.pm/boltx](https://hexdocs.pm/boltx)
 | --------------------- | ------------ |
 | Querys                | YES          |
 | Transactions          | YES          |
-| Stream capabilities   | NO           |
+| Stream capabilities   | YES          |
 | Routing               | NO           |
 
 ## Usage
@@ -114,6 +114,94 @@ iex> Boltx.query!(Bolt, "return 1 as n") |> Boltx.Response.first()
 %{"n" => 1}
 ```
 
+### Streaming Large Result Sets
+
+Boltx supports memory-efficient lazy streaming of large result sets using Elixir's `Stream` module. This allows you to process millions of records without loading them all into memory at once.
+
+#### Basic Streaming
+
+Stream results using `Response.stream/1`:
+
+```elixir
+# Query returns 1 million records
+response = Boltx.query!(conn, "UNWIND range(1, 1000000) AS n RETURN n, n * 2 AS doubled")
+
+# Process results lazily - only loads records as needed
+response
+|> Boltx.Response.stream()
+|> Stream.filter(fn record -> rem(record["n"], 1000) == 0 end)
+|> Stream.map(fn record -> record["doubled"] end)
+|> Enum.take(10)
+# => [2000, 4000, 6000, 8000, 10000, 12000, 14000, 16000, 18000, 20000]
+```
+
+#### Early Termination
+
+Stop processing as soon as you find what you need:
+
+```elixir
+response = Boltx.query!(conn, "MATCH (p:Person) RETURN p.name, p.email")
+
+# Find first matching record without processing everything
+first_admin =
+  response
+  |> Boltx.Response.stream()
+  |> Enum.find(fn record -> String.contains?(record["email"], "@admin.com") end)
+```
+
+#### Processing in Chunks
+
+Process large datasets in batches:
+
+```elixir
+response = Boltx.query!(conn, "MATCH (n:Node) RETURN n")
+
+# Process 500 records at a time
+response
+|> Boltx.Response.stream()
+|> Stream.chunk_every(500)
+|> Enum.each(fn chunk ->
+  # Bulk insert into another system, send notifications, etc.
+  MyApp.bulk_process(chunk)
+end)
+```
+
+#### Aggregations and Reductions
+
+Compute statistics without loading all data:
+
+```elixir
+response = Boltx.query!(conn, "MATCH (t:Transaction) RETURN t.amount")
+
+# Calculate sum without loading all transactions into memory
+total =
+  response
+  |> Boltx.Response.stream()
+  |> Stream.map(fn record -> record["amount"] end)
+  |> Enum.sum()
+```
+
+#### Server-Side Batch Pulling (Advanced)
+
+For queries that haven't fully fetched results yet, use `Response.stream_with_client/2` to pull records in batches from the server:
+
+```elixir
+# For low-level client usage
+{:ok, client} = Boltx.Client.connect(opts)
+{:ok, result_run} = Boltx.Client.send_run(client, "UNWIND range(1, 1000000) AS n RETURN n", %{}, %{})
+
+response = %Boltx.Response{
+  fields: Map.get(result_run, "fields", []),
+  records: [],
+  results: []
+}
+
+# Stream with server-side pulling (fetch_size controls batch size)
+response
+|> Boltx.Response.stream_with_client(client, fetch_size: 1000)
+|> Enum.take(5000)
+# Only pulls 5-6 batches from server, not all 1 million records
+```
 
 ### URI schemes
 

@@ -19,11 +19,15 @@ defmodule Boltx.JsonImplementationsTest do
   end
 
   test "Jason implementation OK" do
-    assert result(:jason) == Jason.encode!(fixture())
+    # Decode both sides to compare data structures, not string representations
+    # This handles key ordering differences between JSON encoders
+    assert Jason.decode!(result(:jason)) == Jason.decode!(Jason.encode!(fixture()))
   end
 
   test "Poison implementation OK" do
-    assert result(:poison) == Poison.encode!(fixture())
+    # Decode both sides to compare data structures, not string representations
+    # This handles key ordering differences between JSON encoders
+    assert Poison.decode!(result(:poison)) == Poison.decode!(Poison.encode!(fixture()))
   end
 
   defp fixture() do
@@ -119,12 +123,10 @@ defmodule Boltx.JsonImplementationsTest do
     # ],
     # "relationships": [
     # {
-    #   "end": null,
     #   "id": 58,
     #   "properties": {
     #     "creation_time": "12:34:56+02:00"
     #   },
-    #   "start": null,
     #   "type": "KNOWS"
     # },
     # {
@@ -140,10 +142,10 @@ defmodule Boltx.JsonImplementationsTest do
     # 1
     # ]
     # }
-    "{\"nodes\":[{\"id\":56,\"labels\":[],\"properties\":{\"duration\":\"P1Y12MT54M65.0S\",\"geoloc\":{\"crs\":\"wgs-84-3d\",\"height\":50.0,\"latitude\":40.32332,\"longitude\":45.006,\"x\":45.006,\"y\":40.32332,\"z\":50.0},\"boltx\":true,\"name\":\"Alice\"}},{\"id\":57,\"labels\":[],\"properties\":{\"created\":\"2019-03-05T12:34:56+01:00\",\"user_strut\":{\"id\":43,\"name\":\"Test\"},\"boltx\":true,\"name\":\"Bob\"}}],\"relationships\":[{\"end\":null,\"id\":58,\"properties\":{\"creation_time\":\"12:34:56+02:00\"},\"start\":null,\"type\":\"KNOWS\"},{\"end\":57,\"id\":58,\"properties\":{},\"start\":56,\"type\":\"LIKES\"}],\"sequence\":[1,1]}"
+    "{\"nodes\":[{\"id\":56,\"labels\":[],\"properties\":{\"duration\":\"P1Y12MT54M65.0S\",\"geoloc\":{\"crs\":\"wgs-84-3d\",\"height\":50.0,\"latitude\":40.32332,\"longitude\":45.006,\"x\":45.006,\"y\":40.32332,\"z\":50.0},\"boltx\":true,\"name\":\"Alice\"}},{\"id\":57,\"labels\":[],\"properties\":{\"created\":\"2019-03-05T12:34:56+01:00\",\"user_strut\":{\"id\":43,\"name\":\"Test\"},\"boltx\":true,\"name\":\"Bob\"}}],\"relationships\":[{\"id\":58,\"properties\":{\"creation_time\":\"12:34:56+02:00\"},\"type\":\"KNOWS\"},{\"end\":57,\"id\":58,\"properties\":{},\"start\":56,\"type\":\"LIKES\"}],\"sequence\":[1,1]}"
   end
 
   defp result(:poison) do
-    "{\"sequence\":[1,1],\"relationships\":[{\"type\":\"KNOWS\",\"start\":null,\"properties\":{\"creation_time\":\"12:34:56+02:00\"},\"id\":58,\"end\":null},{\"type\":\"LIKES\",\"start\":56,\"properties\":{},\"id\":58,\"end\":57}],\"nodes\":[{\"properties\":{\"name\":\"Alice\",\"boltx\":true,\"geoloc\":{\"z\":50.0,\"y\":40.32332,\"x\":45.006,\"longitude\":45.006,\"latitude\":40.32332,\"height\":50.0,\"crs\":\"wgs-84-3d\"},\"duration\":\"P1Y12MT54M65.0S\"},\"labels\":[],\"id\":56},{\"properties\":{\"name\":\"Bob\",\"boltx\":true,\"user_strut\":{\"name\":\"Test\",\"id\":43},\"created\":\"2019-03-05T12:34:56+01:00\"},\"labels\":[],\"id\":57}]}"
+    "{\"sequence\":[1,1],\"relationships\":[{\"type\":\"KNOWS\",\"properties\":{\"creation_time\":\"12:34:56+02:00\"},\"id\":58},{\"type\":\"LIKES\",\"start\":56,\"properties\":{},\"id\":58,\"end\":57}],\"nodes\":[{\"properties\":{\"name\":\"Alice\",\"boltx\":true,\"geoloc\":{\"z\":50.0,\"y\":40.32332,\"x\":45.006,\"longitude\":45.006,\"latitude\":40.32332,\"height\":50.0,\"crs\":\"wgs-84-3d\"},\"duration\":\"P1Y12MT54M65.0S\"},\"labels\":[],\"id\":56},{\"properties\":{\"name\":\"Bob\",\"boltx\":true,\"user_strut\":{\"name\":\"Test\",\"id\":43},\"created\":\"2019-03-05T12:34:56+01:00\"},\"labels\":[],\"id\":57}]}"
   end
 end

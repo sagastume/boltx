@@ -88,7 +88,7 @@ defmodule Boltx.ResponseEncode.JsonTest do
       type: "UPDATED_TO"
     }
 
-    expected = %{end: 30, id: 5, properties: %{is_valid: true}, start: 69, type: "UPDATED_TO"}
+    expected = %{id: 5, properties: %{is_valid: true}, type: "UPDATED_TO"}
     assert expected == Json.encode(r)
   end
 
@@ -121,7 +121,7 @@ defmodule Boltx.ResponseEncode.JsonTest do
         %{id: 56, labels: [], properties: %{"boltx" => true, "name" => "Alice"}},
         %{id: 57, labels: [], properties: %{"boltx" => true, "name" => "Bob"}}
       ],
-      relationships: [%{end: nil, id: 58, properties: %{}, start: nil, type: "KNOWS"}],
+      relationships: [%{id: 58, properties: %{}, type: "KNOWS"}],
       sequence: [1, 1]
     }
 

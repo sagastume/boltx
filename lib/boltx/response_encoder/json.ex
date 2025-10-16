@@ -2,7 +2,7 @@ defprotocol Boltx.ResponseEncoder.Json do
   @moduledoc """
   Protocol controlling how a value is made jsonable.
 
-  Its only purpose is to convert Bolt Boltx specific structures into elixir buit-in types
+  Its only purpose is to convert Bolt Boltx specific structures into elixir built-in types
   which can be encoed in json by Jason.
 
   ## Deriving
@@ -95,9 +95,40 @@ defimpl ResponseEncoder.Json, for: Types.Point do
   end
 end
 
-defimpl ResponseEncoder.Json,
-  for: [Types.Node, Types.Relationship, Types.UnboundRelationship, Types.Path] do
-  @spec encode(struct()) :: map()
+defimpl ResponseEncoder.Json, for: Types.Node do
+  @spec encode(Types.Node.t()) :: map()
+  def encode(value) do
+    value
+    |> Map.from_struct()
+    |> Map.delete(:element_id)
+    |> ResponseEncoder.Json.encode()
+  end
+end
+
+defimpl ResponseEncoder.Json, for: Types.Relationship do
+  @spec encode(Types.Relationship.t()) :: map()
+  def encode(value) do
+    value
+    |> Map.from_struct()
+    |> Map.delete(:element_id)
+    |> Map.delete(:start_node_element_id)
+    |> Map.delete(:end_node_element_id)
+    |> ResponseEncoder.Json.encode()
+  end
+end
+
+defimpl ResponseEncoder.Json, for: Types.UnboundRelationship do
+  @spec encode(Types.UnboundRelationship.t()) :: map()
+  def encode(value) do
+    value
+    |> Map.from_struct()
+    |> Map.delete(:element_id)
+    |> ResponseEncoder.Json.encode()
+  end
+end
+
+defimpl ResponseEncoder.Json, for: Types.Path do
+  @spec encode(Types.Path.t()) :: map()
   def encode(value) do
     value
     |> Map.from_struct()

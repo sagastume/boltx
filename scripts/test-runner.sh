@@ -15,8 +15,13 @@ then
     exit 1
 fi
 
-if ! docker-compose --version &> /dev/null
-then
+# Detect Docker Compose command (V1 or V2)
+DOCKER_COMPOSE_CMD=""
+if docker compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+elif docker-compose --version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+else
     echo "docker-compose is not installed or is not configured correctly."
     exit 1
 fi
@@ -80,7 +85,7 @@ function find_services() {
     return 1
   fi
   local config_json
-  config_json=$(docker-compose config --format=json)
+  config_json=$($DOCKER_COMPOSE_CMD config --format=json)
   filtered_services=$(echo "$config_json" | jq --arg bv "$boltVersion" --arg db "$database" '
     .services | to_entries[] | select(
       (.value.labels.boltVersions | split(",") | index($bv)) and
@@ -93,7 +98,7 @@ function find_services() {
 function getAllBoltVersions() {
   local bolt_versions=()
   local config_json
-  config_json=$(docker-compose config --format json | jq -r '.services[] | .labels.boltVersions')
+  config_json=$($DOCKER_COMPOSE_CMD config --format json | jq -r '.services[] | .labels.boltVersions')
   
   IFS=',' read -ra bolt_versions <<< "$(echo -e "${config_json}" | tr ',' '\n' | sort -u | paste -s -d ',' -)"
   
@@ -103,7 +108,7 @@ function getAllBoltVersions() {
 function getAllDatabases() {
   local databases=()
   local config_json
-  config_json=$(docker-compose config --format json | jq -r '.services[] | .labels.database')
+  config_json=$($DOCKER_COMPOSE_CMD config --format json | jq -r '.services[] | .labels.database')
   
   IFS=$'\n' read -d '' -r -a databases <<< "$(echo -e "${config_json}" | sort -u | paste -s -)"
   
@@ -112,7 +117,7 @@ function getAllDatabases() {
 
 function start_docker_service() {
   service=$1
-  bash -c "docker-compose up -d $service"
+  bash -c "$DOCKER_COMPOSE_CMD up -d $service"
 }
 
 function is_service_running?() {
@@ -129,7 +134,7 @@ function is_service_running?() {
     if [ "$elapsed_time" -ge "$timeout" ]; then
       break
     fi
-    json_output=$(docker-compose ps --status running --format json | jq -s .)    
+    json_output=$($DOCKER_COMPOSE_CMD ps --status running --format json | jq -s .)
     service=$(echo "$json_output" | jq --arg service_name "$service_name" -r '
       .[]
       | select(.Service == $service_name, .State == "running")'
@@ -153,15 +158,15 @@ get_published_port() {
   local published_port
 
   service_name=$(echo "$service_name" | tr -d '"')
-  json_output=$(docker-compose ps --status running --format json | jq -s .)    
+  json_output=$($DOCKER_COMPOSE_CMD ps --status running --format json | jq -s .)
   published_port=$(echo "$json_output" | jq --arg sn "$service_name" -r '
-    .[]
+    [.[]
     | select(.Service == $sn)
     | .Publishers[]
     | select(.TargetPort == 7687)
-    | .PublishedPort
-  ')    
-  echo $published_port
+    | .PublishedPort] | first
+  ')
+  echo "$published_port"
 }
 
 function parse_array() {

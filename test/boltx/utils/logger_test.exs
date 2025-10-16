@@ -11,8 +11,12 @@ defmodule Boltx.Utils.LoggerTest do
   end
 
   test "Log from non-formed message" do
+    Application.put_env(:boltx, :log, true)
+
     assert capture_log(fn -> Logger.log_message(:client, :success, %{data: "ok"}) end) =~
              "C: SUCCESS ~ %{data: \"ok\"}"
+
+    Application.delete_env(:boltx, :log)
   end
 
   # Excluded as another test has a long result and therefore a long hex and slow down tests

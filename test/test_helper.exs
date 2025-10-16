@@ -3,7 +3,6 @@ alias Boltx.Utils.Converters
 Logger.configure(level: :debug)
 
 exclude = [
-  :skip,
   :bench,
   :apoc,
   :legacy
@@ -47,8 +46,11 @@ Application.ensure_started(:porcelain)
 
 defmodule Boltx.TestHelper do
   def opts() do
+    port = System.get_env("BOLT_TCP_PORT", "7687") |> String.to_integer()
+
     [
       hostname: "127.0.0.1",
+      port: port,
       auth: [username: "neo4j", password: "boltxPassword"],
       user_agent: "boltxTest/1",
       ssl_opts: ssl_opts(),
@@ -98,12 +100,5 @@ defmodule Boltx.TestHelper do
   defp file_error_description(:enoent), do: "because the file does not exist."
   defp file_error_description(reason), do: "due to #{reason}."
 end
-
-# Boltx.start_link(Application.get_env(:boltx, Bolt))
-
-# I am using the test db for debugging and the line below will clear *everything*
-# Boltx.query(Boltx.conn, "MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE n,r")
-#
-# todo: The tests should cleanup the data they create.
 
 Process.flag(:trap_exit, true)
