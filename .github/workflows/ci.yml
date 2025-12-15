@@ -145,7 +145,7 @@ jobs:
             _build
           key: ${{ runner.os }}-mix-1.15.6'-'26.1'-${{ hashFiles('**/mix.lock') }}
         
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           path: cover
           pattern: coverdata-${{ github.run_id }}-*
