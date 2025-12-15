@@ -120,7 +120,7 @@ jobs:
         run: |
           mix test --cover --partitions 1 --export-coverage coverdata-${RUN_ID}-${TEST_PARTITION_NUMBER}
         working-directory: .
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: coverdata-${{ github.run_id }}-${{matrix.mixTestPartition}}
           path: cover
