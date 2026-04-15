@@ -235,7 +235,7 @@ defmodule Boltx.Client do
          encode_version <- recv_packets(client, config.connect_timeout),
          version <- decode_version(encode_version) do
       case version do
-        0.0 -> {:error, Boltx.Error.wrap(__MODULE__, :version_negotiation_error)}
+        +0.0 -> {:error, Boltx.Error.wrap(__MODULE__, :version_negotiation_error)}
         _ -> {:ok, %{client | bolt_version: version}}
       end
     else

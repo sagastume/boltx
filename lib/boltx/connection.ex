@@ -107,24 +107,32 @@ defmodule Boltx.Connection do
       {:ok, statement_result} ->
         {:ok, statement_result}
 
-      {:error, %Boltx.Error{code: error_code} = error} ->
-        action =
-          if client.bolt_version >= 3.0,
-            do: &Client.send_reset/1,
-            else: &Client.send_ack_failure/1
-
-        if error_code in [:syntax_error, :semantic_error] do
-          action.(client)
-        end
-
+      {:error, %Boltx.Error{} = error} ->
+        # Always send RESET after any error to clear the Neo4j connection's
+        # FAILED state.  The Bolt protocol requires this -- without it the
+        # connection enters a poisoned state where subsequent queries receive
+        # IGNORED responses.  The original code only reset for :syntax_error
+        # and :semantic_error, leaving constraint-violation and other errors
+        # to poison the connection pool.
+        reset_after_failure(client)
         {:error, error, state}
     end
   rescue
     e in Boltx.Error ->
-      {:error, %{code: :failure, message: "#{e.message}, code: #{e.code}"}, state}
+      {:error, %{code: :failure, message: Exception.message(e)}, state}
 
     e ->
-      {:error, %{code: :failure, message: e}}
+      {:error, %{code: :failure, message: e}, state}
+  end
+
+  defp reset_after_failure(client) do
+    if client.bolt_version >= 3.0,
+      do: Client.send_reset(client),
+      else: Client.send_ack_failure(client)
+  rescue
+    # If the reset itself fails, the connection is truly broken and
+    # DBConnection will discard it on the next health-check.
+    _ -> :ok
   end
 
   defp result(
