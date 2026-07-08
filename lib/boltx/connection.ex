@@ -19,11 +19,34 @@ defmodule Boltx.Connection do
   def connect(opts) do
     config = Client.Config.new(opts)
 
-    with {:ok, %Client{} = client} <- Client.connect(config),
-         {:ok, response_server_metadata} <- do_init(client, opts) do
-      state = get_server_metadata_state(response_server_metadata)
-      {:ok, %__MODULE__{state | client: client}}
+    with {:ok, %Client{} = client} <- Client.connect(config) do
+      try do
+        case do_init(client, opts) do
+          {:ok, response_server_metadata} ->
+            state = get_server_metadata_state(response_server_metadata)
+            {:ok, %__MODULE__{state | client: client}}
+
+          {:error, _reason} = error ->
+            # Client.connect/1 already opened the socket; a HELLO/handshake
+            # failure must not leak it.
+            _ = safe_disconnect(client)
+            error
+        end
+      rescue
+        e ->
+          _ = safe_disconnect(client)
+          reraise e, __STACKTRACE__
+      end
     end
+  end
+
+  # Best-effort teardown of a half-open client socket; never raise from cleanup.
+  defp safe_disconnect(client) do
+    Client.disconnect(client)
+  rescue
+    _ -> :ok
+  catch
+    _, _ -> :ok
   end
 
   @impl true

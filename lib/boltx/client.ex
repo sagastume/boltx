@@ -47,6 +47,15 @@ defmodule Boltx.Client do
       :ssl_opts
     ]
 
+    @doc """
+    Build a `%Config{}` from connection options.
+
+    By default the `BOLT_USER`, `BOLT_PWD`, `BOLT_HOST`, `BOLT_TCP_PORT`, and
+    `BOLT_VERSIONS` environment variables take precedence over (auth) / act as a
+    fallback for (host/port/versions) the passed options. Pass
+    `disable_env_fallback: true` to ignore those environment variables so the
+    explicit options always win (default: `false`).
+    """
     def new(opts) do
       {hostname, port} = get_hostname_and_port(opts)
       {username, password} = get_user_and_pass(opts)
@@ -86,31 +95,40 @@ defmodule Boltx.Client do
       {scheme, ssl, ssl_config}
     end
 
+    # When `disable_env_fallback: true` is passed, ignore the `BOLT_*` environment
+    # variables so explicit config always wins. The `env? && System.get_env(...)`
+    # idiom evaluates to `false` when disabled and `nil` when enabled-but-unset;
+    # both fall through to the passed/opt/default value, so behavior is identical
+    # to today whenever the option is absent or false.
+    defp env_fallback?(opts), do: not Keyword.get(opts, :disable_env_fallback, false)
+
     defp get_user_and_pass(opts) do
       basic_auth = Keyword.get(opts, :auth, [])
+      env? = env_fallback?(opts)
 
       username =
-        System.get_env("BOLT_USER") || Keyword.get(basic_auth, :username, nil) ||
+        (env? && System.get_env("BOLT_USER")) || Keyword.get(basic_auth, :username, nil) ||
           raise(":username is missing")
 
-      password = System.get_env("BOLT_PWD") || Keyword.get(basic_auth, :password)
+      password = (env? && System.get_env("BOLT_PWD")) || Keyword.get(basic_auth, :password)
 
       {username, password}
     end
 
     defp get_hostname_and_port(opts) do
       uri = Keyword.get(opts, :uri, nil)
+      env? = env_fallback?(opts)
 
       parsed_uri =
         uri
         |> to_string
         |> URI.parse()
 
-      port_default = String.to_integer(System.get_env("BOLT_TCP_PORT") || "7687")
+      port_default = String.to_integer((env? && System.get_env("BOLT_TCP_PORT")) || "7687")
 
       hostname =
-        parsed_uri.host || Keyword.get(opts, :hostname, nil) || System.get_env("BOLT_HOST") ||
-          "localhost"
+        parsed_uri.host || Keyword.get(opts, :hostname, nil) ||
+          (env? && System.get_env("BOLT_HOST")) || "localhost"
 
       port = parsed_uri.port || Keyword.get(opts, :port, port_default)
       {hostname, port}
@@ -131,8 +149,8 @@ defmodule Boltx.Client do
       versions =
         case Keyword.get(opts, :versions) do
           nil ->
-            case System.get_env("BOLT_VERSIONS") do
-              nil ->
+            case env_fallback?(opts) && System.get_env("BOLT_VERSIONS") do
+              v when v in [nil, false] ->
                 Versions.latest_versions()
 
               env_versions ->
