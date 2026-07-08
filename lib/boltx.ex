@@ -59,6 +59,13 @@ defmodule Boltx do
 
   * `:auth` - The basic authentication scheme
 
+  * `:disable_env_fallback` - When `true`, ignore the `BOLT_USER`, `BOLT_PWD`,
+   `BOLT_HOST`, `BOLT_TCP_PORT`, and `BOLT_VERSIONS` environment variables so that
+   only the passed options (and their built-in defaults) are used. This prevents
+   ambient environment variables from silently overriding or re-targeting an
+   explicitly configured connection. (default: `false`, so env fallback stays on
+   for backward compatibility)
+
   * `:user_agent` - Optionally override the default user agent name. (Default: 'boltx/<version>')
 
   * `:notifications_minimum_severity` - Set the minimum severity for notifications the server
